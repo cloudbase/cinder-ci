@@ -26,6 +26,16 @@ $hostname = hostname
 git config --global user.email "hyper-v_ci@microsoft.com"
 git config --global user.name "Hyper-V CI"
 
+# Replace Python dir with the archived template
+# TODO: move this to the image instead.
+Remove-Item -Force -Recurse $pythonDir
+$archivePath = 'C:\python27.tar.gz'
+Invoke-WebRequest -Uri http://10.21.7.214/python27.tar.gz -OutFile $archivePath
+tar -xvzf $archivePath -C C:\
+Remove-Item -Force -Recurse $archivePath
+pip install wmi
+pip install virtualenv
+
 if (! Test-Path -Path "$scriptdir\windows\scripts\utils.ps1")
 {
     Remove-Item -Force -Recurse "$scriptdir\*"
