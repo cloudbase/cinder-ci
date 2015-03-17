@@ -107,6 +107,9 @@ popd
 #use $scriptdir\windows\scripts\$test_case\generateConfig.ps1
 #where $test_case = iscsi / smb_windows
 
+& $scriptdir\windows\scripts\$test_case\generateConfig.ps1 `
+    $configDir $cinderTemplate $devstackIP $rabbitUser $logDir $lockPath
+
 Copy-Item "$templateDir\policy.json" "$configDir\" 
 Copy-Item "$templateDir\interfaces.template" "$configDir\"
 
