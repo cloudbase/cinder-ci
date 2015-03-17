@@ -72,3 +72,12 @@ run_ssh_cmd_with_retry () {
     return $EXIT
 }
 
+run_ps_cmd_with_retry () {
+    HOST=$1
+    USERNAME=$2
+    PASSWORD=$3
+    CMD=$4
+    PS_EXEC_POLICY='-ExecutionPolicy RemoteSigned'
+
+    run_wsmancmd_with_retry $HOST $USERNAME $PASSWORD "powershell $PS_EXEC_POLICY $CMD"
+}
