@@ -153,7 +153,7 @@ do
         echo "neutron port-list output:" 
         neutron port-list -D -c device_id -c fixed_ips | grep $VM_ID 
         exit 1
-    fixed
+    fi
     sleep 15
     export FIXED_IP=$(nova show "$CINDER_VM_NAME" | grep "private network" | awk '{print $5}') 
     COUNT=$(($COUNT + 1))
