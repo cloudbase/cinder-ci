@@ -75,7 +75,7 @@ export VMID=`nova show $NAME | grep -w id | awk '{print $4}'`
 echo VM_ID=$VMID >> devstack_params_$ZUUL_CHANGE.txt
 echo VM_ID=$VMID 
 
-exec_with_retry "nova add-floating-ip $NAME $DEVSTACK_FLOATING_IP" 15 5
+exec_with_retry 15 5 "nova add-floating-ip $NAME $DEVSTACK_FLOATING_IP"
 
 nova show "$NAME" 
 

@@ -41,7 +41,7 @@ wait_for_listening_port () {
     HOST=$1
     PORT=$2
     TIMEOUT=$3
-    exec_with_retry "nc -z -w$TIMEOUT $HOST $PORT" 50 5
+    exec_with_retry 50 5 "nc -z -w$TIMEOUT $HOST $PORT"
 }
 
 run_ssh_cmd () {
