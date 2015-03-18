@@ -36,7 +36,7 @@ Remove-Item -Force -Recurse $archivePath
 pip install wmi
 pip install virtualenv
 
-if (! Test-Path -Path "$scriptdir\windows\scripts\utils.ps1")
+if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
     Remove-Item -Force -Recurse "$scriptdir\*"
     GitClonePull "$scriptdir" "https://github.com/cloudbase/cinder-ci" "master"
@@ -79,19 +79,19 @@ if ($hasConfigDir -eq $false) {
     }
 }
 
-if (! Test-Path "$openstackDir\cinder\setup.py"){
+if (!(Test-Path "$openstackDir\cinder\setup.py")){
     Throw "$projectName repository was not found. Please run gerrit-git-prep for this project first"
 }
 
-if (! Test-Path $cinderTemplate){
+if (!(Test-Path $cinderTemplate)){
     Throw "Cinder template not found"
 }
 
-if (! Test-Path $remoteLogs){
+if (!(Test-Path $remoteLogs)){
     mkdir $remoteLogs\$hostname
 }
 
-if (! Test-Path $remoteConfigs){
+if (!(Test-Path $remoteConfigs)){
     mkdir $remoteConfigs\$hostname
 }
 #!!! Binary pre-reqs????
@@ -99,7 +99,7 @@ if (! Test-Path $remoteConfigs){
 #copy distutils.cfg
 Copy-Item $scriptdir\windows\templates\distutils.cfg $pythonDir\Lib\distutils\distutils.cfg
 
-if (! Test-Path $lockPath){
+if (!(Test-Path $lockPath)){
 	mkdir $lockPath
 }
 

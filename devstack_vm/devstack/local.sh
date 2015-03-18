@@ -10,9 +10,6 @@ nova flavor-create m1.nano 42 96 1 1
 nova flavor-delete 84
 nova flavor-create m1.micro 84 128 2 1
 
-nova flavor-delete 451
-nova flavor-create m1.heat 451 512 5 1
-
 # Add DNS config to the private network
 subnet_id=`neutron net-show private | grep subnets | awk '{print $4}'`
 neutron subnet-update $subnet_id --dns_nameservers list=true 8.8.8.8 8.8.4.4
