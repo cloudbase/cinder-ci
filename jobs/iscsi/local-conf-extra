@@ -1,0 +1,6 @@
+[[local|localrc]]
+TEMPEST_VOLUME_DRIVER=WindowsIscsi
+TEMPEST_VOLUME_VENDOR="Microsoft"
+TEMPEST_STORAGE_PROTOCOL=iSCSI
+
+disable_service c-vol

@@ -1,0 +1,6 @@
+[[local|localrc]]
+TEMPEST_VOLUME_DRIVER="Generic_SMBFS"
+TEMPEST_VOLUME_VENDOR="Open Source"
+TEMPEST_STORAGE_PROTOCOL=smbfs
+
+disable_service c-vol
