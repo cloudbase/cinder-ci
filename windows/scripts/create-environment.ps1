@@ -2,6 +2,7 @@ Param(
     [Parameter(Mandatory=$true)][string]$devstackIP,
     [string]$branchName='master',
     [string]$buildFor='openstack/cinder'
+    [string]$testCase='iscsi'
 )
 
 $projectName = $buildFor.split('/')[-1]
@@ -107,10 +108,6 @@ ExecRetry {
 }
 popd
 
-#Add checks and generate config for iSCSI / SMB3
-#use $scriptdir\windows\scripts\$test_case\generateConfig.ps1
-#where $test_case = iscsi / smb_windows
-
 Copy-Item "$templateDir\policy.json" "$configDir\" 
 Copy-Item "$templateDir\interfaces.template" "$configDir\"
 
@@ -118,7 +115,7 @@ if (($branchName.ToLower().CompareTo($('stable/juno').ToLower()) -eq 0) -or ($br
     $rabbitUser = "guest"
 }
 
-& $scriptdir\windows\scripts\$test_case\generateConfig.ps1 `
+& $scriptdir\windows\scripts\$testCase\generateConfig.ps1 `
     $configDir $cinderTemplate $devstackIP $rabbitUser $logDir $lockPath
 
 #$hasCinderExec = Test-Path "$pythonDir\Scripts\cinder-volume.exe"
