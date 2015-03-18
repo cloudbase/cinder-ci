@@ -31,9 +31,7 @@ git config --global user.name "Hyper-V CI"
 Remove-Item -Force -Recurse $pythonDir
 $archivePath = 'python27.tar.gz'
 Invoke-WebRequest -Uri http://10.21.7.214/python27.tar.gz -OutFile "C:\$archivePath"
-pushd c:\
-tar -xvzf $archivePath
-popd
+cmd /c 'cd \ && C:\mingw-get\msys\1.0\bin\tar -xvzf $archivePath'
 Remove-Item -Force -Recurse "c:\$archivePath"
 pip install wmi
 pip install virtualenv
