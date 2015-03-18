@@ -1,3 +1,18 @@
+join_cinder(){
+    set +e
+    WIN_USER=$1
+    WIN_PASS=$2
+    WIN_IP=$3
+
+    PARAMS="$WIN_IP $WIN_USER $WIN_PASS"
+    set -e
+    run_ps_cmd_with_retry $PARAMS "\$env:Path += ';C:\Python27;C:\Python27\Scripts;C:\OpenSSL-Win32\bin;C:\Program Files (x86)\Git\cmd;C:\MinGW\mingw32\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\qemu-img'; setx PATH \$env:Path "
+    run_ps_cmd_with_retry $PARAMS "git clone https://github.com/cloudbase/cinder-ci C:\cinder-ci"
+    run_ps_cmd_with_retry $PARAMS "cd C:\cinder-ci; git checkout cinder"
+    run_ps_cmd_with_retry $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project cinder"
+    run_ps_cmd_with_retry $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT"
+}
+
 export CINDER_VM_NAME="cinder-windows-$UUID"
 echo CINDER_VM_NAME=$CINDER_VM_NAME >> devstack_params_$ZUUL_CHANGE.txt
 
