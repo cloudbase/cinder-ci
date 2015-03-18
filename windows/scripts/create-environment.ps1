@@ -117,15 +117,15 @@ popd
 #use $scriptdir\windows\scripts\$test_case\generateConfig.ps1
 #where $test_case = iscsi / smb_windows
 
-& $scriptdir\windows\scripts\$test_case\generateConfig.ps1 `
-    $configDir $cinderTemplate $devstackIP $rabbitUser $logDir $lockPath
-
 Copy-Item "$templateDir\policy.json" "$configDir\" 
 Copy-Item "$templateDir\interfaces.template" "$configDir\"
 
 if (($branchName.ToLower().CompareTo($('stable/juno').ToLower()) -eq 0) -or ($branchName.ToLower().CompareTo($('stable/icehouse').ToLower()) -eq 0)) {
     $rabbitUser = "guest"
 }
+
+& $scriptdir\windows\scripts\$test_case\generateConfig.ps1 `
+    $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath
 
 #$hasCinderExec = Test-Path "$pythonDir\Scripts\cinder-volume.exe"
 #if ($hasCinderExec -eq $false){
