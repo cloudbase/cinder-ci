@@ -32,7 +32,7 @@ Remove-Item -Force -Recurse $pythonDir
 $archivePath = 'python27.tar.gz'
 Invoke-WebRequest -Uri http://10.21.7.214/python27.tar.gz -OutFile "C:\$archivePath"
 Write-Host "Ensure Python folder is up to date"
-cmd /c cd \ && dir && C:\MinGW\msys\1.0\bin\tar.exe xvzf $archivePath
+cmd /c `'cd \ && dir && C:\MinGW\msys\1.0\bin\tar.exe xvzf $archivePath`'
 Remove-Item -Force -Recurse "c:\$archivePath"
 pip install wmi
 pip install virtualenv
