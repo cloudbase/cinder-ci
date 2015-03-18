@@ -11,7 +11,7 @@ if ($projectName -ne "cinder")
 }
 
 $openstackDir = "C:\Openstack"
-$scriptdir = "$openstackDir\cinder-ci"
+$scriptdir = "C:\cinder-ci"
 $configDir = "$openstackDir\etc"
 $templateDir = "$scriptdir\windows\templates"
 $cinderTemplate = "$templateDir\cinder.conf"
@@ -29,18 +29,18 @@ git config --global user.name "Hyper-V CI"
 # Replace Python dir with the archived template
 # TODO: move this to the image instead.
 Remove-Item -Force -Recurse $pythonDir
-$archivePath = 'C:\python27.tar.gz'
-Invoke-WebRequest -Uri http://10.21.7.214/python27.tar.gz -OutFile $archivePath
+$archivePath = 'python27.tar.gz'
+Invoke-WebRequest -Uri http://10.21.7.214/python27.tar.gz -OutFile "C:\$archivePath"
 pushd c:\
 tar -xvzf $archivePath
 popd
-Remove-Item -Force -Recurse $archivePath
+Remove-Item -Force -Recurse "c:\$archivePath"
 pip install wmi
 pip install virtualenv
 
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
-    Remove-Item -Force -Recurse "$scriptdir\*"
+    Remove-Item -Force -Recurse "$scriptdir\* -ErrorAction SilentlyContinue"
     GitClonePull "$scriptdir" "https://github.com/cloudbase/cinder-ci" "master"
 }
 
