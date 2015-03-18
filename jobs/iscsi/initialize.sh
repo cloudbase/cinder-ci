@@ -72,7 +72,7 @@ done
 
 echo FIXED_IP=$FIXED_IP >> devstack_params_$ZUUL_CHANGE.txt
 
-export VMID=`nova show $NAME | awk '{if (NR == 16) {print $4}}'`
+export VMID=`nova show $NAME | grep -w id | awk '{print $4}'`
 
 echo VM_ID=$VMID >> devstack_params_$ZUUL_CHANGE.txt
 echo VM_ID=$VMID 
@@ -81,33 +81,41 @@ exec_with_retry "nova add-floating-ip $NAME $DEVSTACK_FLOATING_IP" 15 5
 
 nova show "$NAME" 
 
+echo "Wait for answer on port 22 on devstack"
 wait_for_listening_port $DEVSTACK_FLOATING_IP 22 5 || { nova console-log "$NAME" ; exit 1; }
 sleep 5
 
 #set timezone to UTC
+echo "Set local time to UTC on devstack"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime" 1
 
+echo "Copy scripts to devstack VM"
 scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/ 
 
+echo "Update git repos to latest"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "/home/ubuntu/bin/update_devstack_repos.sh --branch $ZUUL_BRANCH --build-for $ZUUL_PROJECT" 1
 
+echo "Ensure configs are copied over"
 scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/devstack/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/devstack 
 
 ZUUL_SITE=`echo "$ZUUL_URL" |sed 's/.\{2\}$//'`
 echo ZUUL_SITE=$ZUUL_SITE >> devstack_params_$ZUUL_CHANGE.txt
-export ZUUL_SITE=$ZUUL_SITE
+
+echo "Run gerrit-git-prep on devstack"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY  "/home/ubuntu/bin/gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT" 1
 
 # run devstack
+echo "Run stack.sh on devstack"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'source /home/ubuntu/keystonerc; /home/ubuntu/bin/run_devstack.sh' 5  
 
 # run post_stack
+echo "Run post_stack scripts on devstack"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/keystonerc && /home/ubuntu/bin/post_stack.sh" 5
 
 export CINDER_VM_NAME="cinder-windows-$UUID"
 echo CINDER_VM_NAME=$CINDER_VM_NAME >> devstack_params_$ZUUL_CHANGE.txt
 
-echo "Deploying cinder $CINDER_VM_NAME"
+echo "Deploying cinder windows VM $CINDER_VM_NAME"
 nova boot --availability-zone cinder --flavor m1.cinder --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll 
 
 if [ $? -ne 0 ]
@@ -165,9 +173,9 @@ then
     exit 1
 fi
 echo CINDER_FLOATING_IP=$CINDER_FLOATING_IP >> devstack_params_$ZUUL_CHANGE.txt
-export CINDER_FLOATING_IP=$CINDER_FLOATING_IP
 
-export WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY) 
+echo "Fetching windows VM password"
+WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY) 
 echo $WINDOWS_PASSWORD
 COUNT=0
 while [ -z "$WINDOWS_PASSWORD" ]
@@ -178,12 +186,9 @@ do
         exit 1
     fi
     sleep 20
-    export WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
+    WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
     COUNT=$(($COUNT + 1))
 done
-
-export WINDOWS_USER=$WINDOWS_USER 
-export WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY) 
 
 nova add-floating-ip $CINDER_VM_NAME $CINDER_FLOATING_IP
 
@@ -191,11 +196,14 @@ echo WINDOWS_USER=$WINDOWS_USER >> devstack_params_$ZUUL_CHANGE.txt
 echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD >> devstack_params_$ZUUL_CHANGE.txt
 echo CINDER_FIXED_IP=$CINDER_FIXED_IP >> devstack_params_$ZUUL_CHANGE.txt
 
+echo "Waiting for answer on winrm port for windows VM"
 wait_for_listening_port $CINDER_FLOATING_IP 5986 10 || { nova console-log "$CINDER_VM_NAME" ; exit 1; }
 sleep 5
 
 #join cinder host
+echo "Start cinder on windows and register with devstack"
 join_cinder $WINDOWS_USER $WINDOWS_PASSWORD $CINDER_FLOATING_IP
 
 # check cinder-volume status
+echo "Test that we have one cinder volume active"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'source /home/ubuntu/keystonerc; CINDER_COUNT=$(cinder service-list | grep cinder-volume | grep -c -w up); if [ "$CINDER_COUNT" == 1 ];then cinder service-list; else cinder service-list; exit 1;fi' 20
