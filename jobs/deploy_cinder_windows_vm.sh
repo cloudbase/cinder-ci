@@ -93,6 +93,7 @@ done
 
 nova add-floating-ip $CINDER_VM_NAME $CINDER_FLOATING_IP
 
+WINDOWS_USER='admin'
 echo WINDOWS_USER=$WINDOWS_USER >> devstack_params_$ZUUL_CHANGE.txt
 echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD >> devstack_params_$ZUUL_CHANGE.txt
 echo CINDER_FIXED_IP=$CINDER_FIXED_IP >> devstack_params_$ZUUL_CHANGE.txt
