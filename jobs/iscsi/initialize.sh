@@ -17,38 +17,38 @@ join_cinder(){
     run_ps_cmd_with_retry $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT"
 }
 
-source /var/lib/jenkins/jenkins-master/keystonerc_admin
+source $KEYSTONERC
 
 UUID=$(python -c "import uuid; print uuid.uuid4().hex")
-export NAME="devstack-cinder-$UUID"
-echo NAME=$NAME > devstack_params.txt
+export NAME="cinder-devstack-$UUID"
+echo NAME=$NAME > devstack_params_$ZUUL_CHANGE.txt
 
-DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
+DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP" 
 if [ -z "$DEVSTACK_FLOATING_IP" ]
 then
     exit 1
 fi
-echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP >> devstack_params.txt
-echo DEVSTACK_SSH_KEY=$DEVSTACK_SSH_KEY >> devstack_params.txt
+echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP >> devstack_params_$ZUUL_CHANGE.txt
+echo DEVSTACK_SSH_KEY=$DEVSTACK_SSH_KEY >> devstack_params_$ZUUL_CHANGE.txt
 
 NET_ID=$(nova net-list | grep 'private' | awk '{print $2}')
-echo NET_ID=$NET_ID >> devstack_params.txt
+echo NET_ID=$NET_ID >> devstack_params_$ZUUL_CHANGE.txt
 
-echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP > /var/log/jenkins/jobs/console-$NAME.log 2>&1
-echo NAME=$NAME >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
-echo NET_ID=$NET_ID >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
+echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP
+echo NAME=$NAME 
+echo NET_ID=$NET_ID 
 
-echo "Deploying devstack $NAME" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
-nova boot --availability-zone cinder --flavor m1.medium --image devstack --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
+echo "Deploying devstack $NAME" 
+nova boot --availability-zone cinder --flavor m1.medium --image devstack --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll 
 
 if [ $? -ne 0 ]
 then
-    echo "Failed to create devstack VM: $NAME" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
-    nova show "$NAME" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
+    echo "Failed to create devstack VM: $NAME" 
+    nova show "$NAME" 
     exit 1
 fi
 
-echo "Fetching devstack VM fixed IP address" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
+echo "Fetching devstack VM fixed IP address" 
 export FIXED_IP=$(nova show "$NAME" | grep "private network" | awk '{print $5}')
 
 COUNT=0
@@ -56,13 +56,13 @@ while [ -z "$FIXED_IP" ]
 do
     if [ $COUNT -ge 10 ]
     then
-        echo "Failed to get fixed IP" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
-        echo "nova show output:" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
-        nova show "$NAME" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
-        echo "nova console-log output:" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
-        nova console-log "$NAME" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
-        echo "neutron port-list output:" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
-        neutron port-list -D -c device_id -c fixed_ips | grep $VM_ID >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
+        echo "Failed to get fixed IP" 
+        echo "nova show output:" 
+        nova show "$NAME" 
+        echo "nova console-log output:" 
+        nova console-log "$NAME" 
+        echo "neutron port-list output:" 
+        neutron port-list -D -c device_id -c fixed_ips | grep $VM_ID 
         exit 1
     fi
     sleep 15
@@ -70,31 +70,31 @@ do
     COUNT=$(($COUNT + 1))
 done
 
-echo FIXED_IP=$FIXED_IP >> devstack_params.txt
+echo FIXED_IP=$FIXED_IP >> devstack_params_$ZUUL_CHANGE.txt
 
 export VMID=`nova show $NAME | awk '{if (NR == 16) {print $4}}'`
 
-echo VM_ID=$VMID >> devstack_params.txt
-echo VM_ID=$VMID >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
+echo VM_ID=$VMID >> devstack_params_$ZUUL_CHANGE.txt
+echo VM_ID=$VMID 
 
 exec_with_retry "nova add-floating-ip $NAME $DEVSTACK_FLOATING_IP" 15 5
 
-nova show "$NAME" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
+nova show "$NAME" 
 
-wait_for_listening_port $DEVSTACK_FLOATING_IP 22 5 || { nova console-log "$NAME" >> /var/log/jenkins/jobs/console-$NAME.log 2>&1; exit 1; }
+wait_for_listening_port $DEVSTACK_FLOATING_IP 22 5 || { nova console-log "$NAME" ; exit 1; }
 sleep 5
 
 #set timezone to UTC
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime" 1
 
-scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/ >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
+scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/ 
 
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "/home/ubuntu/bin/update_devstack_repos.sh --branch $ZUUL_BRANCH --build-for $ZUUL_PROJECT" 1
 
-scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/devstack/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/devstack >> /var/log/jenkins/jobs/console-$NAME.log 2>&1
+scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/devstack/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/devstack 
 
 ZUUL_SITE=`echo "$ZUUL_URL" |sed 's/.\{2\}$//'`
-echo ZUUL_SITE=$ZUUL_SITE >> devstack_params.txt
+echo ZUUL_SITE=$ZUUL_SITE >> devstack_params_$ZUUL_CHANGE.txt
 export ZUUL_SITE=$ZUUL_SITE
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY  "/home/ubuntu/bin/gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT" 1
 
@@ -104,40 +104,40 @@ run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'source /h
 # run post_stack
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/keystonerc && /home/ubuntu/bin/post_stack.sh" 5
 
-export CINDER_VM_NAME="cinder-$UUID"
-echo CINDER_VM_NAME=$CINDER_VM_NAME >> devstack_params.txt
+export CINDER_VM_NAME="cinder-windows-$UUID"
+echo CINDER_VM_NAME=$CINDER_VM_NAME >> devstack_params_$ZUUL_CHANGE.txt
 
-echo "Deploying cinder $CINDER_VM_NAME" > /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
-nova boot --availability-zone cinder --flavor m1.cinder --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
+echo "Deploying cinder $CINDER_VM_NAME"
+nova boot --availability-zone cinder --flavor m1.cinder --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll 
 
 if [ $? -ne 0 ]
 then
-    echo "Failed to create cinder VM: $CINDER_VM_NAME" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
-    nova show "$CINDER_VM_NAME" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
+    echo "Failed to create cinder VM: $CINDER_VM_NAME" 
+    nova show "$CINDER_VM_NAME" 
     exit 1
 fi
 
 #work around restart issue
-echo "Fetching cinder VM status " >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
+echo "Fetching cinder VM status " 
 export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
 COUNT=0
 while [ $CINDER_STATUS != "SHUTOFF" ]
 do
     if [ $COUNT -ge 50 ]
     then
-        echo "Failed to get $CINDER_VM_NAME status" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
-        nova show "$CINDER_VM_NAME" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
+        echo "Failed to get $CINDER_VM_NAME status" 
+        nova show "$CINDER_VM_NAME" 
         exit 1
     fi
     sleep 20
     export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
     COUNT=$(($COUNT + 1))
 done
-echo "Starting $CINDER_VM_NAME" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
-nova start $CINDER_VM_NAME >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
+echo "Starting $CINDER_VM_NAME" 
+nova start $CINDER_VM_NAME 
 
 
-echo "Fetching cinder VM fixed IP address" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
+echo "Fetching cinder VM fixed IP address" 
 export CINDER_FIXED_IP=$(nova show "$CINDER_VM_NAME" | grep "private network" | awk '{print $5}')
 echo $CINDER_FIXED_IP 
 COUNT=0
@@ -145,13 +145,13 @@ while [ -z "$CINDER_FIXED_IP" ]
 do
     if [ $COUNT -ge 20 ]
     then
-        echo "Failed to get fixed IP" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
-        echo "nova show output:" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
-        nova show "$CINDER_FIXED_IP" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
-        echo "nova console-log output:" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
-        nova console-log "$CINDER_FIXED_IP" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
-        echo "neutron port-list output:" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
-        neutron port-list -D -c device_id -c fixed_ips | grep $VM_ID >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
+        echo "Failed to get fixed IP" 
+        echo "nova show output:" 
+        nova show "$CINDER_FIXED_IP" 
+        echo "nova console-log output:" 
+        nova console-log "$CINDER_FIXED_IP" 
+        echo "neutron port-list output:" 
+        neutron port-list -D -c device_id -c fixed_ips | grep $VM_ID 
         exit 1
     fixed
     sleep 15
@@ -159,13 +159,13 @@ do
     COUNT=$(($COUNT + 1))
 done
 
-CINDER_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
+CINDER_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP" 
 if [ -z "$CINDER_FLOATING_IP" ]
 then
     exit 1
 fi
-echo CINDER_FLOATING_IP=$CINDER_FLOATING_IP >> devstack_params.txt
-export CINDER_FLOATING_IP=$CINDER_FLOATING_IP >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log
+echo CINDER_FLOATING_IP=$CINDER_FLOATING_IP >> devstack_params_$ZUUL_CHANGE.txt
+export CINDER_FLOATING_IP=$CINDER_FLOATING_IP
 
 export WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY) 
 echo $WINDOWS_PASSWORD
@@ -174,7 +174,7 @@ while [ -z "$WINDOWS_PASSWORD" ]
 do
     if [ $COUNT -ge 30 ]
     then
-        echo "Failed to get password" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
+        echo "Failed to get password" 
         exit 1
     fi
     sleep 20
@@ -182,16 +182,16 @@ do
     COUNT=$(($COUNT + 1))
 done
 
-export WINDOWS_USER=$WINDOWS_USER >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
-export WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY) >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1
+export WINDOWS_USER=$WINDOWS_USER 
+export WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY) 
 
 nova add-floating-ip $CINDER_VM_NAME $CINDER_FLOATING_IP
 
-echo WINDOWS_USER=$WINDOWS_USER >> devstack_params.txt
-echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD >> devstack_params.txt
-echo CINDER_FIXED_IP=$CINDER_FIXED_IP >> devstack_params.txt
+echo WINDOWS_USER=$WINDOWS_USER >> devstack_params_$ZUUL_CHANGE.txt
+echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD >> devstack_params_$ZUUL_CHANGE.txt
+echo CINDER_FIXED_IP=$CINDER_FIXED_IP >> devstack_params_$ZUUL_CHANGE.txt
 
-wait_for_listening_port $CINDER_FLOATING_IP 5986 10 || { nova console-log "$CINDER_VM_NAME" >> /var/log/jenkins/jobs/console-$CINDER_VM_NAME.log 2>&1; exit 1; }
+wait_for_listening_port $CINDER_FLOATING_IP 5986 10 || { nova console-log "$CINDER_VM_NAME" ; exit 1; }
 sleep 5
 
 #join cinder host
