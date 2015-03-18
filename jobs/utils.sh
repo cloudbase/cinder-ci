@@ -5,9 +5,9 @@ exec_with_retry2 () {
     COUNTER=0
     while [ $COUNTER -lt $MAX_RETRIES ]; do
         EXIT=0
-    echo `date -u +%H:%M:%S` >> ./console-$NAME.log 2>&1
-        # echo "Running: ${@:3}" >> ./console-$NAME.log 2>&1
-        eval '${@:3} >> ./console-$NAME.log 2>&1' || EXIT=$?
+        echo `date -u +%H:%M:%S`
+        # echo "Running: ${@:3}"
+        eval '${@:3}' || EXIT=$?
         if [ $EXIT -eq 0 ]; then
             return 0
         fi
