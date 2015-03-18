@@ -85,6 +85,11 @@ echo "Wait for answer on port 22 on devstack"
 wait_for_listening_port $DEVSTACK_FLOATING_IP 22 5 || { nova console-log "$NAME" ; exit 1; }
 sleep 5
 
+# Add 2 more interfaces after successful SSH
+echo "Adding two more network interfaces to devstack VM"
+nova interface-attach --net-id "$NET_ID" "$NAME" >> /home/jenkins-slave/console-$NAME.log 2>&1
+nova interface-attach --net-id "$NET_ID" "$NAME" >> /home/jenkins-slave/console-$NAME.log 2>&1
+
 #set timezone to UTC
 echo "Set local time to UTC on devstack"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime" 1
