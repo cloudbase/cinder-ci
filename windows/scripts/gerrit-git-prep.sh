@@ -38,8 +38,9 @@ then
     exit 1
 fi
 
-BUILD_DIR="c:/OpenStack/build/"
-PROJECT_DIR="$BUILD_DIR/$ZUUL_PROJECT"
+BUILD_DIR="c:/OpenStack/"
+BUILD_SUBDIR=`basename $ZUUL_PROJECT`
+PROJECT_DIR="$BUILD_DIR/$BUILD_SUBDIR"
 
 function exit_error(){
     echo $1
