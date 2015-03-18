@@ -43,7 +43,7 @@ if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
     GitClonePull "$scriptdir" "https://github.com/cloudbase/cinder-ci" "master"
 }
 
-. "$scriptdir\cinder_env\Cinder\scripts\utils.ps1"
+. "$scriptdir\windows\scripts\utils.ps1"
 
 $ErrorActionPreference = "SilentlyContinue"
 
@@ -67,17 +67,10 @@ if ($(Get-Service cinder-volume).Status -ne "Stopped"){
 }
 
 Write-Host "Cleaning up the config folder."
-if ($hasConfigDir -eq $false) {
+if (!(Test-Path $configDir)) {
     mkdir $configDir
 }else{
-    Try
-    {
-        Remove-Item -Recurse -Force $configDir\*
-    }
-    Catch
-    {
-        Throw "Can not clean the config folder"
-    }
+    Remove-Item -Recurse -Force $configDir\* -ErrorAction SilentlyContinue
 }
 
 if (!(Test-Path "$openstackDir\cinder\setup.py")){
@@ -118,15 +111,15 @@ popd
 #use $scriptdir\windows\scripts\$test_case\generateConfig.ps1
 #where $test_case = iscsi / smb_windows
 
-& $scriptdir\windows\scripts\$test_case\generateConfig.ps1 `
-    $configDir $cinderTemplate $devstackIP $rabbitUser $logDir $lockPath
-
 Copy-Item "$templateDir\policy.json" "$configDir\" 
 Copy-Item "$templateDir\interfaces.template" "$configDir\"
 
 if (($branchName.ToLower().CompareTo($('stable/juno').ToLower()) -eq 0) -or ($branchName.ToLower().CompareTo($('stable/icehouse').ToLower()) -eq 0)) {
     $rabbitUser = "guest"
 }
+
+& $scriptdir\windows\scripts\$test_case\generateConfig.ps1 `
+    $configDir $cinderTemplate $devstackIP $rabbitUser $logDir $lockPath
 
 #$hasCinderExec = Test-Path "$pythonDir\Scripts\cinder-volume.exe"
 #if ($hasCinderExec -eq $false){
