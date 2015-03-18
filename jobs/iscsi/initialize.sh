@@ -4,16 +4,14 @@ join_cinder(){
     set +e
     WIN_USER=$1
     WIN_PASS=$2
-    URL=$3
+    WIN_IP=$3
 
-    PARAMS="$URL $WIN_USER $WIN_PASS"
+    PARAMS="$WIN_IP $WIN_USER $WIN_PASS"
     set -e
-    run_ps_cmd_with_retry $PARAMS "\$env:Path += ';C:\Python27;C:\Python27\Scripts;C:\OpenSSL-Win32\bin;"\
-"C:\Program Files (x86)\Git\cmd;C:\MinGW\mingw32\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\qemu-img'; setx PATH \$env:Path "
+    run_ps_cmd_with_retry $PARAMS "\$env:Path += ';C:\Python27;C:\Python27\Scripts;C:\OpenSSL-Win32\bin;C:\Program Files (x86)\Git\cmd;C:\MinGW\mingw32\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\qemu-img'; setx PATH \$env:Path "
     run_ps_cmd_with_retry $PARAMS "git clone https://github.com/cloudbase/cinder-ci C:\cinder-ci"
     run_ps_cmd_with_retry $PARAMS "cd C:\cinder-ci; git checkout cinder"
-    run_ps_cmd_with_retry $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh"\
-" --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project cinder"
+    run_ps_cmd_with_retry $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project cinder"
     run_ps_cmd_with_retry $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT"
 }
 
@@ -87,8 +85,8 @@ sleep 5
 
 # Add 2 more interfaces after successful SSH
 echo "Adding two more network interfaces to devstack VM"
-nova interface-attach --net-id "$NET_ID" "$NAME" >> /home/jenkins-slave/console-$NAME.log 2>&1
-nova interface-attach --net-id "$NET_ID" "$NAME" >> /home/jenkins-slave/console-$NAME.log 2>&1
+nova interface-attach --net-id "$NET_ID" "$NAME"
+nova interface-attach --net-id "$NET_ID" "$NAME"
 
 #set timezone to UTC
 echo "Set local time to UTC on devstack"
@@ -200,6 +198,8 @@ nova add-floating-ip $CINDER_VM_NAME $CINDER_FLOATING_IP
 echo WINDOWS_USER=$WINDOWS_USER >> devstack_params_$ZUUL_CHANGE.txt
 echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD >> devstack_params_$ZUUL_CHANGE.txt
 echo CINDER_FIXED_IP=$CINDER_FIXED_IP >> devstack_params_$ZUUL_CHANGE.txt
+echo WINDOWS_USER=$WINDOWS_USER
+echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD
 
 echo "Waiting for answer on winrm port for windows VM"
 wait_for_listening_port $CINDER_FLOATING_IP 5986 10 || { nova console-log "$CINDER_VM_NAME" ; exit 1; }

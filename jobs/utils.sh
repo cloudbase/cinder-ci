@@ -5,11 +5,13 @@ exec_with_retry2 () {
     COUNTER=0
     while [ $COUNTER -lt $MAX_RETRIES ]; do
         EXIT=0
-        eval '${@:3}' || EXIT=$?
+    echo `date -u +%H:%M:%S` >> ./console-$NAME.log 2>&1
+        # echo "Running: ${@:3}" >> ./console-$NAME.log 2>&1
+        eval '${@:3} >> ./console-$NAME.log 2>&1' || EXIT=$?
         if [ $EXIT -eq 0 ]; then
             return 0
         fi
-        let COUNTER=COUNTER+1
+    let COUNTER=COUNTER+1
 
         if [ -n "$INTERVAL" ]; then
             sleep $INTERVAL
@@ -19,9 +21,9 @@ exec_with_retry2 () {
 }
 
 exec_with_retry () {
-    CMD=$1
-    MAX_RETRIES=${2-10}
-    INTERVAL=${3-0}
+    CMD=${@:3}
+    MAX_RETRIES=$1
+    INTERVAL=$2
 
     exec_with_retry2 $MAX_RETRIES $INTERVAL $CMD
 }
@@ -30,9 +32,9 @@ run_wsmancmd_with_retry () {
     HOST=$1
     USERNAME=$2
     PASSWORD=$3
-    CMD=$4
+    CMD=${@:4}
 
-    exec_with_retry "python /var/lib/jenkins/jenkins-master/wsman.py -U https://$HOST:5986/wsman -u $USERNAME -p $PASSWORD $CMD"
+    exec_with_retry 1 1 "python /var/lib/jenkins/jenkins-master/wsman.py -U https://$HOST:5986/wsman -u $USERNAME -p $PASSWORD $CMD"
 }
 
 wait_for_listening_port () {
@@ -76,7 +78,7 @@ run_ps_cmd_with_retry () {
     HOST=$1
     USERNAME=$2
     PASSWORD=$3
-    CMD=$4
+    CMD=${@:4}
     PS_EXEC_POLICY='-ExecutionPolicy RemoteSigned'
 
     run_wsmancmd_with_retry $HOST $USERNAME $PASSWORD "powershell $PS_EXEC_POLICY $CMD"
