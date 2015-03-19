@@ -116,7 +116,7 @@ if (($branchName.ToLower().CompareTo($('stable/juno').ToLower()) -eq 0) -or ($br
 }
 
 & $scriptdir\windows\scripts\$testCase\generateConfig.ps1 `
-    $configDir $cinderTemplate $devstackIP $rabbitUser $logDir $lockPath
+    $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs\$hostname $lockPath
 
 #$hasCinderExec = Test-Path "$pythonDir\Scripts\cinder-volume.exe"
 #if ($hasCinderExec -eq $false){
@@ -129,6 +129,11 @@ if (($branchName.ToLower().CompareTo($('stable/juno').ToLower()) -eq 0) -or ($br
 
 Remove-Item -Recurse -Force "$remoteConfigs\*"
 Copy-Item -Recurse $configDir "$remoteConfigs\"
+
+Write-Host "Service Details:"
+$filter = 'Name=' + "'" + $serviceName + "'" + ''
+Get-WMIObject -namespace "root\cimv2" -class Win32_Service -Filter $filter | Select *
+
 
 Write-Host "Starting the services"
 Try
