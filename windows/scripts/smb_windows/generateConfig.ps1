@@ -13,11 +13,10 @@ $configFile = '$configDir\cinder.conf'
 
 
 $sharePath = '\\$devstackIp\openstack\volumes'
-if (! Test-Path -Path "$sharePath"){
-    mkdir $sharePath
-}
 sc $smbSharesConfigPath $sharePath
 
 $template = gc $templatePath
-$config = $ExecutionContext.InvokeCommand.ExpandString($template)
+$config = expand_template $template
+Write-Host "Config file:"
+Write-Host $config
 sc $configFile $config
