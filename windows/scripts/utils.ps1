@@ -501,3 +501,13 @@ function GitClonePull($path, $url, $branch="master")
     }
 }
 
+function expand_template($template)
+{
+    $expanded_template = ''
+    foreach($line in $template)
+    {
+        $expanded_line = $ExecutionContext.InvokeCommand.ExpandString($line)
+        $expanded_template += "$expanded_line`r`n"
+    }
+    return $expanded_template
+}
