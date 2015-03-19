@@ -83,11 +83,11 @@ if (!(Test-Path $cinderTemplate)){
 }
 
 if (!(Test-Path $remoteLogs)){
-    mkdir $remoteLogs\$hostname
+    mkdir $remoteLogs
 }
 
 if (!(Test-Path $remoteConfigs)){
-    mkdir $remoteConfigs\$hostname
+    mkdir $remoteConfigs
 }
 #!!! Binary pre-reqs????
 
@@ -116,7 +116,7 @@ if (($branchName.ToLower().CompareTo($('stable/juno').ToLower()) -eq 0) -or ($br
 }
 
 & $scriptdir\windows\scripts\$testCase\generateConfig.ps1 `
-    $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs\$hostname $lockPath
+    $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath
 
 #$hasCinderExec = Test-Path "$pythonDir\Scripts\cinder-volume.exe"
 #if ($hasCinderExec -eq $false){
