@@ -12,7 +12,7 @@ $smbSharesConfigPath = '$configDir\smbfs_shares_config.txt'
 $configFile = '$configDir\cinder.conf'
 
 
-$sharePath = '$devstackIp\openstack\volumes'
+$sharePath = '\\$devstackIp\openstack\volumes'
 if (! Test-Path -Path "$sharePath"){
     mkdir $sharePath
 }

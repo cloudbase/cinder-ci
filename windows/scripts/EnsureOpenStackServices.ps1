@@ -7,7 +7,7 @@ Param(
 
 $openstackDir = "C:\OpenStack"
 $pythonDir = "C:\Python27"
-$configDir = "$openstackDir\etc\cinder"
+$configDir = "$openstackDir\etc"
 $downloadLocation = "http://dl.openstack.tld/"
 $scriptdir = "C:\cinder-ci"
 
