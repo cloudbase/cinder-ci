@@ -8,9 +8,8 @@ join_cinder(){
     set -e
     echo "Set paths for windows"
     run_ps_cmd_with_retry $PARAMS "\$env:Path += ';C:\Python27;C:\Python27\Scripts;C:\OpenSSL-Win32\bin;C:\Program Files (x86)\Git\cmd;C:\MinGW\mingw32\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\qemu-img'; setx PATH \$env:Path "
-    echo "Remove c:\cinder-ci if it exists"
-    run_ps_cmd_with_retry $PARAMS "Remove-Item -Force -Recurse C:\cinder-ci -ErrorAction SilentlyContinue"
-    echo "Ensure c:\cinder-ci folder exists."
+    echo "Ensure c:\cinder-ci folder exists and is empty."
+    run_ps_cmd_with_retry $PARAMS "if (Test-Path -Path C:\cinder-ci) {Remove-Item -Force -Recurse C:\cinder-ci}"
     run_wsmancmd_with_retry $PARAMS "mkdir C:\cinder-ci"
     echo "git clone cinder-ci"
     run_wsmancmd_with_retry $PARAMS "git clone https://github.com/cloudbase/cinder-ci C:\cinder-ci"

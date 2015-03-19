@@ -11,7 +11,7 @@ $volumeDriver = 'cinder.volume.drivers.windows.windows.WindowsDriver'
 $configFile = "$configDir\cinder.conf"
 
 $template = gc $templatePath
-$config =  $ExecutionContext.InvokeCommand.ExpandString($template)
+$config =  expand_template $template
 Write-Host "Config file:"
 Write-Host $config
 Set-Content $configFile $config
