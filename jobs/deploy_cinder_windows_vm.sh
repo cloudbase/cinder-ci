@@ -6,11 +6,22 @@ join_cinder(){
 
     PARAMS="$WIN_IP $WIN_USER $WIN_PASS"
     set -e
+    echo "Set paths for windows"
     run_ps_cmd_with_retry $PARAMS "\$env:Path += ';C:\Python27;C:\Python27\Scripts;C:\OpenSSL-Win32\bin;C:\Program Files (x86)\Git\cmd;C:\MinGW\mingw32\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\qemu-img'; setx PATH \$env:Path "
-    run_ps_cmd_with_retry $PARAMS "git clone https://github.com/cloudbase/cinder-ci C:\cinder-ci"
-    run_ps_cmd_with_retry $PARAMS "cd C:\cinder-ci; git checkout cinder"
-    run_ps_cmd_with_retry $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project cinder"
-    run_ps_cmd_with_retry $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT"
+    echo "Remove c:\cinder-ci if it exists"
+    run_ps_cmd_with_retry $PARAMS "Remove-Item -Force -Recurse C:\cinder-ci"
+    echo "Ensure c:\cinder-ci folder exists."
+    run_wsmancmd_with_retry $PARAMS "mkdir C:\cinder-ci"
+    echo "git clone cinder-ci"
+    run_wsmancmd_with_retry $PARAMS "git clone https://github.com/cloudbase/cinder-ci C:\cinder-ci"
+    echo "cinder-ci: checkout master and pull latest"
+    run_ps_cmd_with_retry $PARAMS "cd C:\cinder-ci; git checkout master; git pull"
+    echo "Run gerrit-git-prep"
+    run_wsmancmd_with_retry $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT"
+    echo "Ensure service is configured"
+    run_ps_cmd_with_retry $PARAMS "C:\cinder-ci\windows\scripts\EnsureOpenStackServices.ps1 $WINDOWS_USER $WINDOWS_PASSWORD"
+    echo "create cinder env on windows"
+    run_ps_cmd_with_retry $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase iscsi"
 }
 
 export CINDER_VM_NAME="cinder-windows-$UUID"
