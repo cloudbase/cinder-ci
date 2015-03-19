@@ -15,7 +15,7 @@ $scriptdir = "C:\cinder-ci"
 
 $cinderServiceName = "cinder-volume"
 $cinderServiceDescription = "OpenStack Cinder Volume Service"
-$cinderServiceExecutable = "$pythonDir\Scripts\cinder-volume.exe"
+$cinderServiceExecutable = $pythonDir+'\python.exe -c "from ctypes import wintypes; from cinder.cmd import volume; volume.main()"'
 $cinderServiceConfig = "$configDir\cinder.conf"
 
 Check-Service $cinderServiceName $cinderServiceDescription $cinderServiceExecutable $cinderServiceConfig
