@@ -104,7 +104,7 @@ scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DE
 ZUUL_SITE=`echo "$ZUUL_URL" |sed 's/.\{2\}$//'`
 echo ZUUL_SITE=$ZUUL_SITE >> devstack_params_$ZUUL_CHANGE.txt
 
-run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p /openstack/volumes"
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p -m 777 /openstack/volumes"
 
 #get locally the vhdx files used by tempest
 echo "Downloading the images for devstack"
