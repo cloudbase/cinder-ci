@@ -16,7 +16,7 @@ neutron subnet-update $subnet_id --dns_nameservers list=true 8.8.8.8 8.8.4.4
 
 TEMPEST_CONFIG=/opt/stack/tempest/etc/tempest.conf
 
-iniset $TEMPEST_CONFIG compute volume_device_name "sdb"
+#iniset $TEMPEST_CONFIG compute volume_device_name "sdb"
 iniset $TEMPEST_CONFIG compute-feature-enabled rdp_console true
 iniset $TEMPEST_CONFIG compute-feature-enabled block_migrate_cinder_iscsi False
 
