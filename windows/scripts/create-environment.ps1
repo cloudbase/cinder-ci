@@ -72,7 +72,7 @@ if (!(Test-Path $configDir)) {
     mkdir $configDir
 }else{
     Remove-Item -Recurse -Force $configDir\* -ErrorAction SilentlyContinue
-}
+}in
 
 if (!(Test-Path "$openstackDir\cinder\setup.py")){
     Throw "$projectName repository was not found. Please run gerrit-git-prep for this project first"
@@ -100,6 +100,11 @@ if (!(Test-Path $lockPath)){
 
 pip install networkx
 pip install futures
+
+# TODO: remove this after the clone volume bug is fixed
+$windows_utils = "$openstackDir\cinder\cinder\volume\drivers\windows\windows_utils.py"
+$content = gc $windows_utils
+sc $windows_utils $content.Replace("# queries or comments, WQL queries are not exposed to WQL injection.", "os.unlink(destination_path)")
 
 pushd $openstackDir\cinder
 ExecRetry {
