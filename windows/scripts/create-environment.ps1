@@ -102,10 +102,9 @@ pip install networkx
 pip install futures
 
 # TODO: remove this after the clone volume bug is fixed
-$windows_utils = "$openstackDir\cinder\cinder\volume\drivers\windows\windows_utils.py"
+$windows_utils = "$openstackDir\cinder\cinder\volume\drivers\windows\windows.py"
 $content = gc $windows_utils
-sc $windows_utils $content.Replace("# queries or comments, WQL queries are not exposed to WQL injection.", "os.unlink(destination_path)")
-
+sc $windows_utils $content.Replace("self.create_volume(volume)", "self.create_volume(volume);os.unlink(self.local_path(volume))")
 pushd $openstackDir\cinder
 ExecRetry {
     cmd.exe /C "$pythonDir\$pythonExec" setup.py install
