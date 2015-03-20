@@ -5,7 +5,7 @@ join_cinder(){
     WIN_IP=$3
 
     PARAMS="$WIN_IP $WIN_USER $WIN_PASS"
-    set -e
+    # set -e
     echo "Set paths for windows"
     run_ps_cmd_with_retry $PARAMS "\$env:Path += ';C:\Python27;C:\Python27\Scripts;C:\OpenSSL-Win32\bin;C:\Program Files (x86)\Git\cmd;C:\MinGW\mingw32\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\qemu-img'; setx PATH \$env:Path "
     echo "Ensure c:\cinder-ci folder exists and is empty."
