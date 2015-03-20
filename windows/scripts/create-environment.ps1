@@ -72,7 +72,7 @@ if (!(Test-Path $configDir)) {
     mkdir $configDir
 }else{
     Remove-Item -Recurse -Force $configDir\* -ErrorAction SilentlyContinue
-}in
+}
 
 if (!(Test-Path "$openstackDir\cinder\setup.py")){
     Throw "$projectName repository was not found. Please run gerrit-git-prep for this project first"
