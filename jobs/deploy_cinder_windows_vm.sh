@@ -1,3 +1,4 @@
+#!/bin/bash
 join_cinder(){
     set +e
     WIN_USER=$1
@@ -24,7 +25,7 @@ join_cinder(){
 }
 
 export CINDER_VM_NAME="cinder-windows-$UUID"
-echo CINDER_VM_NAME=$CINDER_VM_NAME >> devstack_params_$ZUUL_CHANGE.txt
+echo CINDER_VM_NAME=$CINDER_VM_NAME >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 echo "Deploying cinder windows VM $CINDER_VM_NAME"
 nova boot --availability-zone cinder --flavor m1.cinder --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll
@@ -83,7 +84,7 @@ if [ -z "$CINDER_FLOATING_IP" ]
 then
     exit 1
 fi
-echo CINDER_FLOATING_IP=$CINDER_FLOATING_IP >> devstack_params_$ZUUL_CHANGE.txt
+echo CINDER_FLOATING_IP=$CINDER_FLOATING_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 echo "Fetching windows VM password"
 WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
@@ -103,9 +104,9 @@ done
 
 nova add-floating-ip $CINDER_VM_NAME $CINDER_FLOATING_IP
 
-echo WINDOWS_USER=$WINDOWS_USER >> devstack_params_$ZUUL_CHANGE.txt
-echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD >> devstack_params_$ZUUL_CHANGE.txt
-echo CINDER_FIXED_IP=$CINDER_FIXED_IP >> devstack_params_$ZUUL_CHANGE.txt
+echo WINDOWS_USER=$WINDOWS_USER >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+echo CINDER_FIXED_IP=$CINDER_FIXED_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 echo WINDOWS_USER=$WINDOWS_USER
 echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD
 

@@ -38,6 +38,14 @@ fi
 cd /home/ubuntu/devstack
 git pull
 sudo easy_install -U pip
+
+# Revert the driver disable patch
+cd /opt/stack/cinder
+git config --global user.email "microsoft_cinder_ci@microsoft.com"
+git config --global user.name "Microsoft Cinder CI"
+git revert --no-edit -n 85f0814
+cd /home/ubuntu/devstack
+
 ./unstack.sh
 
 nohup ./stack.sh > /opt/stack/logs/stack.sh.txt 2>&1 &

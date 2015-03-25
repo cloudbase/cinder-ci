@@ -1,3 +1,4 @@
+#!/bin/bash
 exec_with_retry2 () {
     MAX_RETRIES=$1
     INTERVAL=$2

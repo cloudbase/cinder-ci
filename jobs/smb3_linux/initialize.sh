@@ -1,3 +1,4 @@
+#!/bin/bash
 source /usr/local/src/cinder-ci/jobs/utils.sh
 
 source $KEYSTONERC

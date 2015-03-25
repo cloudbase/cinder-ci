@@ -1,3 +1,4 @@
+#!/bin/bash
 source $KEYSTONERC
 
 set +e

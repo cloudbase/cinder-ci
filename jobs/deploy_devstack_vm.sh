@@ -1,3 +1,4 @@
+#!/bin/bash
 run_devstack (){
     # run devstack
     echo "Run stack.sh on devstack"
@@ -19,18 +20,18 @@ update_local_conf (){
 
 UUID=$(python -c "import uuid; print uuid.uuid4().hex")
 export NAME="cinder-devstack-$UUID"
-echo NAME=$NAME > devstack_params_$ZUUL_CHANGE.txt
+echo NAME=$NAME > /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP"
 if [ -z "$DEVSTACK_FLOATING_IP" ]
 then
     exit 1
 fi
-echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP >> devstack_params_$ZUUL_CHANGE.txt
-echo DEVSTACK_SSH_KEY=$DEVSTACK_SSH_KEY >> devstack_params_$ZUUL_CHANGE.txt
+echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+echo DEVSTACK_SSH_KEY=$DEVSTACK_SSH_KEY >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 NET_ID=$(nova net-list | grep 'private' | awk '{print $2}')
-echo NET_ID=$NET_ID >> devstack_params_$ZUUL_CHANGE.txt
+echo NET_ID=$NET_ID >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP
 echo NAME=$NAME
@@ -68,11 +69,11 @@ do
     COUNT=$(($COUNT + 1))
 done
 
-echo FIXED_IP=$FIXED_IP >> devstack_params_$ZUUL_CHANGE.txt
+echo FIXED_IP=$FIXED_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 export VMID=`nova show $NAME | grep -w id | awk '{print $4}'`
 
-echo VM_ID=$VMID >> devstack_params_$ZUUL_CHANGE.txt
+echo VM_ID=$VMID >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 echo VM_ID=$VMID
 
 exec_with_retry 15 5 "nova add-floating-ip $NAME $DEVSTACK_FLOATING_IP"
@@ -102,7 +103,7 @@ echo "Ensure configs are copied over"
 scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/devstack/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/devstack
 
 ZUUL_SITE=`echo "$ZUUL_URL" |sed 's/.\{2\}$//'`
-echo ZUUL_SITE=$ZUUL_SITE >> devstack_params_$ZUUL_CHANGE.txt
+echo ZUUL_SITE=$ZUUL_SITE >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p -m 777 /openstack/volumes"
 
