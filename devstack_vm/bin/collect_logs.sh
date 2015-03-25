@@ -3,7 +3,7 @@ TAR=$(which tar)
 GZIP=$(which gzip)
 
 DEVSTACK_LOGS="/opt/stack/logs/screen"
-DEVSTACK_BUILD_LOG="/opt/stack/logs/stack.sh.log"
+DEVSTACK_BUILD_LOG="/opt/stack/logs/stack.sh.txt"
 WIN_LOGS="/openstack/logs"
 TEMPEST_LOGS="/home/ubuntu/tempest"
 WIN_CONFIGS="/openstack/config/etc"
@@ -90,7 +90,6 @@ function archive_windows_configs(){
     if [ -d "WIN_CONFIGS" ]
     then
         mkdir -p $CONFIG_DST_WIN
-
         for i in `ls -A "$WIN_CONFIGS"`
         do
             $GZIP -c "$WIN_CONFIGS/$i" > "$CONFIG_DST_WIN/$i.gz" || emit_warning "Failed to archive $WIN_CONFIGS/$i"
