@@ -21,7 +21,7 @@ join_cinder(){
     echo "Ensure service is configured"
     run_ps_cmd_with_retry $PARAMS "C:\cinder-ci\windows\scripts\EnsureOpenStackServices.ps1 $WINDOWS_USER $WINDOWS_PASSWORD"
     echo "create cinder env on windows"
-    run_ps_cmd_with_retry $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase iscsi"
+    run_ps_cmd_with_retry $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase $JOB_TYPE"
 }
 
 export CINDER_VM_NAME="cinder-windows-$UUID"
