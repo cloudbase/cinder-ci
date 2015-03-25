@@ -2,7 +2,7 @@ Param(
     [Parameter(Mandatory=$true)][string]$devstackIP,
     [string]$branchName='master',
     [string]$buildFor='openstack/cinder',
-    [string]$testCase='iscsi'
+    [Parameter(Mandatory=$true)][string]$testCase
 )
 
 $projectName = $buildFor.split('/')[-1]
