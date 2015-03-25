@@ -6,7 +6,7 @@ DEVSTACK_LOGS="/opt/stack/logs/screen"
 DEVSTACK_BUILD_LOG="/opt/stack/logs/stack.sh.log"
 WIN_LOGS="/openstack/logs"
 TEMPEST_LOGS="/home/ubuntu/tempest"
-WIN_CONFIGS="/openstack/config"
+WIN_CONFIGS="/openstack/config/etc"
 
 LOG_DST="/home/ubuntu/aggregate"
 LOG_DST_DEVSTACK="$LOG_DST/devstack_logs"
@@ -52,7 +52,7 @@ function archive_devstack() {
             fi
         done
     done
-    $GZIP -c /home/ubuntu/devstack/localrc > "$CONFIG_DST_DEVSTACK/localrc.txt.gz"
+    #$GZIP -c /home/ubuntu/devstack/localrc > "$CONFIG_DST_DEVSTACK/localrc.txt.gz"
     $GZIP -c /home/ubuntu/devstack/local.conf > "$CONFIG_DST_DEVSTACK/local.conf.gz"
     $GZIP -c /opt/stack/tempest/etc/tempest.conf > "$CONFIG_DST_DEVSTACK/tempest.conf.gz"
     df -h > "$CONFIG_DST_DEVSTACK/df.txt" 2>&1 && $GZIP "$CONFIG_DST_DEVSTACK/df.txt"
