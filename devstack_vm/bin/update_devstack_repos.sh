@@ -32,7 +32,7 @@ git checkout "$BRANCH" || echo "Failed to switch branch"
 echo "Devstack final branch:"
 git branch
 echo "Devstack git log:"
-git log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
+git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
 popd
 
 if [ ! -d "$BASEDIR" ]
@@ -61,10 +61,7 @@ do
 		echo "Git branch output:"
 		git branch
 		echo "Git Log output:"
-		if ! [[ $i =~ .*noVNC.* ]]
-		then
-			git log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
-		fi
+		git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
 		popd
 	fi
 done
