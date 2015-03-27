@@ -35,7 +35,7 @@ run_wsmancmd_with_retry () {
     PASSWORD=$3
     CMD=${@:4}
 
-    exec_with_retry 1 1 "python /var/lib/jenkins/jenkins-master/wsman.py -U https://$HOST:5986/wsman -u $USERNAME -p $PASSWORD $CMD"
+    exec_with_retry 10 5 "python /var/lib/jenkins/jenkins-master/wsman.py -U https://$HOST:5986/wsman -u $USERNAME -p $PASSWORD $CMD"
 }
 
 wait_for_listening_port () {
