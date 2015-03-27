@@ -55,8 +55,9 @@ do
         	then
         		git reset --hard
         		git clean -f -d
-        		git pull
+        		git fetch --all
         		git checkout "$BRANCH" || echo "Failed to switch branch"
+                git pull
         	fi
 		echo "Folder: $BASEDIR/$i"
 		echo "Git branch output:"
