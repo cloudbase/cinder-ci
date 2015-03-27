@@ -25,7 +25,7 @@ echo "Before gzip:"
 ls -lia `dirname $CONSOLE_LOG`
 
 echo "GZIP:"
-gzip -9 -l -v $CONSOLE_LOG
+gzip -9 -v $CONSOLE_LOG
 
 echo "After gzip:"
 ls -lia `dirname $CONSOLE_LOG`
