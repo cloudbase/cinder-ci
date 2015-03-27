@@ -20,8 +20,18 @@ scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK
 
 echo "Uploading logs"
 scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY "aggregate-$NAME.tar.gz" logs@logs.openstack.tld:/srv/logs/cinder/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE/aggregate-logs.tar.gz
-gzip -9 $CONSOLE_LOG
-scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY "$CONSOLE_LOG.gz" logs@logs.openstack.tld:/srv/logs/cinder/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE/console.log.gz && rm -f $CONSOLE_LOG*
+
+echo "Before gzip:"
+ls -lia `dirname $CONSOLE_LOG`
+
+echo "GZIP:"
+gzip -9 -l -v $CONSOLE_LOG
+
+echo "After gzip:"
+ls -lia `dirname $CONSOLE_LOG`
+
+scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY $CONSOLE_LOG* logs@logs.openstack.tld:/srv/logs/cinder/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE/ && rm -f $CONSOLE_LOG*
+
 echo "Extracting logs"
 ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY logs@logs.openstack.tld "tar -xzf /srv/logs/cinder/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE/aggregate-logs.tar.gz -C /srv/logs/cinder/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE/"
 echo "Fixing permissions on all log files"
