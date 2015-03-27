@@ -27,7 +27,7 @@ iniset $TEMPEST_CONFIG scenario img_disk_format vhd
 IMAGE_REF=`iniget $TEMPEST_CONFIG compute image_ref`
 iniset $TEMPEST_CONFIG compute image_ref_alt $IMAGE_REF
 
-iniset $TEMPEST_CONFIG compute build_timeout 120
+iniset $TEMPEST_CONFIG compute build_timeout 300
 iniset $TEMPEST_CONFIG orchestration build_timeout 120
 iniset $TEMPEST_CONFIG volume build_timeout 120
 iniset $TEMPEST_CONFIG boto build_timeout 120
