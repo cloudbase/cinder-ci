@@ -7,6 +7,10 @@ enable_service c-vol
 CINDER_ENABLED_BACKENDS=SMBFS
 
 [[post-config|$CINDER_CONF]]
+[DEFAULT]
+os_privileged_user_password=Passw0rd
+os_privileged_user_tenant=admin
+os_privileged_user_name=admin
 [SMBFS]
 volume_backend_name=SMBFS
 volume_driver=cinder.volume.drivers.smbfs.SmbfsDriver
