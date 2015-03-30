@@ -21,8 +21,8 @@ iniset $TEMPEST_CONFIG compute-feature-enabled rdp_console true
 iniset $TEMPEST_CONFIG compute-feature-enabled block_migrate_cinder_iscsi False
 
 iniset $TEMPEST_CONFIG scenario img_dir "/home/ubuntu/devstack/files/images/"
-iniset $TEMPEST_CONFIG scenario img_file "cirros-0.3.3-x86_64.vhdx"
-iniset $TEMPEST_CONFIG scenario img_disk_format vhd
+iniset $TEMPEST_CONFIG scenario img_file "cirros-0.3.3-x86_64.img"
+iniset $TEMPEST_CONFIG scenario img_disk_format qcow2
 
 IMAGE_REF=`iniget $TEMPEST_CONFIG compute image_ref`
 iniset $TEMPEST_CONFIG compute image_ref_alt $IMAGE_REF
