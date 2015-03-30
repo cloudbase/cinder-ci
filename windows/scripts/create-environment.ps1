@@ -128,6 +128,21 @@ ExecRetry {
     git cherry-pick c0ed2ab8cc6b1197e426cd6c58c3b582624d1cfd
     if ($LastExitCode) { Throw "Failed git cherry-pick c0ed2ab8cc6b1197e426cd6c58c3b582624d1cfd" }
 }
+ExecRetry {
+    git cherry-pick 01fd56078bc4d73236dab02f6df0bd38b344834c
+    if ($LastExitCode) { Throw "Failed git cherry-pick 01fd56078bc4d73236dab02f6df0bd38b344834c" }
+}
+ExecRetry {
+    git cherry-pick ae508692c7978e19743211290c1b2a8dfa63f75d
+    if ($LastExitCode) { Throw "Failed git cherry-pick ae508692c7978e19743211290c1b2a8dfa63f75d" }
+}
+ExecRetry {
+    git cherry-pick 184506b6db02f9f7e620ce340b74e391cc200f41
+    if ($LastExitCode) { Throw "Failed git cherry-pick 184506b6db02f9f7e620ce340b74e391cc200f41" }
+}
+
+
+
 
 ExecRetry {
     cmd.exe /C "$pythonDir\$pythonExec" setup.py install
