@@ -24,9 +24,6 @@ $remoteConfigs="\\"+$devstackIP+"\openstack\config"
 $rabbitUser = "stackrabbit"
 $hostname = hostname
 
-git config --global user.email "hyper-v_ci@microsoft.com"
-git config --global user.name "Hyper-V CI"
-
 # Replace Python dir with the archived template
 # TODO: move this to the image instead.
 Remove-Item -Force -Recurse $pythonDir
@@ -110,11 +107,27 @@ pushd $openstackDir\cinder
 # Revert the driver disable patch
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
-git remote add downstream https://github.com/petrutlucian94/cinder
-git fetch downstream
-git cherry-pick d99a73a6410a4a63b4818f387d7c561ca268db2f
-git cherry-pick d9e5d12258bac06e436605da7e3928808f9c98e0
-git cherry-pick c0ed2ab8cc6b1197e426cd6c58c3b582624d1cfd
+
+ExecRetry {
+    git remote add downstream https://github.com/petrutlucian94/cinder
+    if ($LastExitCode) { Throw "Failed adding to git the remote downstream petrutlucian94" }
+}
+ExecRetry {
+    git fetch downstream
+    if ($LastExitCode) { Throw "Failed fetching remote downstream petrutlucian94" }
+}
+ExecRetry {
+    git cherry-pick d99a73a6410a4a63b4818f387d7c561ca268db2f
+    if ($LastExitCode) { Throw "Failed git cherry-pick d99a73a6410a4a63b4818f387d7c561ca268db2f" }
+}
+ExecRetry {
+    git cherry-pick d9e5d12258bac06e436605da7e3928808f9c98e0
+    if ($LastExitCode) { Throw "Failed git cherry-pick d9e5d12258bac06e436605da7e3928808f9c98e0" }
+}
+ExecRetry {
+    git cherry-pick c0ed2ab8cc6b1197e426cd6c58c3b582624d1cfd
+    if ($LastExitCode) { Throw "Failed git cherry-pick c0ed2ab8cc6b1197e426cd6c58c3b582624d1cfd" }
+}
 
 ExecRetry {
     cmd.exe /C "$pythonDir\$pythonExec" setup.py install
