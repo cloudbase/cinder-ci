@@ -1,10 +1,12 @@
 Param(
     [Parameter(Mandatory=$true)][string]$configDir,
     [Parameter(Mandatory=$true)][string]$templatePath,
-    [Parameter(Mandatory=$true)][string]$devstackIP,
+    [Parameter(Mandatory=$true)][string]$serverIP,
     [Parameter(Mandatory=$true)][string]$rabbitUser,
     [Parameter(Mandatory=$true)][string]$logDir,
-    [Parameter(Mandatory=$true)][string]$lockPath
+    [Parameter(Mandatory=$true)][string]$lockPath,
+    [Parameter(Mandatory=$true)][string]$username,
+    [Parameter(Mandatory=$true)][string]$password
 )
 
 function unzip($src, $dest) {
@@ -23,7 +25,7 @@ $smbSharesConfigPath = "$configDir\smbfs_shares_config.txt"
 $configFile = "$configDir\cinder.conf"
 
 
-$sharePath = "//$devstackIp/openstack/volumes -o noperm"
+$sharePath = "//$serverIP/SMBShare -o username=$username,password=$username"
 sc $smbSharesConfigPath $sharePath
 
 $template = gc $templatePath
@@ -36,3 +38,16 @@ sc $configFile $config
 Invoke-WebRequest -Uri http://dl.openstack.tld/qemu-img-cbsl-build.zip -OutFile c:\qemu-img\qemu-img-cbsl-build.zip
 mkdir c:\qemu2
 unzip c:\qemu-img\qemu-img-cbsl-build.zip c:\qemu2
+
+# Ensure Windows Share is available
+if (! (Test-Path -Path C:\SMBShare))
+{
+    mkdir c:\SMBShare
+}
+
+if (!(Get-SMBShare -Name SMBShare))
+{
+    $hostname=hostname
+    New-SMBShare -Name SMBShare -Path C:\SMBShare -FullAccess "$hostname\Admin"
+}
+Grant-SmbShareAccess -Name SMBShare -AccountName Admin -AccessRight Full -Force
