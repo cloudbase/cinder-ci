@@ -25,7 +25,7 @@ $smbSharesConfigPath = "$configDir\smbfs_shares_config.txt"
 $configFile = "$configDir\cinder.conf"
 
 
-$sharePath = "//$serverIP/SMBShare -o username=$username,password=$username"
+$sharePath = "//$serverIP/SMBShare -o username=$username,password=$password"
 sc $smbSharesConfigPath $sharePath
 
 $template = gc $templatePath
