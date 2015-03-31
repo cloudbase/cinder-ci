@@ -19,7 +19,7 @@ function unzip($src, $dest) {
 	}
 
 }
-
+$serverIP =  (Get-NetIPAddress -AddressFamily IPv4 -PrefixOrigin Dhcp).IPAddress
 $volumeDriver = 'cinder.volume.drivers.windows.smbfs.WindowsSmbfsDriver'
 $smbSharesConfigPath = "$configDir\smbfs_shares_config.txt"
 $configFile = "$configDir\cinder.conf"
