@@ -62,7 +62,7 @@ echo $CINDER_FIXED_IP
 COUNT=0
 while [ -z "$CINDER_FIXED_IP" ]
 do
-    if [ $COUNT -ge 20 ]
+    if [ $COUNT -ge 50 ]
     then
         echo "Failed to get fixed IP"
         echo "nova show output:"
