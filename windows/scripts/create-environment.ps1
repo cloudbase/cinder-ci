@@ -2,7 +2,9 @@ Param(
     [Parameter(Mandatory=$true)][string]$devstackIP,
     [string]$branchName='master',
     [string]$buildFor='openstack/cinder',
-    [Parameter(Mandatory=$true)][string]$testCase
+    [Parameter(Mandatory=$true)][string]$testCase,
+    [Parameter(Mandatory=$true)][string]$winUser,
+    [Parameter(Mandatory=$true)][string]$winPasswd
 )
 
 $projectName = $buildFor.split('/')[-1]
@@ -158,7 +160,7 @@ if (($branchName.ToLower().CompareTo($('stable/juno').ToLower()) -eq 0) -or ($br
 }
 
 & $scriptdir\windows\scripts\$testCase\generateConfig.ps1 `
-    $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath
+    $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath $winUser $winPasswd
 
 #$hasCinderExec = Test-Path "$pythonDir\Scripts\cinder-volume.exe"
 #if ($hasCinderExec -eq $false){
