@@ -38,6 +38,7 @@ sc $configFile $config
 Invoke-WebRequest -Uri http://dl.openstack.tld/qemu-img-cbsl-build.zip -OutFile c:\qemu-img\qemu-img-cbsl-build.zip
 mkdir c:\qemu2
 unzip c:\qemu-img\qemu-img-cbsl-build.zip c:\qemu2
+Move-Item -Path C:\qemu2\* -Destination C:\qemu-img\ -Force
 
 # Ensure Windows Share is available
 if (! (Test-Path -Path C:\SMBShare))
