@@ -87,7 +87,7 @@ function archive_windows_logs() {
 }
 
 function archive_windows_configs(){
-    if [ -d "WIN_CONFIGS" ]
+    if [ -d "$WIN_CONFIGS" ]
     then
         mkdir -p $CONFIG_DST_WIN
         for i in `ls -A "$WIN_CONFIGS"`
