@@ -44,7 +44,8 @@ sudo easy_install -U pip
 cd /opt/stack/cinder
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
-git remote add downstream https://github.com/petrutlucian94/cinder
+git remote add https://github.com/alexpilotti/cinder-ci-fixes
+#git remote add downstream https://github.com/petrutlucian94/cinder
 git fetch downstream
 git cherry-pick d99a73a6410a4a63b4818f387d7c561ca268db2f
 git cherry-pick d9e5d12258bac06e436605da7e3928808f9c98e0
@@ -52,6 +53,8 @@ git cherry-pick c0ed2ab8cc6b1197e426cd6c58c3b582624d1cfd
 git cherry-pick 01fd56078bc4d73236dab02f6df0bd38b344834c
 git cherry-pick ae508692c7978e19743211290c1b2a8dfa63f75d
 git cherry-pick 184506b6db02f9f7e620ce340b74e391cc200f41
+git cherry-pick 73cb62a862ecf005192c5563d5782416dcf4aec9
+git cherry-pick b87d4fcbca7eed40af6c94fe08b724ec007f943e
 
 cd /home/ubuntu/devstack
 
