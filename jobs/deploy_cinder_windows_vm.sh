@@ -55,6 +55,26 @@ done
 echo "Starting $CINDER_VM_NAME"
 nova start $CINDER_VM_NAME
 
+export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
+echo "Cinder VM Status is: $CINDER_STATUS"
+
+COUNT=0
+while [ $CINDER_STATUS = "SHUTOFF" ]
+do
+    if [ $COUNT -ge 60 ]
+    then
+        echo "Failed to restart Cinder VM"
+        nova show "$CINDER_VM_NAME"
+        exit 1
+    fi
+    sleep 20
+    nova start $CINDER_VM_NAME
+    export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
+    echo "Cinder VM Status is: $CINDER_STATUS"
+    COUNT=$(($COUNT + 1))
+done
+
+echo "Cinder VM Status is: $CINDER_STATUS"
 
 echo "Fetching cinder VM fixed IP address"
 export CINDER_FIXED_IP=$(nova show "$CINDER_VM_NAME" | grep "private network" | awk '{print $5}')
