@@ -148,8 +148,8 @@ ExecRetry {
     if ($LastExitCode) { Throw "Failed git cherry-pick 73cb62a862ecf005192c5563d5782416dcf4aec9" }
 }
 ExecRetry {
-    git cherry-pick b87d4fcbca7eed40af6c94fe08b724ec007f943e
-    if ($LastExitCode) { Throw "Failed git cherry-pick b87d4fcbca7eed40af6c94fe08b724ec007f943e" }
+    git cherry-pick ba1873b1c9292434b10b5445c92ebe29d7088969
+    if ($LastExitCode) { Throw "Failed git cherry-pick ba1873b1c9292434b10b5445c92ebe29d7088969" }
 }
 
 ExecRetry {
