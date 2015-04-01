@@ -99,10 +99,12 @@ do
         exit 1
     fi
     sleep 20
-    WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
-    COUNT=$(($COUNT + 1))
     date
     echo "Count: $COUNT"
+    echo "WINDOWS_PASSWORD=nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY"
+    WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
+    echo "WINDOWS_PASSWORD=$WINDOWS_PASSWORD"
+    COUNT=$(($COUNT + 1))
 done
 date
 echo "Count: $COUNT"
