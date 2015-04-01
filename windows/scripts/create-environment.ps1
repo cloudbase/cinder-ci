@@ -111,7 +111,8 @@ git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
 
 ExecRetry {
-    git remote add downstream https://github.com/petrutlucian94/cinder
+    # git remote add downstream https://github.com/petrutlucian94/cinder
+    git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
     if ($LastExitCode) { Throw "Failed adding to git the remote downstream petrutlucian94" }
 }
 ExecRetry {
@@ -142,9 +143,14 @@ ExecRetry {
     git cherry-pick 184506b6db02f9f7e620ce340b74e391cc200f41
     if ($LastExitCode) { Throw "Failed git cherry-pick 184506b6db02f9f7e620ce340b74e391cc200f41" }
 }
-
-
-
+ExecRetry {
+    git cherry-pick 73cb62a862ecf005192c5563d5782416dcf4aec9
+    if ($LastExitCode) { Throw "Failed git cherry-pick 73cb62a862ecf005192c5563d5782416dcf4aec9" }
+}
+ExecRetry {
+    git cherry-pick b87d4fcbca7eed40af6c94fe08b724ec007f943e
+    if ($LastExitCode) { Throw "Failed git cherry-pick b87d4fcbca7eed40af6c94fe08b724ec007f943e" }
+}
 
 ExecRetry {
     cmd.exe /C "$pythonDir\$pythonExec" setup.py install
