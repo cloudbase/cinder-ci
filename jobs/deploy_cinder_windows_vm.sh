@@ -85,6 +85,8 @@ then
 fi
 echo CINDER_FLOATING_IP=$CINDER_FLOATING_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
+sleep 30
+
 echo "Fetching windows VM password"
 WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
 echo $WINDOWS_PASSWORD
@@ -99,7 +101,12 @@ do
     sleep 20
     WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
     COUNT=$(($COUNT + 1))
+    date
+    echo "Count: $COUNT"
 done
+date
+echo "Count: $COUNT"
+echo "Windows Password: $WINDOWS_PASSWORD"
 
 nova add-floating-ip $CINDER_VM_NAME $CINDER_FLOATING_IP
 
