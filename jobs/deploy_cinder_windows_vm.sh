@@ -42,7 +42,7 @@ export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $
 COUNT=0
 while [ $CINDER_STATUS != "SHUTOFF" ]
 do
-    if [ $COUNT -ge 50 ]
+    if [ $COUNT -ge 60 ]
     then
         echo "Failed to get $CINDER_VM_NAME status"
         nova show "$CINDER_VM_NAME"
@@ -93,15 +93,20 @@ echo $WINDOWS_PASSWORD
 COUNT=0
 while [ -z "$WINDOWS_PASSWORD" ]
 do
-    if [ $COUNT -ge 30 ]
+    if [ $COUNT -ge 50 ]
     then
+        echo "VM Status:"
+        nova show $CINDER_VM_NAME
+        echo "Console log:"
+        nova console-log $CINDER_VM_NAME
+        echo "VM Password:"
+        echo "WINDOWS_PASSWORD=$WINDOWS_PASSWORD"
         echo "Failed to get password"
         exit 1
     fi
     sleep 20
     date
     echo "Count: $COUNT"
-    echo "WINDOWS_PASSWORD=nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY"
     WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
     echo "WINDOWS_PASSWORD=$WINDOWS_PASSWORD"
     COUNT=$(($COUNT + 1))
