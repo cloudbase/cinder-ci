@@ -18,8 +18,8 @@ update_local_conf (){
         "cat /home/ubuntu/devstack/local-conf-extra >> /home/ubuntu/devstack/local.conf" 1
 }
 
-UUID=$(python -c "import uuid; print uuid.uuid4().hex")
-export NAME="cinder-devstack-$UUID"
+#UUID=$(python -c "import uuid; print uuid.uuid4().hex")
+export NAME="cinder-devstack-$ZUUL_UUID-$JOB_TYPE"
 echo NAME=$NAME > /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP"
