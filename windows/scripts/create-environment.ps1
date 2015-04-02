@@ -111,8 +111,8 @@ git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
 
 ExecRetry {
-    # git remote add downstream https://github.com/petrutlucian94/cinder
-    git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
+    git remote add downstream https://github.com/petrutlucian94/cinder
+    # git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
     if ($LastExitCode) { Throw "Failed adding to git the remote downstream petrutlucian94" }
 }
 ExecRetry {
@@ -136,20 +136,20 @@ ExecRetry {
     if ($LastExitCode) { Throw "Failed git cherry-pick 01fd56078bc4d73236dab02f6df0bd38b344834c" }
 }
 ExecRetry {
-    git cherry-pick ae508692c7978e19743211290c1b2a8dfa63f75d
-    if ($LastExitCode) { Throw "Failed git cherry-pick ae508692c7978e19743211290c1b2a8dfa63f75d" }
+    git cherry-pick 5ea88ec3fb90a520126743669697c957dccf7e96
+    if ($LastExitCode) { Throw "Failed git cherry-pick 5ea88ec3fb90a520126743669697c957dccf7e96" }
 }
 ExecRetry {
-    git cherry-pick 184506b6db02f9f7e620ce340b74e391cc200f41
-    if ($LastExitCode) { Throw "Failed git cherry-pick 184506b6db02f9f7e620ce340b74e391cc200f41" }
+    git cherry-pick ba51ca2f0dc46565cdd825c689607521ddea6c28
+    if ($LastExitCode) { Throw "Failed git cherry-pick ba51ca2f0dc46565cdd825c689607521ddea6c28" }
 }
 ExecRetry {
-    git cherry-pick 73cb62a862ecf005192c5563d5782416dcf4aec9
-    if ($LastExitCode) { Throw "Failed git cherry-pick 73cb62a862ecf005192c5563d5782416dcf4aec9" }
+    git cherry-pick 401b44d6f9d45b74a688a6dc70dbefc9346a9fe4
+    if ($LastExitCode) { Throw "Failed git cherry-pick 401b44d6f9d45b74a688a6dc70dbefc9346a9fe4" }
 }
 ExecRetry {
-    git cherry-pick 554810c3224c01edf7755f9b5809f59f5f73df23
-    if ($LastExitCode) { Throw "Failed git cherry-pick 554810c3224c01edf7755f9b5809f59f5f73df23" }
+    git cherry-pick 88313c535d4430fb7771965b7ab7f56a61d3aa6c
+    if ($LastExitCode) { Throw "Failed git cherry-pick 88313c535d4430fb7771965b7ab7f56a61d3aa6c" }
 }
 
 ExecRetry {
