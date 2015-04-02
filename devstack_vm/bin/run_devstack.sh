@@ -54,7 +54,7 @@ git cherry-pick 01fd56078bc4d73236dab02f6df0bd38b344834c
 git cherry-pick ae508692c7978e19743211290c1b2a8dfa63f75d
 git cherry-pick 184506b6db02f9f7e620ce340b74e391cc200f41
 git cherry-pick 73cb62a862ecf005192c5563d5782416dcf4aec9
-git cherry-pick ba1873b1c9292434b10b5445c92ebe29d7088969
+git cherry-pick 554810c3224c01edf7755f9b5809f59f5f73df23
 
 cd /home/ubuntu/devstack
 
