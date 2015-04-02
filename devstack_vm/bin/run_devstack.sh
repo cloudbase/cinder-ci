@@ -13,6 +13,9 @@ sudo sed -i '2i127.0.0.1  '$HOSTNAME'' /etc/hosts
 sudo pip install -U six
 sudo pip install -U kombu
 
+#Ensure subunit is available
+sudo apt-get install -y subunit
+
 DEVSTACK_LOGS="/opt/stack/logs/screen"
 LOCALRC="/home/ubuntu/devstack/localrc"
 LOCALCONF="/home/ubuntu/devstack/local.conf"
