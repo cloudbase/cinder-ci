@@ -52,6 +52,7 @@ do
     export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
     COUNT=$(($COUNT + 1))
 done
+sleep 10
 echo "Starting $CINDER_VM_NAME"
 nova start $CINDER_VM_NAME
 
