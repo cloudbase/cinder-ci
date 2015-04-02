@@ -110,11 +110,9 @@ pushd $openstackDir\cinder
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
 
-ExecRetry {
-    git remote add downstream https://github.com/petrutlucian94/cinder
-    # git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
-    if ($LastExitCode) { Throw "Failed adding to git the remote downstream petrutlucian94" }
-}
+git remote add downstream https://github.com/petrutlucian94/cinder
+# git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
+
 ExecRetry {
     git fetch downstream
     if ($LastExitCode) { Throw "Failed fetching remote downstream petrutlucian94" }
