@@ -12,7 +12,7 @@ RUN_TESTS_LIST="$TEMPEST_DIR/test_list.txt"
 mkdir -p "$TEMPEST_DIR"
 
 if [ $job_type = "smb3_windows" ]; then
-    testr list-tests | grep volume | grep -v test_snapshot_create_with_volume_in_use > "$RUN_TESTS_LIST" || echo "failed to generate list of tests"
+    testr list-tests | grep volume | grep -v test_volume_boot_pattern > "$RUN_TESTS_LIST" || echo "failed to generate list of tests"
 else
     testr list-tests | grep volume > "$RUN_TESTS_LIST" || echo "failed to generate list of tests"
 fi
