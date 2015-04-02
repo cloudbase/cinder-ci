@@ -44,7 +44,7 @@ sudo easy_install -U pip
 cd /opt/stack/cinder
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
-git remote add https://github.com/alexpilotti/cinder-ci-fixes
+git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
 #git remote add downstream https://github.com/petrutlucian94/cinder
 git fetch downstream
 git cherry-pick d99a73a6410a4a63b4818f387d7c561ca268db2f
