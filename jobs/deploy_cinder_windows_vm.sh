@@ -73,7 +73,7 @@ do
     sleep 3
     echo "Starting $CINDER_VM_NAME"
     nova start $CINDER_VM_NAME
-
+    sleep 5
     export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
     echo "Cinder VM Status is: $CINDER_STATUS"
 
@@ -86,8 +86,10 @@ do
             nova show "$CINDER_VM_NAME"
             break
         fi
-        sleep 10
+        sleep 5
+        export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
         nova start $CINDER_VM_NAME
+        sleep 10
         export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
         echo "Cinder VM Status is: $CINDER_STATUS"
         COUNT=$(($COUNT + 1))
