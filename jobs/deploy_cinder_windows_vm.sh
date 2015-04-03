@@ -36,11 +36,24 @@ then
     exit 1
 fi
 
-WINDOWS_VM_STATUS="NOT OK"
+WINDOWS_VM_STATUS="NOT_OK"
 BOOT_COUNT=0
 
 while [ $WINDOWS_VM_STATUS != "OK" ]
 do
+    set +e
+    nova delete "$CINDER_VM_NAME"
+    set -e
+    sleep 20
+    nova boot --availability-zone cinder --flavor m1.cinder --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll
+
+    if [ $? -ne 0 ]
+    then
+        echo "Failed to create cinder VM: $CINDER_VM_NAME"
+        nova show "$CINDER_VM_NAME"
+        exit 1
+    fi
+
     #work around restart issue
     echo "Fetching cinder VM status "
     export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
@@ -51,7 +64,7 @@ do
         then
             echo "Failed to get $CINDER_VM_NAME status"
             nova show "$CINDER_VM_NAME"
-            exit 1
+            break
         fi
         sleep 10
         export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
@@ -71,7 +84,7 @@ do
         then
             echo "Failed to restart Cinder VM"
             nova show "$CINDER_VM_NAME"
-            exit 1
+            break
         fi
         sleep 10
         nova start $CINDER_VM_NAME
@@ -97,13 +110,12 @@ do
             nova console-log "$CINDER_FIXED_IP"
             echo "neutron port-list output:"
             neutron port-list -D -c device_id -c fixed_ips | grep $VM_ID
-            exit 1
+            break
         fi
         sleep 10
         export FIXED_IP=$(nova show "$CINDER_VM_NAME" | grep "private network" | awk '{print $5}')
         COUNT=$(($COUNT + 1))
     done
-
 
     echo "Fetching windows VM password"
     WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
@@ -120,7 +132,7 @@ do
             echo "VM Password:"
             echo "WINDOWS_PASSWORD=$WINDOWS_PASSWORD"
             echo "Failed to get password"
-            exit 1
+            break
         fi
         sleep 10
         date
@@ -132,9 +144,6 @@ do
     date
     echo "Count: $COUNT"
     echo "Windows Password: $WINDOWS_PASSWORD"
-
-
-
 
     if [ -z "$WINDOWS_PASSWORD" ]
     then
@@ -148,19 +157,7 @@ do
             echo "Failed to get password"
             exit 1
         fi
-
         echo "Retrying bootng a Windows VM"
-
-        nova delete "$CINDER_VM_NAME"
-        sleep 20
-        nova boot --availability-zone cinder --flavor m1.cinder --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll
-
-        if [ $? -ne 0 ]
-        then
-            echo "Failed to create cinder VM: $CINDER_VM_NAME"
-            nova show "$CINDER_VM_NAME"
-            exit 1
-        fi
     else
         WINDOWS_VM_STATUS="OK"
     fi
