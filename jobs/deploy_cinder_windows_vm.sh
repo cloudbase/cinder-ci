@@ -36,67 +36,134 @@ then
     exit 1
 fi
 
-#work around restart issue
-echo "Fetching cinder VM status "
-export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
-COUNT=0
-while [ $CINDER_STATUS != "SHUTOFF" ]
+WINDOWS_VM_STATUS="NOT OK"
+BOOT_COUNT=0
+
+while [ $WINDOWS_VM_STATUS != "OK" ]
 do
-    if [ $COUNT -ge 60 ]
-    then
-        echo "Failed to get $CINDER_VM_NAME status"
-        nova show "$CINDER_VM_NAME"
-        exit 1
-    fi
-    sleep 20
+    #work around restart issue
+    echo "Fetching cinder VM status "
     export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
-    COUNT=$(($COUNT + 1))
-done
-sleep 10
-echo "Starting $CINDER_VM_NAME"
-nova start $CINDER_VM_NAME
-
-export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
-echo "Cinder VM Status is: $CINDER_STATUS"
-
-COUNT=0
-while [ $CINDER_STATUS = "SHUTOFF" ]
-do
-    if [ $COUNT -ge 60 ]
-    then
-        echo "Failed to restart Cinder VM"
-        nova show "$CINDER_VM_NAME"
-        exit 1
-    fi
-    sleep 20
+    COUNT=0
+    while [ $CINDER_STATUS != "SHUTOFF" ]
+    do
+        if [ $COUNT -ge 60 ]
+        then
+            echo "Failed to get $CINDER_VM_NAME status"
+            nova show "$CINDER_VM_NAME"
+            exit 1
+        fi
+        sleep 10
+        export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
+        COUNT=$(($COUNT + 1))
+    done
+    sleep 3
+    echo "Starting $CINDER_VM_NAME"
     nova start $CINDER_VM_NAME
+
     export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
     echo "Cinder VM Status is: $CINDER_STATUS"
-    COUNT=$(($COUNT + 1))
-done
 
-echo "Cinder VM Status is: $CINDER_STATUS"
+    COUNT=0
+    while [ $CINDER_STATUS = "SHUTOFF" ]
+    do
+        if [ $COUNT -ge 60 ]
+        then
+            echo "Failed to restart Cinder VM"
+            nova show "$CINDER_VM_NAME"
+            exit 1
+        fi
+        sleep 10
+        nova start $CINDER_VM_NAME
+        export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
+        echo "Cinder VM Status is: $CINDER_STATUS"
+        COUNT=$(($COUNT + 1))
+    done
 
-echo "Fetching cinder VM fixed IP address"
-export CINDER_FIXED_IP=$(nova show "$CINDER_VM_NAME" | grep "private network" | awk '{print $5}')
-echo $CINDER_FIXED_IP
-COUNT=0
-while [ -z "$CINDER_FIXED_IP" ]
-do
-    if [ $COUNT -ge 50 ]
+    echo "Cinder VM Status is: $CINDER_STATUS"
+
+    echo "Fetching cinder VM fixed IP address"
+    export CINDER_FIXED_IP=$(nova show "$CINDER_VM_NAME" | grep "private network" | awk '{print $5}')
+    echo $CINDER_FIXED_IP
+    COUNT=0
+    while [ -z "$CINDER_FIXED_IP" ]
+    do
+        if [ $COUNT -ge 30 ]
+        then
+            echo "Failed to get fixed IP"
+            echo "nova show output:"
+            nova show "$CINDER_FIXED_IP"
+            echo "nova console-log output:"
+            nova console-log "$CINDER_FIXED_IP"
+            echo "neutron port-list output:"
+            neutron port-list -D -c device_id -c fixed_ips | grep $VM_ID
+            exit 1
+        fi
+        sleep 10
+        export FIXED_IP=$(nova show "$CINDER_VM_NAME" | grep "private network" | awk '{print $5}')
+        COUNT=$(($COUNT + 1))
+    done
+
+
+    echo "Fetching windows VM password"
+    WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
+    echo $WINDOWS_PASSWORD
+    COUNT=0
+    while [ -z "$WINDOWS_PASSWORD" ]
+    do
+        if [ $COUNT -ge 90 ]
+        then
+            echo "VM Status:"
+            nova show $CINDER_VM_NAME
+            echo "Console log:"
+            nova console-log $CINDER_VM_NAME
+            echo "VM Password:"
+            echo "WINDOWS_PASSWORD=$WINDOWS_PASSWORD"
+            echo "Failed to get password"
+            exit 1
+        fi
+        sleep 10
+        date
+        echo "Count: $COUNT"
+        WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
+        echo "WINDOWS_PASSWORD=$WINDOWS_PASSWORD"
+        COUNT=$(($COUNT + 1))
+    done
+    date
+    echo "Count: $COUNT"
+    echo "Windows Password: $WINDOWS_PASSWORD"
+
+
+
+
+    if [ -z "$WINDOWS_PASSWORD" ]
     then
-        echo "Failed to get fixed IP"
-        echo "nova show output:"
-        nova show "$CINDER_FIXED_IP"
-        echo "nova console-log output:"
-        nova console-log "$CINDER_FIXED_IP"
-        echo "neutron port-list output:"
-        neutron port-list -D -c device_id -c fixed_ips | grep $VM_ID
-        exit 1
+        BOOT_COUNT=$(($BOOT_COUNT + 1))
+        if [ $BOOT_COUNT -ge 10 ]
+        then
+            echo "Failed to get a working VM in $BOOT_COUNT tries."
+            nova show $CINDER_VM_NAME
+            echo "Console log:"
+            nova console-log $CINDER_VM_NAME
+            echo "Failed to get password"
+            exit 1
+        fi
+
+        echo "Retrying bootng a Windows VM"
+
+        nova delete "$CINDER_VM_NAME"
+        sleep 20
+        nova boot --availability-zone cinder --flavor m1.cinder --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll
+
+        if [ $? -ne 0 ]
+        then
+            echo "Failed to create cinder VM: $CINDER_VM_NAME"
+            nova show "$CINDER_VM_NAME"
+            exit 1
+        fi
+    else
+        WINDOWS_VM_STATUS="OK"
     fi
-    sleep 15
-    export FIXED_IP=$(nova show "$CINDER_VM_NAME" | grep "private network" | awk '{print $5}')
-    COUNT=$(($COUNT + 1))
 done
 
 CINDER_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP"
@@ -107,34 +174,6 @@ fi
 echo CINDER_FLOATING_IP=$CINDER_FLOATING_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 sleep 30
-
-echo "Fetching windows VM password"
-WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
-echo $WINDOWS_PASSWORD
-COUNT=0
-while [ -z "$WINDOWS_PASSWORD" ]
-do
-    if [ $COUNT -ge 50 ]
-    then
-        echo "VM Status:"
-        nova show $CINDER_VM_NAME
-        echo "Console log:"
-        nova console-log $CINDER_VM_NAME
-        echo "VM Password:"
-        echo "WINDOWS_PASSWORD=$WINDOWS_PASSWORD"
-        echo "Failed to get password"
-        exit 1
-    fi
-    sleep 20
-    date
-    echo "Count: $COUNT"
-    WINDOWS_PASSWORD=$(nova get-password $CINDER_VM_NAME $DEVSTACK_SSH_KEY)
-    echo "WINDOWS_PASSWORD=$WINDOWS_PASSWORD"
-    COUNT=$(($COUNT + 1))
-done
-date
-echo "Count: $COUNT"
-echo "Windows Password: $WINDOWS_PASSWORD"
 
 nova add-floating-ip $CINDER_VM_NAME $CINDER_FLOATING_IP
 
