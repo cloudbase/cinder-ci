@@ -102,7 +102,7 @@ do
     COUNT=0
     while [ -z "$CINDER_FIXED_IP" ]
     do
-        if [ $COUNT -ge 30 ]
+        if [ $COUNT -ge 12 ]
         then
             echo "Failed to get fixed IP"
             echo "nova show output:"
@@ -124,7 +124,7 @@ do
     COUNT=0
     while [ -z "$WINDOWS_PASSWORD" ]
     do
-        if [ $COUNT -ge 90 ]
+        if [ $COUNT -ge 30 ]
         then
             echo "VM Status:"
             nova show $CINDER_VM_NAME
