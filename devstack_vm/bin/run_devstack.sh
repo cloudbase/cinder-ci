@@ -1,5 +1,7 @@
 #!/bin/bash
 
+job_type=$1
+
 set -x
 set -e
 sudo ifconfig eth1 promisc up
@@ -48,7 +50,7 @@ cd /opt/stack/cinder
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
 
-if [ $JOB_TYPE != "iscsi" ]; then
+if [ $job_type != "iscsi" ]; then
     set +e
     #git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
     git remote add downstream https://github.com/petrutlucian94/cinder
