@@ -22,12 +22,6 @@ set -e
 export NAME="cinder-devstack-$ZUUL_UUID-$JOB_TYPE"
 echo NAME=$NAME > /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP"
-if [ -z "$DEVSTACK_FLOATING_IP" ]
-then
-    exit 1
-fi
-echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 echo DEVSTACK_SSH_KEY=$DEVSTACK_SSH_KEY >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 NET_ID=$(nova net-list | grep 'private' | awk '{print $2}')
@@ -38,7 +32,7 @@ echo NAME=$NAME
 echo NET_ID=$NET_ID
 
 echo "Deploying devstack $NAME"
-exec_with_retry 15 5 "nova boot --availability-zone cinder --flavor m1.medium --image devstack --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll"
+exec_with_retry 15 5 "nova boot --availability-zone cinder --flavor cinder.linux --image devstack --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll"
 
 if [ $? -ne 0 ]
 then
@@ -70,6 +64,13 @@ do
 done
 
 echo FIXED_IP=$FIXED_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+
+DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP"
+if [ -z "$DEVSTACK_FLOATING_IP" ]
+then
+    exit 1
+fi
+echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 export VMID=`nova show $NAME | grep -w id | awk '{print $4}'`
 
