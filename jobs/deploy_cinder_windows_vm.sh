@@ -26,7 +26,7 @@ export CINDER_VM_NAME="cinder-windows-$ZUUL_UUID-$JOB_TYPE"
 echo CINDER_VM_NAME=$CINDER_VM_NAME >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 echo "Deploying cinder windows VM $CINDER_VM_NAME"
-nova boot --availability-zone cinder --flavor m1.cinder --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll
+nova boot --availability-zone cinder --flavor cinder.windows --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll
 
 if [ $? -ne 0 ]
 then
