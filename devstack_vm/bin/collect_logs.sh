@@ -105,6 +105,11 @@ function archive_tempest_files() {
 }
 
 # Clean
+
+pushd /home/ubuntu/devstack
+./unstack.sh
+popd
+
 [ -d "$LOG_DST" ] && rm -rf "$LOG_DST"
 mkdir -p "$LOG_DST"
 
