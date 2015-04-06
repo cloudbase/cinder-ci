@@ -1,6 +1,6 @@
 #!/bin/bash
 source /usr/local/src/cinder-ci/jobs/utils.sh
-
+set -e
 source $KEYSTONERC
 
 # Deploy devstack vm
