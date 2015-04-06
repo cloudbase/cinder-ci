@@ -17,7 +17,7 @@ update_local_conf (){
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY \
         "cat /home/ubuntu/devstack/local-conf-extra >> /home/ubuntu/devstack/local.conf" 1
 }
-
+set -e
 #UUID=$(python -c "import uuid; print uuid.uuid4().hex")
 export NAME="cinder-devstack-$ZUUL_UUID-$JOB_TYPE"
 echo NAME=$NAME > /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
@@ -38,7 +38,7 @@ echo NAME=$NAME
 echo NET_ID=$NET_ID
 
 echo "Deploying devstack $NAME"
-nova boot --availability-zone cinder --flavor m1.medium --image devstack --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll
+exec_with_retry 15 5 "nova boot --availability-zone cinder --flavor m1.medium --image devstack --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll"
 
 if [ $? -ne 0 ]
 then
