@@ -26,14 +26,6 @@ export CINDER_VM_NAME="cinder-windows-$ZUUL_UUID-$JOB_TYPE"
 echo CINDER_VM_NAME=$CINDER_VM_NAME >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 echo "Deploying cinder windows VM $CINDER_VM_NAME"
-nova boot --availability-zone cinder --flavor cinder.windows --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll
-
-if [ $? -ne 0 ]
-then
-    echo "Failed to create cinder VM: $CINDER_VM_NAME"
-    nova show "$CINDER_VM_NAME"
-    exit 1
-fi
 
 WINDOWS_VM_STATUS="NOT_OK"
 BOOT_COUNT=0
@@ -41,16 +33,16 @@ BOOT_COUNT=0
 while [ $WINDOWS_VM_STATUS != "OK" ]
 do
     set +e
-    nova delete "$CINDER_VM_NAME"
+    nova delete "$CINDER_VM_NAME" || true
     set -e
     sleep 20
-    nova boot --availability-zone cinder --flavor m1.cinder --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll
+    nova boot --availability-zone cinder --flavor cinder.windows --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll
 
     if [ $? -ne 0 ]
     then
         echo "Failed to create cinder VM: $CINDER_VM_NAME"
         nova show "$CINDER_VM_NAME"
-        exit 1
+        break
     fi
 
     #work around restart issue
@@ -69,32 +61,14 @@ do
         export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
         COUNT=$(($COUNT + 1))
     done
-    sleep 3
+    sleep 5
+    nova show "$CINDER_VM_NAME"
     echo "Starting $CINDER_VM_NAME"
     nova start $CINDER_VM_NAME
     sleep 5
+    nova show "$CINDER_VM_NAME"
     export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
     echo "Cinder VM Status is: $CINDER_STATUS"
-
-    #COUNT=0
-    #while [ $CINDER_STATUS = "SHUTOFF" ]
-    #do
-    #    if [ $COUNT -ge 60 ]
-    #    then
-    #        echo "Failed to restart Cinder VM"
-    #        nova show "$CINDER_VM_NAME"
-    #        break
-    #    fi
-    #    sleep 5
-    #    export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
-    #    nova start $CINDER_VM_NAME
-    #    sleep 10
-    #    export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
-    #    echo "Cinder VM Status is: $CINDER_STATUS"
-    #    COUNT=$(($COUNT + 1))
-    #done
-
-    #echo "Cinder VM Status is: $CINDER_STATUS"
 
     echo "Fetching cinder VM fixed IP address"
     export CINDER_FIXED_IP=$(nova show "$CINDER_VM_NAME" | grep "private network" | awk '{print $5}')
@@ -158,7 +132,7 @@ do
             echo "Failed to get password"
             exit 1
         fi
-        echo "Retrying bootng a Windows VM"
+        echo "Retrying booting a Windows VM"
     else
         WINDOWS_VM_STATUS="OK"
     fi
