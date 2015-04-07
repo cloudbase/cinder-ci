@@ -1,0 +1,15 @@
+deb http://cinder.clouds.archive.ubuntu.com/ubuntu/ trusty main
+deb-src http://cinder.clouds.archive.ubuntu.com/ubuntu/ trusty main
+
+deb http://cinder.clouds.archive.ubuntu.com/ubuntu/ trusty-updates main
+deb-src http://cinder.clouds.archive.ubuntu.com/ubuntu/ trusty-updates main
+
+deb http://cinder.clouds.archive.ubuntu.com/ubuntu/ trusty universe
+deb-src http://cinder.clouds.archive.ubuntu.com/ubuntu/ trusty universe
+deb http://cinder.clouds.archive.ubuntu.com/ubuntu/ trusty-updates universe
+deb-src http://cinder.clouds.archive.ubuntu.com/ubuntu/ trusty-updates universe
+
+deb http://security.ubuntu.com/ubuntu trusty-security main
+deb-src http://security.ubuntu.com/ubuntu trusty-security main
+deb http://security.ubuntu.com/ubuntu trusty-security universe
+deb-src http://security.ubuntu.com/ubuntu trusty-security universe
