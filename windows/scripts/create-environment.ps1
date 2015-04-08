@@ -4,8 +4,7 @@ Param(
     [string]$buildFor='openstack/cinder',
     [Parameter(Mandatory=$true)][string]$testCase,
     [Parameter(Mandatory=$true)][string]$winUser,
-    [Parameter(Mandatory=$true)][string]$winPasswd,
-    [Parameter(Mandatory=$true)][string]$zuulChange
+    [Parameter(Mandatory=$true)][string]$winPasswd
 )
 
 $projectName = $buildFor.split('/')[-1]
@@ -118,12 +117,6 @@ if ($testCase -ne "iscsi"){
 	ExecRetry {
 	    git fetch downstream
 	    if ($LastExitCode) { Throw "Failed fetching remote downstream petrutlucian94" }
-	}
-	if ($zuulChange -ne "171484"){
-		ExecRetry {
-		    git cherry-pick d99a73a6410a4a63b4818f387d7c561ca268db2f
-		    if ($LastExitCode) { Throw "Failed git cherry-pick d99a73a6410a4a63b4818f387d7c561ca268db2f" }
-		}
 	}
 	ExecRetry {
 	    git cherry-pick d9e5d12258bac06e436605da7e3928808f9c98e0
