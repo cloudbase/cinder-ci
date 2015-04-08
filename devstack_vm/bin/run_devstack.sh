@@ -1,6 +1,7 @@
 #!/bin/bash
 
 job_type=$1
+zuul_change=$2
 
 set -x
 set -e
@@ -56,7 +57,9 @@ if [ $job_type != "iscsi" ]; then
     git remote add downstream https://github.com/petrutlucian94/cinder
     git fetch downstream
     set -e
-    git cherry-pick d99a73a6410a4a63b4818f387d7c561ca268db2f
+    if [ $zuul_change != "171484" ]; then
+        git cherry-pick d99a73a6410a4a63b4818f387d7c561ca268db2f
+    fi
     git cherry-pick d9e5d12258bac06e436605da7e3928808f9c98e0
     git cherry-pick c0ed2ab8cc6b1197e426cd6c58c3b582624d1cfd
     git cherry-pick 01fd56078bc4d73236dab02f6df0bd38b344834c
