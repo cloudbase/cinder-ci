@@ -1,7 +1,6 @@
 #!/bin/bash
 
 job_type=$1
-zuul_change=$2
 
 set -x
 set -e
