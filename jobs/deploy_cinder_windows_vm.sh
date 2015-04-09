@@ -29,6 +29,7 @@ echo "Deploying cinder windows VM $CINDER_VM_NAME"
 
 WINDOWS_VM_STATUS="NOT_OK"
 BOOT_COUNT=0
+NET_ID=$(nova net-list | grep 'private' | awk '{print $2}')
 
 while [ $WINDOWS_VM_STATUS != "OK" ]
 do
