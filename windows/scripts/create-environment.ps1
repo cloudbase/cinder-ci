@@ -110,6 +110,16 @@ pushd $openstackDir\cinder
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
 
+function cherry_pick($commit){
+    $ErrorActionPreference = "Continue"
+    git cherry-pick $commit
+
+    if ($LastExitCode) {
+        echo "Ignoring failed git cherry-pick $commit"
+        git checkout --force
+    }
+}
+
 if ($testCase -ne "iscsi"){
 	git remote add downstream https://github.com/petrutlucian94/cinder
 	# git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
@@ -118,34 +128,16 @@ if ($testCase -ne "iscsi"){
 	    git fetch downstream
 	    if ($LastExitCode) { Throw "Failed fetching remote downstream petrutlucian94" }
 	}
-	ExecRetry {
-	    git cherry-pick d9e5d12258bac06e436605da7e3928808f9c98e0
-	    if ($LastExitCode) { Throw "Failed git cherry-pick d9e5d12258bac06e436605da7e3928808f9c98e0" }
-	}
-	ExecRetry {
-	    git cherry-pick c0ed2ab8cc6b1197e426cd6c58c3b582624d1cfd
-	    if ($LastExitCode) { Throw "Failed git cherry-pick c0ed2ab8cc6b1197e426cd6c58c3b582624d1cfd" }
-	}
-	ExecRetry {
-	    git cherry-pick 01fd56078bc4d73236dab02f6df0bd38b344834c
-	    if ($LastExitCode) { Throw "Failed git cherry-pick 01fd56078bc4d73236dab02f6df0bd38b344834c" }
-	}
-	ExecRetry {
-	    git cherry-pick 5ea88ec3fb90a520126743669697c957dccf7e96
-	    if ($LastExitCode) { Throw "Failed git cherry-pick 5ea88ec3fb90a520126743669697c957dccf7e96" }
-	}
-	ExecRetry {
-	    git cherry-pick ba51ca2f0dc46565cdd825c689607521ddea6c28
-	    if ($LastExitCode) { Throw "Failed git cherry-pick ba51ca2f0dc46565cdd825c689607521ddea6c28" }
-	}
-	ExecRetry {
-	    git cherry-pick 401b44d6f9d45b74a688a6dc70dbefc9346a9fe4
-	    if ($LastExitCode) { Throw "Failed git cherry-pick 401b44d6f9d45b74a688a6dc70dbefc9346a9fe4" }
-	}
-	ExecRetry {
-	    git cherry-pick 88313c535d4430fb7771965b7ab7f56a61d3aa6c
-	    if ($LastExitCode) { Throw "Failed git cherry-pick 88313c535d4430fb7771965b7ab7f56a61d3aa6c" }
-	}
+
+    git checkout -b "testBranch"
+
+    cherry_pick d9e5d12258bac06e436605da7e3928808f9c98e0
+    cherry_pick c0ed2ab8cc6b1197e426cd6c58c3b582624d1cfd
+    cherry_pick 01fd56078bc4d73236dab02f6df0bd38b344834c
+    cherry_pick 5ea88ec3fb90a520126743669697c957dccf7e96
+    cherry_pick ba51ca2f0dc46565cdd825c689607521ddea6c28
+    cherry_pick 401b44d6f9d45b74a688a6dc70dbefc9346a9fe4
+    cherry_pick 88313c535d4430fb7771965b7ab7f56a61d3aa6c
 }
 
 ExecRetry {
