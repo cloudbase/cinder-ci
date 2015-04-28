@@ -71,13 +71,10 @@ if [ $job_type != "iscsi" ]; then
     git fetch downstream
     git checkout -b testBranch
     set -e
-    cherry_pick d9e5d12258bac06e436605da7e3928808f9c98e0
-    cherry_pick c0ed2ab8cc6b1197e426cd6c58c3b582624d1cfd
-    cherry_pick 01fd56078bc4d73236dab02f6df0bd38b344834c
-    cherry_pick 5ea88ec3fb90a520126743669697c957dccf7e96
-    cherry_pick ba51ca2f0dc46565cdd825c689607521ddea6c28
-    cherry_pick 401b44d6f9d45b74a688a6dc70dbefc9346a9fe4
-    cherry_pick 88313c535d4430fb7771965b7ab7f56a61d3aa6c
+    cherry_pick 3df6cd5be8b432d7646625a78ea71fbac5c85305
+    cherry_pick c63cb654262170cfbb0f804193265977b5aa5ae0
+    cherry_pick 7cc14caa27cfd8c19b7719560fe743597b6dea45
+    cherry_pick 605bb71895282521983a0c1c0284c8acce12ad28
 fi
 
 cd /home/ubuntu/devstack
