@@ -36,7 +36,7 @@ cmd /c cd \ `&`& C:\MinGW\msys\1.0\bin\tar.exe xvzf $archivePath
 Remove-Item -Force -Recurse "c:\$archivePath"
 pip install wmi
 pip install virtualenv
-pip install -U "pbr<0.11"
+pip install -U setuptools
 
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
