@@ -93,8 +93,8 @@ nova interface-attach --net-id "$NET_ID" "$NAME"
 echo "Copy scripts to devstack VM"
 scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/
 
-echo "Add known to be working repos"
-run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo cp /home/ubuntu/cbs_sources.list /etc/apt/sources.list.d/" 1
+#echo "Add known to be working repos"
+#run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo cp /home/ubuntu/cbs_sources.list /etc/apt/sources.list.d/" 1
 
 echo "apt-get update:"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo apt-get update -y" 1
