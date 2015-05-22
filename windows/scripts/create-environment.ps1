@@ -181,7 +181,20 @@ Try
 }
 Catch
 {
+    $proc = Start-Process -PassThru -RedirectStandardError "$remoteLogs\$hostname\process_error.txt" -RedirectStandardOutput "$remoteLogs\$hostname\process_output.txt" $pythonDir+'\python.exe -c "from ctypes import wintypes; from cinder.cmd import volume; volume.main()"' 
+    Start-Sleep -s 30
+    if (! $proc.HasExited) {Stop-Process -Id $proc.Id -Force}
     Throw "Can not start the cinder-volume service"
 }
+Start-Sleep -s 30
+if ($(get-service nova-compute).Status -eq "Stopped")
+{
+    $proc = Start-Process -PassThru -RedirectStandardError "$remoteLogs\$hostname\process_error.txt" -RedirectStandardOutput "$remoteLogs\$hostname\process_output.txt" $pythonDir+'\python.exe -c "from ctypes import wintypes; from cinder.cmd import volume; volume.main()"' 
+    Start-Sleep -s 30
+    if (! $proc.HasExited) {Stop-Process -Id $proc.Id -Force}
+    Throw "Can not start the cinder-volume service"
+}
+
+
 Write-Host "Environment initialization done."
 
