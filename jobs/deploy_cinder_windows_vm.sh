@@ -34,7 +34,7 @@ NET_ID=$(nova net-list | grep 'private' | awk '{print $2}')
 while [ $WINDOWS_VM_STATUS != "OK" ]
 do
     set +e
-    nova delete "$CINDER_VM_NAME" || true
+    if (`nova list | grep "$CINDER_VM_NAME" > /dev/null 2>&1`); then nova delete "$CINDER_VM_NAME"; fi
     set -e
     sleep 20
     nova boot --availability-zone cinder --flavor cinder.windows --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll
