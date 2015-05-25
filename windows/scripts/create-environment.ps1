@@ -181,7 +181,7 @@ Try
 }
 Catch
 {
-    $proc = Start-Process -PassThru -RedirectStandardError "$remoteLogs\$hostname\process_error.txt" -RedirectStandardOutput "$remoteLogs\$hostname\process_output.txt" $pythonDir+'\python.exe -c "from ctypes import wintypes; from cinder.cmd import volume; volume.main()"' 
+    $proc = Start-Process -PassThru -RedirectStandardError "$remoteLogs\process_error.txt" -RedirectStandardOutput "$remoteLogs\process_output.txt" $pythonDir+'\python.exe -c "from ctypes import wintypes; from cinder.cmd import volume; volume.main()"' 
     Start-Sleep -s 30
     if (! $proc.HasExited) {Stop-Process -Id $proc.Id -Force}
     Throw "Can not start the cinder-volume service"
@@ -190,10 +190,10 @@ Start-Sleep -s 30
 if ($(get-service cinder-volume).Status -eq "Stopped")
 {
     Write-Host "We try to start:"
-    Write-Host "Start-Process -PassThru -RedirectStandardError $remoteLogs\$hostname\process_error.txt -RedirectStandardOutput $remoteLogs\$hostname\process_output.txt $pythonDir+\python.exe -c from ctypes import wintypes; from cinder.cmd import volume; volume.main()"
+    Write-Host "Start-Process -PassThru -RedirectStandardError $remoteLogs\process_error.txt -RedirectStandardOutput $remoteLogs\process_output.txt $pythonDir+\python.exe -c from ctypes import wintypes; from cinder.cmd import volume; volume.main()"
     Try
     {
-    	$proc = Start-Process -PassThru -RedirectStandardError "$remoteLogs\$hostname\process_error.txt" -RedirectStandardOutput "$remoteLogs\$hostname\process_output.txt" $pythonDir+'\python.exe -c "from ctypes import wintypes; from cinder.cmd import volume; volume.main()"'
+    	$proc = Start-Process -PassThru -RedirectStandardError "$remoteLogs\process_error.txt" -RedirectStandardOutput "$remoteLogs\process_output.txt" $pythonDir+'\python.exe -c "from ctypes import wintypes; from cinder.cmd import volume; volume.main()"'
     }
     Catch
     {
