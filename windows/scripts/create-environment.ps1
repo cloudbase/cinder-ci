@@ -35,9 +35,8 @@ Write-Host "Ensure Python folder is up to date"
 cmd /c cd \ `&`& C:\MinGW\msys\1.0\bin\tar.exe xvzf $archivePath
 Remove-Item -Force -Recurse "c:\$archivePath"
 pip install -U pip
-pip install -U oslo.versionedobjects
-pip install -U os-brick
 pip install wmi
+pip install cffi==1.0.1
 pip install virtualenv
 #pip install -U setuptools
 pip install -U distribute
@@ -110,6 +109,8 @@ $windows_utils = "$openstackDir\cinder\cinder\volume\drivers\windows\windows.py"
 $content = gc $windows_utils
 sc $windows_utils $content.Replace("self.create_volume(volume)", "self.create_volume(volume);os.unlink(self.local_path(volume))")
 pushd $openstackDir\cinder
+
+pip install -r requirements.txt
 
 # Revert the driver disable patch
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
