@@ -34,7 +34,7 @@ Invoke-WebRequest -Uri http://10.21.7.214/python27.tar.gz -OutFile "C:\$archiveP
 Write-Host "Ensure Python folder is up to date"
 cmd /c cd \ `&`& C:\MinGW\msys\1.0\bin\tar.exe xvzf $archivePath
 Remove-Item -Force -Recurse "c:\$archivePath"
-pip install -U pip
+easy_install -U pip
 pip install oslo.log==1.1.0
 pip install wmi
 pip install cffi==1.0.1
