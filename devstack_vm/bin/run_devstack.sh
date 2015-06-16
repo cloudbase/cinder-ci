@@ -77,6 +77,11 @@ if [ $job_type != "iscsi" ]; then
     cherry_pick 171dbfcd067c79a2313da54a4bef0372606d76df
 fi
 
+cd /opt/stack/nova
+# Nova volume attach race condition fix
+git fetch https://plucian@review.openstack.org/openstack/nova refs/changes/19/187619/2
+cherry_pick FETCH_HEAD
+
 cd /home/ubuntu/devstack
 
 ./unstack.sh
