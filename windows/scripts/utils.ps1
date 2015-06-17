@@ -422,7 +422,7 @@ Function Check-Service
     }
 }
 
-function ExecRetry($command, $maxRetryCount = 10, $retryInterval=2)
+function ExecRetry($command, $maxRetryCount = 3, $retryInterval=2)
 {
     $currErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
