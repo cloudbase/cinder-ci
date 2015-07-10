@@ -35,12 +35,12 @@ Write-Host "Ensure Python folder is up to date"
 cmd /c cd \ `&`& C:\MinGW\msys\1.0\bin\tar.exe xvzf $archivePath
 Remove-Item -Force -Recurse "c:\$archivePath"
 easy_install -U pip
-pip install oslo.log==1.1.0
+#pip install oslo.log==1.1.0
 pip install wmi
-pip install cffi==1.0.1
+#pip install cffi==1.0.1
 pip install virtualenv
 #pip install -U setuptools
-pip install -U distribute
+#pip install -U distribute
 
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
