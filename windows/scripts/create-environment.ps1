@@ -39,6 +39,7 @@ pip install oslo.log==1.1.0
 pip install wmi
 pip install cffi==1.0.1
 pip install virtualenv
+pip install pbr==1.2.0
 #pip install -U setuptools
 pip install -U distribute
 
