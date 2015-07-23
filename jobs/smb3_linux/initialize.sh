@@ -18,7 +18,7 @@ run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP \
     $DEVSTACK_SSH_KEY "sudo apt-get --asume-yes -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f install cifs-utils"
 if [ $? -ne 0 ]; then
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP \
-    $DEVSTACK_SSH_KEY "sudo dpkg -i http://lug.mtu.edu/ubuntu/pool/main/c/cifs-utils/cifs-utils_6.0-1ubuntu2_amd64.deb"
+    $DEVSTACK_SSH_KEY "sudo dpkg --install http://dl.openstack.tld/cifs-utils_6.0-1ubuntu2_amd64.deb"
     exit_code=$?
 fi
 set -e
