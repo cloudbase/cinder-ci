@@ -39,6 +39,7 @@ pip install wmi
 pip install virtualenv
 pip install -U setuptools
 pip install -U distribute
+pip install mock==1.2.0
 
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
