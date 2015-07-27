@@ -181,6 +181,10 @@ Get-WMIObject -namespace "root\cimv2" -class Win32_Service -Filter $filter | Sel
 #Fix for bug in monotonic pip package
 (Get-Content "C:\Python27\Lib\site-packages\monotonic.py") | foreach-object {$_ -replace ">= 0", "> 0"} | Set-Content  "C:\Python27\Lib\site-packages\monotonic.py"
 
+pip install decorator==3.4.2
+# Fix for the __qualname__ attribute issue appended to decorated methods, impacting osprofiler
+# TODO(lpetrut): send a fix for the latest decorator lib
+
 Write-Host "Starting the services"
 Try
 {
