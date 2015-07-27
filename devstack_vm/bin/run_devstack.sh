@@ -22,6 +22,7 @@ sudo apt-get install subunit -y -o Debug::pkgProblemResolver=true -o Debug::Acqu
 if [ $? -ne 0 ]; then
     sudo wget http://dl.openstack.tld/subunit_0.0.18-0ubuntu7_all.deb -O /tmp/subunit_0.0.18-0ubuntu7_all.deb
     sudo dpkg --install /tmp/subunit_0.0.18-0ubuntu7_all.deb
+    sudo apt-get -f install
     exit_code=$?
 fi
 set -e
