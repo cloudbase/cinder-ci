@@ -100,7 +100,7 @@ run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo rm -
 echo "apt-get update:"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo apt-get update -y" 1
 echo "adding apt-cacher as proxy"
-run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo 'Acquire::http::Proxy \"http://10.21.7.214:3142\"; ' | sudo tee /etc/apt/apt.conf.d/90-apt-proxy.conf" 1
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo 'Acquire::http::Proxy \"http://10.21.7.214:3142\" ' | sudo tee /etc/apt/apt.conf.d/90-apt-proxy.conf" 1
 echo "apt-get upgrade:"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'sudo DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -q -y -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" upgrade' 1
 
