@@ -16,7 +16,18 @@ sudo pip install -U six
 sudo pip install -U kombu
 
 #Ensure subunit is available
-sudo apt-get install -y subunit
+set +e
+sudo apt-get install subunit -y -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f
+
+if [ $? -ne 0 ]; then
+    sudo wget http://dl.openstack.tld/subunit_0.0.18-0ubuntu7_all.deb -O /tmp/subunit_0.0.18-0ubuntu7_all.deb
+    sudo dpkg --install /tmp/subunit_0.0.18-0ubuntu7_all.deb
+    exit_code=$?
+fi
+set -e
+if [ $exit_code -ne 0 ]; then
+    exit 1
+fi
 
 DEVSTACK_LOGS="/opt/stack/logs/screen"
 LOCALRC="/home/ubuntu/devstack/localrc"
