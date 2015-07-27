@@ -97,7 +97,7 @@ scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DE
 #run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo cp /home/ubuntu/cbs_sources.list /etc/apt/sources.list.d/" 1
 echo "adding apt-cacher as proxy"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo touch /etc/apt/apt.conf.d/90-apt-proxy.conf" 1
-run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo 'Acquire::http::Proxy "http://10.21.7.214:3142";' | sudo tee --append /etc/apt/apt.conf.d/90-apt-proxy.conf" 1
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'echo "Acquire::http::Proxy "http://10.21.7.214:3142";" | sudo tee --append /etc/apt/apt.conf.d/90-apt-proxy.conf' 1
 echo "clean any apt files:"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo rm -rf /var/lib/apt/lists/*" 1
 echo "apt-get update:"
