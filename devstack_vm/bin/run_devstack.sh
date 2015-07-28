@@ -20,17 +20,12 @@ set +e
 sudo apt-get install subunit -y -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f
 # Backup install in case repository install fails
 if [ $? -ne 0 ]; then
-    sudo wget http://dl.openstack.tld/subunit_deps/libsubunit-perl_0.0.18-0ubuntu7_all.deb -O /tmp/libsubunit-perl_0.0.18-0ubuntu7_all.deb
-    sudo dpkg --install /tmp/libsubunit-perl_0.0.18-0ubuntu7_all.deb
-    sudo wget http://dl.openstack.tld/subunit_deps/python-subunit_0.0.18-0ubuntu7_all.deb -O /tmp/python-subunit_0.0.18-0ubuntu7_all.deb
-    sudo dpkg --install /tmp/python-subunit_0.0.18-0ubuntu7_all.deb
-    sudo wget http://dl.openstack.tld/subunit_deps/python-gtk2_2.24.0-3ubuntu3_amd64.deb -O /tmp/python-gtk2_2.24.0-3ubuntu3_amd64.deb
-    sudo dpkg --install /tmp/python-gtk2_2.24.0-3ubuntu3_amd64.deb
-    sudo wget http://dl.openstack.tld/subunit_deps/python-junitxml_0.6-1.1build1_all.deb -O /tmp/python-junitxml_0.6-1.1build1_all.deb
-    sudo dpkg --install /tmp/python-junitxml_0.6-1.1build1_all.deb
-    sudo wget http://dl.openstack.tld/subunit_0.0.18-0ubuntu7_all.deb -O /tmp/subunit_0.0.18-0ubuntu7_all.deb
-    sudo dpkg --install /tmp/subunit_0.0.18-0ubuntu7_all.deb
-    sudo apt-get -f install
+    wget --quiet --output-document=/tmp/libsubunit-perl_0.0.18-0ubuntu7_all.deb http://dl.openstack.tld/subunit_deps/libsubunit-perl_0.0.18-0ubuntu7_all.deb | sudo dpkg --install /tmp/libsubunit-perl_0.0.18-0ubuntu7_all.deb
+    wget --quiet --output-document=/tmp/python-subunit_0.0.18-0ubuntu7_all.deb http://dl.openstack.tld/subunit_deps/python-subunit_0.0.18-0ubuntu7_all.deb | sudo dpkg --install /tmp/python-subunit_0.0.18-0ubuntu7_all.deb
+    wget --quiet --output-document=/tmp/python-gtk2_2.24.0-3ubuntu3_amd64.deb http://dl.openstack.tld/subunit_deps/python-gtk2_2.24.0-3ubuntu3_amd64.deb | sudo dpkg --install /tmp/python-gtk2_2.24.0-3ubuntu3_amd64.deb
+    wget --quiet --output-document=/tmp/python-junitxml_0.6-1.1build1_all.deb http://dl.openstack.tld/subunit_deps/python-junitxml_0.6-1.1build1_all.deb | sudo dpkg --install /tmp/python-junitxml_0.6-1.1build1_all.deb
+    wget --quiet --output-document=/tmp/subunit_0.0.18-0ubuntu7_all.deb http://dl.openstack.tld/subunit_0.0.18-0ubuntu7_all.deb | sudo dpkg --install /tmp/subunit_0.0.18-0ubuntu7_all.deb
+    sudo apt-get -f install -y
     exit_code=$?
 fi
 set -e
