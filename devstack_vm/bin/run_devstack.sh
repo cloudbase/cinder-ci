@@ -15,8 +15,12 @@ sudo sed -i '2i127.0.0.1  '$HOSTNAME'' /etc/hosts
 sudo pip install -U six
 sudo pip install -U kombu
 
+#Running an extra apt-get update
+sudo apt-get update --assume-yes
+
 #Ensure subunit is available
 set +e
+exit_code=0
 sudo apt-get install subunit -y -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f
 # Backup install in case repository install fails
 if [ $? -ne 0 ]; then
