@@ -179,7 +179,7 @@ Get-WMIObject -namespace "root\cimv2" -class Win32_Service -Filter $filter | Sel
 
 & pip install -U "Jinja2>=2.6"
 #Fix for bug in monotonic pip package
-(Get-Content "C:\Python27\Lib\site-packages\monotonic.py") | foreach-object {$_ -replace ">= 0", "> 0"} | Set-Content  "C:\Python27\Lib\site-packages\monotonic.py"
+#(Get-Content "C:\Python27\Lib\site-packages\monotonic.py") | foreach-object {$_ -replace ">= 0", "> 0"} | Set-Content  "C:\Python27\Lib\site-packages\monotonic.py"
 
 pip install decorator==3.4.2
 # Fix for the __qualname__ attribute issue appended to decorated methods, impacting osprofiler
