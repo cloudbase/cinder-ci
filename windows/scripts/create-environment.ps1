@@ -155,8 +155,10 @@ if (($branchName.ToLower().CompareTo($('stable/juno').ToLower()) -eq 0) -or ($br
     $rabbitUser = "guest"
 }
 
-& $scriptdir\windows\scripts\$testCase\generateConfig.ps1 `
-    $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath $winUser $winPasswd
+& $scriptdir\windows\scripts\$testCase\generateConfig.ps1 $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath $winUser $winPasswd  > "$remoteLogs\generateConfig_error.txt" 2>&1
+if ($LastExitCode -ne 0) {
+ echo "generateConfig has failed!"
+}
 
 #$hasCinderExec = Test-Path "$pythonDir\Scripts\cinder-volume.exe"
 #if ($hasCinderExec -eq $false){
