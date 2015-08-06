@@ -121,6 +121,5 @@ cd /home/ubuntu/devstack
 nohup ./stack.sh > /opt/stack/logs/stack.sh.txt 2>&1 &
 pid=$!
 wait $pid
-nova console-log "$NAME"
 cat /opt/stack/logs/stack.sh.txt
 
