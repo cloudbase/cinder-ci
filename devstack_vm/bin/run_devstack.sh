@@ -122,9 +122,9 @@ nohup ./stack.sh > /opt/stack/logs/stack.sh.txt 2>&1 &
 pid=$!
 wait "$pid"
 stack_status=$?
+cat /opt/stack/logs/stack.sh.txt
 if [ $stack_status -ne 0 ]
 then
     echo "stack_status is: $stack_status"
     exit 1
 fi
-cat /opt/stack/logs/stack.sh.txt
