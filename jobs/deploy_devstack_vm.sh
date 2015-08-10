@@ -1,9 +1,10 @@
 #!/bin/bash
 run_devstack (){
     # run devstack
+    set +e
     echo "Checking nova console-log for errors before installing devstack"
     nova console-log "$NAME"
-    echo ""
+    set -e
     echo "Run stack.sh on devstack"
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/keystonerc; /home/ubuntu/bin/run_devstack.sh $JOB_TYPE" 5 
 
