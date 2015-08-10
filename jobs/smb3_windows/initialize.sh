@@ -7,8 +7,6 @@ source $KEYSTONERC
 # Deploy devstack vm
 source /usr/local/src/cinder-ci/jobs/deploy_devstack_vm.sh
 
-update_local_conf "/usr/local/src/cinder-ci/jobs/smb3_windows/local-conf-extra"
-
 DEVSTACK_VM_STATUS="NOT_OK"
 COUNT=0
 while [ $DEVSTACK_VM_STATUS != "OK" ]
@@ -43,6 +41,13 @@ do
             echo "Failed to prepare devstack on cinder vm! Failed at: prepare_devstack"
             break
         fi
+        
+        update_local_conf "/usr/local/src/cinder-ci/jobs/smb3_windows/local-conf-extra"
+        if [ $? -ne 0 ]
+        then
+            echo "Failed to update local-conf-extra on cinder vm! Failed at: update_local_conf"
+            break
+        fi        
     
         run_devstack
         if [ $? -ne 0 ]
