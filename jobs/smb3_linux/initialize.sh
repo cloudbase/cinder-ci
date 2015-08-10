@@ -7,14 +7,6 @@ source $KEYSTONERC
 # Deploy devstack vm
 source /usr/local/src/cinder-ci/jobs/deploy_devstack_vm.sh
 
-# Set up the smbfs shares list
-run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP \
-    $DEVSTACK_SSH_KEY "sudo mkdir -p /etc/cinder && sudo chown ubuntu /etc/cinder" 1
-run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP \
-    $DEVSTACK_SSH_KEY "sudo echo //$DEVSTACK_FLOATING_IP/openstack/volumes -o guest > /etc/cinder/smbfs_shares_config" 1
-
-update_local_conf "/usr/local/src/cinder-ci/jobs/smb3_linux/local-conf-extra"
-
 DEVSTACK_VM_STATUS="NOT_OK"
 COUNT=0
 while [ $DEVSTACK_VM_STATUS != "OK" ]
@@ -49,6 +41,20 @@ do
             echo "Failed to prepare devstack on cinder vm! Failed at: prepare_devstack"
             break
         fi
+
+        setup_smbfs_shares
+        if [ $? -ne 0 ]
+        then    
+            echo "Failed to setup smbfs shares! Failed at: setup_smbfs_shares"
+            break
+        fi
+        
+        update_local_conf "/usr/local/src/cinder-ci/jobs/smb3_linux/local-conf-extra"
+        if [ $? -ne 0 ]
+        then    
+            echo "Failed to update local-conf-extra on cinder vm! Failed at: update_local_conf"
+            break
+        fi        
     
         run_devstack
         if [ $? -ne 0 ]
