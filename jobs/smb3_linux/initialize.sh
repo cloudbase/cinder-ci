@@ -29,8 +29,7 @@ do
         fi
     
         prepare_networking
-        echo "$status_ssh_port"
-        if [ $status_ssh_port -ne 0 ]
+        if [ $? -ne 0 ]
         then
             echo "Failed to prepare networking for cinder vm! Failed at: prepare_networking"
             break
@@ -58,8 +57,7 @@ do
         fi        
     
         run_devstack
-        echo "$stack_status"
-        if [ $stack_status -ne 0 ]
+        if [ $? -ne 0 ]
         then
             echo "Failed to install devstack on cinder vm! Failed at: run_devstack"
             break
