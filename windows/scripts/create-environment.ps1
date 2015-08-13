@@ -40,10 +40,8 @@ pip install virtualenv
 pip install -U setuptools
 pip install -U distribute
 
-# Fix 4 Aug 2015 - cannot start cinder-volume because of latest olso.config, olso.utils, oslo.service
-pip install oslo.config==2.1.0
-pip install oslo.utils==2.1.0
-pip install oslo.service==0.5.0
+# Fix 13 Aug to use oslo.service latest master
+pip install -e git+http://github.com/openstack/oslo.service.git#egg=master
 
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
