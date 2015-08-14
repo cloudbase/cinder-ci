@@ -7,13 +7,15 @@ update_local_conf (){
     if [ $JOB_TYPE = "smb3_linux" ]
     then 
         EXTRA_OPTS_PATH="/usr/local/src/cinder-ci/jobs/smb3_linux/local-conf-extra"
-    else 
-        if [ $JOB_TYPE = "smb3_windows" ]
+    elif [ $JOB_TYPE = "smb3_windows" ]
         then
             EXTRA_OPTS_PATH="/usr/local/src/cinder-ci/jobs/smb3_windows/local-conf-extra"
-        else
-            EXTRA_OPTS_PATH="/usr/local/src/cinder-ci/jobs/iscsi/local-conf-extra"
-        fi
+        elif [ $JOB_TYPE = "iscsi" ]
+            then            
+                EXTRA_OPTS_PATH="/usr/local/src/cinder-ci/jobs/iscsi/local-conf-extra"
+            else 
+                echo "No proper JOB_TYPE received!"
+                exit 1
     fi
     scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" \
         -i $DEVSTACK_SSH_KEY $EXTRA_OPTS_PATH \
