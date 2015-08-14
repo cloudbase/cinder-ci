@@ -42,7 +42,6 @@ then
     NET_ID=$(nova net-list | grep 'private' | awk '{print $2}')
     echo NET_ID=$NET_ID >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-    echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP
     echo NAME=$NAME
     echo NET_ID=$NET_ID
 
