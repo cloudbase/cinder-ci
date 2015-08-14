@@ -4,7 +4,17 @@
 #
 # Functions section
 update_local_conf (){
-    local EXTRA_OPTS_PATH=$1
+    if [ $JOB_TYPE = "smb3_linux" ]
+    then 
+        EXTRA_OPTS_PATH="/usr/local/src/cinder-ci/jobs/smb3_linux/local-conf-extra"
+    else 
+        if [ $JOB_TYPE = "smb3_windows" ]
+        then
+            EXTRA_OPTS_PATH="/usr/local/src/cinder-ci/jobs/smb3_windows/local-conf-extra"
+        else
+            EXTRA_OPTS_PATH="/usr/local/src/cinder-ci/jobs/iscsi/local-conf-extra"
+        fi
+    fi
     scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" \
         -i $DEVSTACK_SSH_KEY $EXTRA_OPTS_PATH \
         ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/devstack
@@ -157,7 +167,7 @@ then
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo echo //$DEVSTACK_FLOATING_IP/openstack/volumes -o guest > /etc/cinder/smbfs_shares_config" 1   
 
     # Update local conf
-    update_local_conf $EXTRA_OPTS_PATH
+    update_local_conf
 
     # Run devstack
     echo "Run stack.sh on devstack"
