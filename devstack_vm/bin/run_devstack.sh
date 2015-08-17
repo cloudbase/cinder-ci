@@ -104,9 +104,9 @@ if [ $job_type != "iscsi" ]; then
     git checkout -b testBranch
     set -e
     #cherry_pick 25c992c73a2e278dcbf5be5bf0c885127e5eb43c
-    cherry_pick 87032e45ef3cd067120f96b5bc4cc0cb6ca23e25
-    cherry_pick 54a3427c0c57efc6a9ce351b3e7889909584b6a2
-    cherry_pick 171dbfcd067c79a2313da54a4bef0372606d76df
+    cherry_pick 45a34d5265bf63c4e263e41a0097fd178e657d1a
+    cherry_pick aded8aa26fd236c30c10e9da0ace6c82fbb003fe
+    cherry_pick aa2c42e499458dda9b841f60e215646744875936
 fi
 
 cd /opt/stack/nova
