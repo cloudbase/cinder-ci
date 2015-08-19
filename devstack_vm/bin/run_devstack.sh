@@ -14,7 +14,7 @@ sudo sed -i '2i127.0.0.1  '$HOSTNAME'' /etc/hosts
 #Update six to latest version
 sudo pip install -U six
 sudo pip install -U kombu
-sudo pip uninstall PasteDeploy
+sudo pip uninstall PasteDeploy -y
 
 #Running an extra apt-get update
 sudo apt-get update --assume-yes
