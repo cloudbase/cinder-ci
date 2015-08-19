@@ -11,6 +11,9 @@ HOSTNAME=$(hostname)
 
 sudo sed -i '2i127.0.0.1  '$HOSTNAME'' /etc/hosts
 
+# Update pip to latest
+sudo easy_install -U pip
+
 #Update six to latest version
 sudo pip install -U six
 sudo pip install -U kombu
@@ -76,7 +79,6 @@ fi
 
 cd /home/ubuntu/devstack
 git pull
-sudo easy_install -U pip
 
 # Revert the driver disable patch
 cd /opt/stack/cinder
