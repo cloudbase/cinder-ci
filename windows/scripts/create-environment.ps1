@@ -40,9 +40,6 @@ pip install virtualenv
 pip install -U setuptools
 pip install -U distribute
 
-# Fix 13 Aug to use oslo.service latest master
-pip install -e git+http://github.com/openstack/oslo.service.git#egg=master
-
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
     Remove-Item -Force -Recurse "$scriptdir\* -ErrorAction SilentlyContinue"
