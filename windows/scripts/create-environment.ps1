@@ -39,6 +39,7 @@ pip install wmi
 pip install virtualenv
 pip install -U setuptools
 pip install -U distribute
+pip install --use-wheel --no-index --find-links=http://dl.openstack.tld/wheels cffi
 
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
