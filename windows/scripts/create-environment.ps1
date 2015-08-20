@@ -20,7 +20,7 @@ $templateDir = "$scriptdir\windows\templates"
 $cinderTemplate = "$templateDir\cinder.conf"
 $pythonDir = "C:\Python27"
 $pythonExec = "python.exe"
-$pythonArchive = "C:\python27.tar.gz"
+$pythonArchive = "python27.tar.gz"
 $lockPath = "C:\Openstack\locks"
 $remoteLogs="\\"+$devstackIP+"\openstack\logs"
 $remoteConfigs="\\"+$devstackIP+"\openstack\config"
@@ -44,14 +44,11 @@ if (Test-Path $pythonDir)
 {
     Remove-Item -Recurse -Force $pythonDir
 }
+
 Write-Host "Ensure Python folder is up to date"
-& C:\MinGW\msys\1.0\bin\tar.exe -xvzf $pythonArchive
-& easy_install -U pip
-& pip install -U wmi
-& pip install -U virtualenv
-& pip install -U setuptools
-& pip install -U distribute
-& pip install --use-wheel --no-index --trusted-host dl.openstack.tld --find-links=http://dl.openstack.tld/wheels cffi
+& C:\MinGW\msys\1.0\bin\tar.exe -xvzf "$pythonArchive"
+Write-Host "Removing the python archive.."
+Remove-Item -Force -Recurse $pythonArchive
 
 $hasPipConf = Test-Path "$env:APPDATA\pip"
 if ($hasPipConf -eq $false){
@@ -62,6 +59,13 @@ else
     Remove-Item -Force "$env:APPDATA\pip\*"
 }
 Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
+
+& easy_install -U pip
+& pip install -U wmi
+& pip install -U virtualenv
+& pip install -U setuptools
+& pip install -U distribute
+& pip install --use-wheel --no-index --find-links=http://dl.openstack.tld/wheels cffi
 
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
