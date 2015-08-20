@@ -38,6 +38,7 @@ find-links =
 
 # Replace Python dir with the archived template
 # TODO: move this to the image instead.
+pushd C:\
 
 Invoke-WebRequest -Uri http://dl.openstack.tld/python27.tar.gz -OutFile $pythonArchive
 if (Test-Path $pythonDir)
@@ -66,6 +67,8 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install -U setuptools
 & pip install -U distribute
 & pip install --use-wheel --no-index --find-links=http://dl.openstack.tld/wheels cffi
+
+popd
 
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
