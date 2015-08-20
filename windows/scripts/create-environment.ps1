@@ -26,6 +26,15 @@ $remoteConfigs="\\"+$devstackIP+"\openstack\config"
 $rabbitUser = "stackrabbit"
 $hostname = hostname
 
+$pip_conf_content = @"
+[global]
+index-url = http://dl.openstack.tld:8080/root/pypi/+simple/
+[install]
+trusted-host = dl.openstack.tld
+find-links = 
+    http://dl.openstack.tld/wheels
+"@
+
 # Replace Python dir with the archived template
 # TODO: move this to the image instead.
 Remove-Item -Force -Recurse $pythonDir
@@ -40,6 +49,16 @@ pip install virtualenv
 pip install -U setuptools
 pip install -U distribute
 pip install --use-wheel --no-index --trusted-host dl.openstack.tld --find-links=http://dl.openstack.tld/wheels cffi
+
+$hasPipConf = Test-Path "$env:APPDATA\pip"
+if ($hasPipConf -eq $false){
+    mkdir "$env:APPDATA\pip"
+}
+else 
+{
+    Remove-Item -Force "$env:APPDATA\pip\*"
+}
+Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
@@ -225,6 +244,4 @@ if ($(get-service cinder-volume).Status -eq "Stopped")
     }
 }
 
-
 Write-Host "Environment initialization done."
-
