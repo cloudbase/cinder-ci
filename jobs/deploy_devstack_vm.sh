@@ -43,7 +43,7 @@ then
     echo NET_ID=$NET_ID
 
     echo "Deploying devstack $NAME"
-    nova boot --availability-zone cinder --flavor cinder.linux --image devstack-61 --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll
+    nova boot --availability-zone cinder --flavor cinder.linux --image devstack-62v2 --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll
 
     if [ $? -ne 0 ]
     then
