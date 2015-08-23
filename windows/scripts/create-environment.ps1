@@ -47,7 +47,8 @@ if (Test-Path $pythonDir)
 }
 
 Write-Host "Ensure Python folder is up to date"
-& C:\MinGW\msys\1.0\bin\tar.exe -xvzf "$pythonArchive"
+Write-Host "Extracting archive.."
+& C:\MinGW\msys\1.0\bin\tar.exe -xzf "$pythonArchive"
 Write-Host "Removing the python archive.."
 Remove-Item -Force -Recurse $pythonArchive
 
