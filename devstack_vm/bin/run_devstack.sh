@@ -21,6 +21,10 @@ sudo pip install -U kombu
 #Ensure subunit is available
 set +e
 sudo apt-get install subunit -y -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f
+# moreutils is needed for tc (timestamp)
+sudo apt-get install moreutils -y -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f
+# sysstat needed for iostat
+sudo apt-get install sysstat -y -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f
 set -e
 
 DEVSTACK_LOGS="/opt/stack/logs/screen"
@@ -89,3 +93,21 @@ cd /home/ubuntu/devstack
 ./unstack.sh
 
 ./stack.sh 2>&1 | tee /opt/stack/logs/stack.sh.txt
+
+set +x
+set +e
+# While ./stack.sh is running...
+while kill -0 $pid_stack 2> /dev/null; do
+    echo "Checking VM statistics"
+    echo ""
+    echo "### Memory usage"
+    free -m | ts '[%Y-%m-%d %H:%M:%S]' | tee -a /opt/stack/logs/memory_usage.log
+    echo ""
+    echo "### IOstat"
+    iostat -dx 1 1 | ts '[%Y-%m-%d %H:%M:%S]' | tee -a /opt/stack/logs/iostat.log
+    echo ""
+    sleep 60
+done
+
+# Disable the trap on a normal exit.
+trap - EXIT
