@@ -101,5 +101,5 @@ cherry_pick FETCH_HEAD
 cd /home/ubuntu/devstack
 
 ./unstack.sh
-
+set -o pipefail
 ./stack.sh 2>&1 | tee /opt/stack/logs/stack.sh.txt
