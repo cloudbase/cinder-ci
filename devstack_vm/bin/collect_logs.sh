@@ -4,6 +4,8 @@ GZIP=$(which gzip)
 
 DEVSTACK_LOGS="/opt/stack/logs/screen"
 DEVSTACK_BUILD_LOG="/opt/stack/logs/stack.sh.txt"
+MEMORY_STATS="/opt/stack/logs/memory_usage.log"
+IOSTAT_LOG="/opt/stack/logs/iostat.log"
 WIN_LOGS="/openstack/logs"
 TEMPEST_LOGS="/home/ubuntu/tempest"
 WIN_CONFIGS="/openstack/config/etc"
@@ -39,6 +41,8 @@ function archive_devstack() {
         fi
     done
     $GZIP -c "$DEVSTACK_BUILD_LOG" > "$LOG_DST_DEVSTACK/stack.sh.log.gz" || emit_warning "Failed to archive devstack log"
+    $GZIP -c "$MEMORY_STATS" > "$LOG_DST_DEVSTACK/memory_usage.log.gz" || emit_warning "Failed to archive memory_stat.log"
+    $GZIP -c "$IOSTAT_LOG" > "$LOG_DST_DEVSTACK/iostat.log.gz" || emit_warning "Failed to archive iostat.log"
     for i in cinder glance keystone neutron nova openvswitch openvswitch-switch
     do
         mkdir -p $CONFIG_DST_DEVSTACK/$i
@@ -52,7 +56,6 @@ function archive_devstack() {
             fi
         done
     done
-    #$GZIP -c /home/ubuntu/devstack/localrc > "$CONFIG_DST_DEVSTACK/localrc.txt.gz"
     $GZIP -c /home/ubuntu/devstack/local.conf > "$CONFIG_DST_DEVSTACK/local.conf.gz"
     $GZIP -c /opt/stack/tempest/etc/tempest.conf > "$CONFIG_DST_DEVSTACK/tempest.conf.gz"
     df -h > "$CONFIG_DST_DEVSTACK/df.txt" 2>&1 && $GZIP "$CONFIG_DST_DEVSTACK/df.txt"
