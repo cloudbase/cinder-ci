@@ -21,6 +21,10 @@ echo "trusted-host = dl.openstack.tld" >> $HOME/.pip/pip.conf
 echo "find-links =" >> $HOME/.pip/pip.conf
 echo "    http://dl.openstack.tld/wheels" >> $HOME/.pip/pip.conf
 
+sudo mkdir -p /root/.pip
+sudo cp $HOME/.pip/pip.conf /root/.pip/
+sudo chown -R root:root /root/.pip
+
 # Update pip to latest
 sudo easy_install -U pip
 
