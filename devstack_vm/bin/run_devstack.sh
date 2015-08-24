@@ -120,6 +120,7 @@ while kill -0 $pid_stack 2> /dev/null; do
     echo ""
     sleep 60
 done
-
+set -x
+set -e
 # Disable the trap on a normal exit.
 trap - EXIT
