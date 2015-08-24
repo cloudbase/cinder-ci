@@ -11,6 +11,16 @@ HOSTNAME=$(hostname)
 
 sudo sed -i '2i127.0.0.1  '$HOSTNAME'' /etc/hosts
 
+# Add pip cache for devstack
+mkdir -p $HOME/.pip
+echo "[global]" > $HOME/.pip/pip.conf
+echo "trusted-host = dl.openstack.tld" >> $HOME/.pip/pip.conf
+echo "index-url = http://dl.openstack.tld:8080/root/pypi/+simple/" >> $HOME/.pip/pip.conf
+echo "[install]" >> $HOME/.pip/pip.conf
+echo "trusted-host = dl.openstack.tld" >> $HOME/.pip/pip.conf
+echo "find-links =" >> $HOME/.pip/pip.conf
+echo "    http://dl.openstack.tld/wheels" >> $HOME/.pip/pip.conf
+
 # Update pip to latest
 sudo easy_install -U pip
 
@@ -92,18 +102,20 @@ cd /home/ubuntu/devstack
 
 ./unstack.sh
 
-./stack.sh 2>&1 | tee /opt/stack/logs/stack.sh.txt
+./stack.sh 2>&1 | tee /opt/stack/logs/stack.sh.txt &
+pid_stack=$!
+# If this script is killed, kill the ./stack.sh
+trap "kill $pid_stack 2> /dev/null" EXIT
 
 set +x
 set +e
 # While ./stack.sh is running...
 while kill -0 $pid_stack 2> /dev/null; do
-    echo "Checking VM statistics"
     echo ""
-    echo "### Memory usage"
+    echo "### VM - Memory usage"
     free -m | ts '[%Y-%m-%d %H:%M:%S]' | tee -a /opt/stack/logs/memory_usage.log
     echo ""
-    echo "### IOstat"
+    echo "### VM - IOstat"
     iostat -dx 1 1 | ts '[%Y-%m-%d %H:%M:%S]' | tee -a /opt/stack/logs/iostat.log
     echo ""
     sleep 60
