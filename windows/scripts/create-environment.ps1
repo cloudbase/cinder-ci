@@ -40,7 +40,18 @@ find-links =
 # TODO: move this to the image instead.
 pushd C:\
 
-Invoke-WebRequest -Uri http://dl.openstack.tld/python27.tar.gz -OutFile $pythonArchive
+if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
+{
+    Remove-Item -Force -Recurse "$scriptdir\* -ErrorAction SilentlyContinue"
+    GitClonePull "$scriptdir" "https://github.com/cloudbase/cinder-ci" "master"
+}
+
+. "$scriptdir\windows\scripts\utils.ps1"
+
+ExecRetry {
+    Invoke-WebRequest -Uri http://dl.openstack.tld/python27.tar.gz -OutFile $pythonArchive
+    if ($LastExitCode) { Throw "Failed fetching python27.tar.gz" }
+}
 if (Test-Path $pythonDir)
 {
     Remove-Item -Recurse -Force $pythonDir
@@ -70,14 +81,6 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install --use-wheel --no-index --find-links=http://dl.openstack.tld/wheels cffi
 
 popd
-
-if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
-{
-    Remove-Item -Force -Recurse "$scriptdir\* -ErrorAction SilentlyContinue"
-    GitClonePull "$scriptdir" "https://github.com/cloudbase/cinder-ci" "master"
-}
-
-. "$scriptdir\windows\scripts\utils.ps1"
 
 $ErrorActionPreference = "SilentlyContinue"
 
