@@ -102,20 +102,4 @@ cd /home/ubuntu/devstack
 
 ./unstack.sh
 
-./stack.sh 2>&1 | tee /opt/stack/logs/stack.sh.txt &
-pid_stack=$!
-
-# If this script is killed, kill the ./stack.sh
-trap "kill $pid_stack 2> /dev/null" EXIT
-
-# While ./stack.sh is running...
-while kill -0 $pid_stack 2> /dev/null; do
-    echo "### VM - Memory usage"
-    free -m | ts '[%Y-%m-%d %H:%M:%S]' | tee -a /opt/stack/logs/memory_usage.log
-    echo "### VM - IOstat"
-    iostat -dx 1 1 | ts '[%Y-%m-%d %H:%M:%S]' | tee -a /opt/stack/logs/iostat.log
-    sleep 60
-done
-
-# Disable the trap on a normal exit.
-trap - EXIT
+./stack.sh 2>&1 | tee /opt/stack/logs/stack.sh.txt
