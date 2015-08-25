@@ -102,9 +102,9 @@ then
     fi
 
     # Add 2 more interfaces after successful SSH
-    echo "Adding two more network interfaces to devstack VM"
-    nova interface-attach --net-id "$NET_ID" "$NAME"
-    nova interface-attach --net-id "$NET_ID" "$NAME"
+    #echo "Adding two more network interfaces to devstack VM"
+    #nova interface-attach --net-id "$NET_ID" "$NAME"
+    #nova interface-attach --net-id "$NET_ID" "$NAME"
 
     echo "Copy scripts to devstack VM"
     scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/
