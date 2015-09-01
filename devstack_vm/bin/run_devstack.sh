@@ -100,7 +100,7 @@ fi
 
 cd /opt/stack/nova
 # Nova volume attach race condition fix
-git fetch https://plucian@review.openstack.org/openstack/nova refs/changes/19/187619/2
+git fetch https://plucian@review.openstack.org/openstack/nova refs/changes/19/187619/3
 cherry_pick FETCH_HEAD
 
 cd /home/ubuntu/devstack
