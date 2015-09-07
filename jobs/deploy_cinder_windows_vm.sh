@@ -161,7 +161,7 @@ echo WINDOWS_USER=$WINDOWS_USER
 echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD
 
 echo "Waiting for answer on winrm port for windows VM"
-wait_for_listening_port $CINDER_FLOATING_IP 5986 10 || { nova console-log "$CINDER_VM_NAME" ; exit 1; }
+wait_for_listening_port $CINDER_FLOATING_IP 5986 20 || { nova console-log "$CINDER_VM_NAME" ; exit 1; }
 sleep 5
 
 #join cinder host
