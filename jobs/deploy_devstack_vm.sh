@@ -39,7 +39,7 @@ esac
 if [[ ! -z $IS_DEBUG_JOB ]] && [[ $IS_DEBUG_JOB = "yes" ]]; then 
 	NAME="$NAME-dbg"
 fi
-export $NAME
+export NAME=$NAME
 
 DEVSTACK_VM_STATUS="NOT_OK"
 COUNT=0

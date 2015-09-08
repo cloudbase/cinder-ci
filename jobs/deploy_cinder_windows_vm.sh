@@ -42,7 +42,7 @@ if [[ ! -z $IS_DEBUG_JOB ]] && [[ $IS_DEBUG_JOB = "yes" ]]; then
         CINDER_VM_NAME="$CINDER_VM_NAME-dbg"
 fi
 
-export $CINDER_VM_NAME
+export CINDER_VM_NAME=$CINDER_VM_NAME
 
 echo CINDER_VM_NAME=$CINDER_VM_NAME >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
