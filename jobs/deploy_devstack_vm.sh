@@ -93,7 +93,7 @@ then
     nova show "$NAME"
 
     echo "Wait for answer on port 22 on devstack"
-    exec_with_retry 50 30 "nc -z -w3 $DEVSTACK_FLOATING_IP 22"
+    exec_with_retry 25 30 "nc -z -w3 $DEVSTACK_FLOATING_IP 22"
     if [ $? -ne 0 ]
     then
         echo "Failed listening for ssh port on devstack."
