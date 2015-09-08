@@ -37,3 +37,6 @@ iniset $TEMPEST_CONFIG compute allow_tenant_isolation True
 
 # Disable STP on bridge
 # ovs-vsctl set bridge br-eth1 stp_enable=true
+
+# Workaround for the missing volume type id. TODO: remove this after it's fixed.
+cinder type-create blank

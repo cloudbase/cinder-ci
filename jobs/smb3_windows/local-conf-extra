@@ -9,3 +9,7 @@ disable_service c-vol
 [libvirt]
 # libvirt-qemu uid, gid
 smbfs_mount_options='-o uid=107,gid=113 -o guest'
+
+[[post-config|$CINDER_CONF]]
+[DEFAULT]
+default_volume_type=blank
