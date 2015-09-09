@@ -22,7 +22,28 @@ join_cinder(){
     run_ps_cmd_with_retry $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase $JOB_TYPE -winUser $WINDOWS_USER -winPasswd $WINDOWS_PASSWORD"
 }
 
-export CINDER_VM_NAME="cinder-windows-$ZUUL_UUID-$JOB_TYPE"
+CINDER_VM_NAME="cnd-win-$ZUUL_CHANGE-$ZUUL_PATCHSET"
+
+case "$JOB_TYPE" in
+        iscsi)
+            CINDER_VM_NAME="$CINDER_VM_NAME-is"
+            ;;
+
+        smb3_windows)
+            CINDER_VM_NAME="$CINDER_VM_NAME-sw"
+            ;;
+
+        smb3_linux)
+            CINDER_VM_NAME="$CINDER_VM_NAME-sl"
+            ;;
+esac
+
+if [[ ! -z $IS_DEBUG_JOB ]] && [[ $IS_DEBUG_JOB = "yes" ]]; then 
+        CINDER_VM_NAME="$CINDER_VM_NAME-dbg"
+fi
+
+export CINDER_VM_NAME=$CINDER_VM_NAME
+
 echo CINDER_VM_NAME=$CINDER_VM_NAME >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 echo "Deploying cinder windows VM $CINDER_VM_NAME"

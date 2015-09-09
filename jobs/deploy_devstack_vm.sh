@@ -21,6 +21,26 @@ update_local_conf (){
         "cat /home/ubuntu/devstack/local-conf-extra >> /home/ubuntu/devstack/local.conf" 12
 }
 # Main section
+
+NAME="cnd-dvs-$ZUUL_CHANGE-$ZUUL_PATCHSET"
+
+case "$JOB_TYPE" in
+         iscsi)
+            NAME="$NAME-is"
+            ;;
+        smb3_windows)
+            NAME="$NAME-sw"
+            ;;
+        smb3_linux)
+            NAME="$NAME-sl"
+            ;;
+esac
+
+if [[ ! -z $IS_DEBUG_JOB ]] && [[ $IS_DEBUG_JOB = "yes" ]]; then 
+	NAME="$NAME-dbg"
+fi
+export NAME=$NAME
+
 DEVSTACK_VM_STATUS="NOT_OK"
 COUNT=0
 while [ $DEVSTACK_VM_STATUS != "OK" ]
@@ -31,7 +51,6 @@ then
     set +e
     if (`nova list | grep "$NAME" > /dev/null 2>&1`); then nova delete "$NAME"; fi
     set -e
-    export NAME="cinder-devstack-$ZUUL_UUID-$JOB_TYPE"
     echo NAME=$NAME > /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
     echo DEVSTACK_SSH_KEY=$DEVSTACK_SSH_KEY >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
