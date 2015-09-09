@@ -8,6 +8,7 @@ CINDER_ENABLED_BACKENDS=SMBFS
 
 [[post-config|$CINDER_CONF]]
 [DEFAULT]
+default_volume_type=blank
 os_privileged_user_password=Passw0rd
 os_privileged_user_tenant=admin
 os_privileged_user_name=admin
