@@ -214,6 +214,7 @@ $filter = 'Name=' + "'" + $serviceName + "'" + ''
 Get-WMIObject -namespace "root\cimv2" -class Win32_Service -Filter $filter | Select *
 
 & pip install -U "Jinja2>=2.6"
+pip install python-novaclient==2.28.1
 #Fix for bug in monotonic pip package
 #(Get-Content "C:\Python27\Lib\site-packages\monotonic.py") | foreach-object {$_ -replace ">= 0", "> 0"} | Set-Content  "C:\Python27\Lib\site-packages\monotonic.py"
 
