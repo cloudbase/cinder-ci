@@ -12,9 +12,19 @@ RUN_TESTS_LIST="$TEMPEST_DIR/test_list.txt"
 mkdir -p "$TEMPEST_DIR"
 
 if [ $job_type = "iscsi" ]; then
-    testr list-tests | grep volume > "$RUN_TESTS_LIST" || echo "failed to generate list of tests"
+    testr list-tests | grep volume > "$RUN_TESTS_LIST"
+    res=$?
+    if [ $res -ne 0 ]; then
+        echo "failed to generate list of tests"
+        exit $res
+    fi
 else
-    testr list-tests | grep volume | grep -v test_volume_boot_pattern > "$RUN_TESTS_LIST" || echo "failed to generate list of tests"
+    testr list-tests | grep volume | grep -v test_volume_boot_pattern > "$RUN_TESTS_LIST"
+    res=$?
+    if [ $res -ne 0 ]; then
+        echo "failed to generate list of tests"
+        exit $res
+    fi
 fi
 
 testr run --parallel --subunit  --load-list=$RUN_TESTS_LIST |  subunit-2to1  > /home/ubuntu/tempest/subunit-output.log 2>&1
