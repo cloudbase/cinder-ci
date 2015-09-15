@@ -38,7 +38,7 @@ case "$JOB_TYPE" in
             ;;
 esac
 
-if [[ ! -z $IS_DEBUG_JOB ]] && [[ $IS_DEBUG_JOB = "yes" ]]; then 
+if [[ ! -z $DEBUG_JOB ]] && [[ $DEBUG_JOB = "yes" ]]; then 
         CINDER_VM_NAME="$CINDER_VM_NAME-dbg"
 fi
 
