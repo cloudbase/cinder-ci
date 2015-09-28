@@ -49,7 +49,6 @@ function archive_devstack() {
     $GZIP -c /var/log/dmesg > "$LOG_DST_DEVSTACK/dmesg.log.gz" || emit_warning "Failed to archive dmesg.log"
     $GZIP -c /var/log/kern.log > "$LOG_DST_DEVSTACK/kern.log.gz" || emit_warning "Failed to archive kern.log"
     $GZIP -c /var/log/syslog > "$LOG_DST_DEVSTACK/syslog.log.gz" || emit_warning "Failed to archive syslog.log"
-    $GZIP -c /opt/stack/logs/stack.sh.txt > "$LOG_DST_DEVSTACK/stack.sh.txt.gz" || emit_warning "Failed to archive stack.sh"
     mkdir -p "$LOG_DST_DEVSTACK/rabbitmq"
     cp /var/log/rabbitmq/* "$LOG_DST_DEVSTACK/rabbitmq"
     sudo rabbitmqctl status > "$LOG_DST_DEVSTACK/rabbitmq/status.txt" 2>&1
