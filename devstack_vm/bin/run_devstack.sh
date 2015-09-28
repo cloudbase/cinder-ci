@@ -4,19 +4,43 @@ job_type=$1
 
 set -x
 set -e
-sudo ifconfig eth1 promisc up
-sudo ifconfig eth2 promisc up
+sudo ifconfig eth0 promisc up
+# sudo ifconfig eth1 promisc up
+# sudo ifconfig eth2 promisc up
 
 HOSTNAME=$(hostname)
 
 sudo sed -i '2i127.0.0.1  '$HOSTNAME'' /etc/hosts
+
+# Add pip cache for devstack
+mkdir -p $HOME/.pip
+echo "[global]" > $HOME/.pip/pip.conf
+echo "trusted-host = dl.openstack.tld" >> $HOME/.pip/pip.conf
+echo "index-url = http://dl.openstack.tld:8080/root/pypi/+simple/" >> $HOME/.pip/pip.conf
+echo "[install]" >> $HOME/.pip/pip.conf
+echo "trusted-host = dl.openstack.tld" >> $HOME/.pip/pip.conf
+echo "find-links =" >> $HOME/.pip/pip.conf
+echo "    http://dl.openstack.tld/wheels" >> $HOME/.pip/pip.conf
+
+sudo mkdir -p /root/.pip
+sudo cp $HOME/.pip/pip.conf /root/.pip/
+sudo chown -R root:root /root/.pip
+
+# Update pip to latest
+sudo easy_install -U pip
 
 #Update six to latest version
 sudo pip install -U six
 sudo pip install -U kombu
 
 #Ensure subunit is available
-sudo apt-get install -y subunit
+set +e
+sudo apt-get install subunit -y -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f
+# moreutils is needed for tc (timestamp)
+sudo apt-get install moreutils -y -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f
+# sysstat needed for iostat
+sudo apt-get install sysstat -y -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f
+set -e
 
 DEVSTACK_LOGS="/opt/stack/logs/screen"
 LOCALRC="/home/ubuntu/devstack/localrc"
@@ -43,7 +67,6 @@ fi
 
 cd /home/ubuntu/devstack
 git pull
-sudo easy_install -U pip
 
 # Revert the driver disable patch
 cd /opt/stack/cinder
@@ -66,28 +89,23 @@ function cherry_pick(){
 
 if [ $job_type != "iscsi" ]; then
     set +e
-    #git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
     git remote add downstream https://github.com/petrutlucian94/cinder
     git fetch downstream
     git checkout -b testBranch
     set -e
-    cherry_pick 25c992c73a2e278dcbf5be5bf0c885127e5eb43c
-    cherry_pick 87032e45ef3cd067120f96b5bc4cc0cb6ca23e25
-    cherry_pick 54a3427c0c57efc6a9ce351b3e7889909584b6a2
-    cherry_pick 171dbfcd067c79a2313da54a4bef0372606d76df
+    git fetch https://plucian@review.openstack.org/openstack/cinder refs/changes/13/158713/18
+    cherry_pick FETCH_HEAD
+    cherry_pick 82f169a0aec3fe5ba3f4fa87f36fe365ecf8f108
+    cherry_pick 4fef430adbd6c1e40a885040b347e4c9c394c161
 fi
 
 cd /opt/stack/nova
 # Nova volume attach race condition fix
-git fetch https://plucian@review.openstack.org/openstack/nova refs/changes/19/187619/2
+git fetch https://plucian@review.openstack.org/openstack/nova refs/changes/19/187619/3
 cherry_pick FETCH_HEAD
 
 cd /home/ubuntu/devstack
 
 ./unstack.sh
-
-nohup ./stack.sh > /opt/stack/logs/stack.sh.txt 2>&1 &
-pid=$!
-wait $pid
-cat /opt/stack/logs/stack.sh.txt
-
+set -o pipefail
+./stack.sh 2>&1 | tee /opt/stack/logs/stack.sh.txt

@@ -20,27 +20,25 @@ $templateDir = "$scriptdir\windows\templates"
 $cinderTemplate = "$templateDir\cinder.conf"
 $pythonDir = "C:\Python27"
 $pythonExec = "python.exe"
+$pythonArchive = "python27.tar.gz"
 $lockPath = "C:\Openstack\locks"
 $remoteLogs="\\"+$devstackIP+"\openstack\logs"
 $remoteConfigs="\\"+$devstackIP+"\openstack\config"
 $rabbitUser = "stackrabbit"
 $hostname = hostname
 
+$pip_conf_content = @"
+[global]
+index-url = http://dl.openstack.tld:8080/root/pypi/+simple/
+[install]
+trusted-host = dl.openstack.tld
+find-links = 
+    http://dl.openstack.tld/wheels
+"@
+
 # Replace Python dir with the archived template
 # TODO: move this to the image instead.
-Remove-Item -Force -Recurse $pythonDir
-$archivePath = 'python27.tar.gz'
-Invoke-WebRequest -Uri http://10.21.7.214/python27.tar.gz -OutFile "C:\$archivePath"
-Write-Host "Ensure Python folder is up to date"
-cmd /c cd \ `&`& C:\MinGW\msys\1.0\bin\tar.exe xvzf $archivePath
-Remove-Item -Force -Recurse "c:\$archivePath"
-easy_install -U pip
-pip install oslo.log==1.1.0
-pip install wmi
-pip install cffi==1.0.1
-pip install virtualenv
-#pip install -U setuptools
-pip install -U distribute
+pushd C:\
 
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
@@ -49,6 +47,40 @@ if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 }
 
 . "$scriptdir\windows\scripts\utils.ps1"
+
+ExecRetry {
+    Invoke-WebRequest -Uri http://dl.openstack.tld/python27.tar.gz -OutFile $pythonArchive
+    if ($LastExitCode) { Throw "Failed fetching python27.tar.gz" }
+}
+if (Test-Path $pythonDir)
+{
+    Remove-Item -Recurse -Force $pythonDir
+}
+
+Write-Host "Ensure Python folder is up to date"
+Write-Host "Extracting archive.."
+& C:\MinGW\msys\1.0\bin\tar.exe -xzf "$pythonArchive"
+Write-Host "Removing the python archive.."
+Remove-Item -Force -Recurse $pythonArchive
+
+$hasPipConf = Test-Path "$env:APPDATA\pip"
+if ($hasPipConf -eq $false){
+    mkdir "$env:APPDATA\pip"
+}
+else 
+{
+    Remove-Item -Force "$env:APPDATA\pip\*"
+}
+Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
+
+& easy_install -U pip
+& pip install -U wmi
+& pip install -U virtualenv
+& pip install -U setuptools
+& pip install -U distribute
+& pip install --use-wheel --no-index --find-links=http://dl.openstack.tld/wheels cffi
+
+popd
 
 $ErrorActionPreference = "SilentlyContinue"
 
@@ -138,10 +170,10 @@ if ($testCase -ne "iscsi"){
 
     git checkout -b "testBranch"
 
-    cherry_pick 25c992c73a2e278dcbf5be5bf0c885127e5eb43c
-    cherry_pick 87032e45ef3cd067120f96b5bc4cc0cb6ca23e25
-    cherry_pick 54a3427c0c57efc6a9ce351b3e7889909584b6a2
-    cherry_pick 171dbfcd067c79a2313da54a4bef0372606d76df
+    git fetch https://plucian@review.openstack.org/openstack/cinder refs/changes/13/158713/18
+    cherry_pick FETCH_HEAD
+    cherry_pick 82f169a0aec3fe5ba3f4fa87f36fe365ecf8f108
+    cherry_pick 4fef430adbd6c1e40a885040b347e4c9c394c161
 }
 
 ExecRetry {
@@ -157,8 +189,10 @@ if (($branchName.ToLower().CompareTo($('stable/juno').ToLower()) -eq 0) -or ($br
     $rabbitUser = "guest"
 }
 
-& $scriptdir\windows\scripts\$testCase\generateConfig.ps1 `
-    $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath $winUser $winPasswd
+& $scriptdir\windows\scripts\$testCase\generateConfig.ps1 $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath $winUser $winPasswd  > "$remoteLogs\generateConfig_error.txt" 2>&1
+if ($LastExitCode -ne 0) {
+ echo "generateConfig has failed!"
+}
 
 #$hasCinderExec = Test-Path "$pythonDir\Scripts\cinder-volume.exe"
 #if ($hasCinderExec -eq $false){
@@ -180,8 +214,13 @@ $filter = 'Name=' + "'" + $serviceName + "'" + ''
 Get-WMIObject -namespace "root\cimv2" -class Win32_Service -Filter $filter | Select *
 
 & pip install -U "Jinja2>=2.6"
+pip install python-novaclient==2.28.1
 #Fix for bug in monotonic pip package
-(Get-Content "C:\Python27\Lib\site-packages\monotonic.py") | foreach-object {$_ -replace ">= 0", "> 0"} | Set-Content  "C:\Python27\Lib\site-packages\monotonic.py"
+#(Get-Content "C:\Python27\Lib\site-packages\monotonic.py") | foreach-object {$_ -replace ">= 0", "> 0"} | Set-Content  "C:\Python27\Lib\site-packages\monotonic.py"
+
+#pip install decorator==3.4.2
+# Fix for the __qualname__ attribute issue appended to decorated methods, impacting osprofiler
+# TODO(lpetrut): send a fix for the latest decorator lib
 
 Write-Host "Starting the services"
 Try
@@ -220,6 +259,4 @@ if ($(get-service cinder-volume).Status -eq "Stopped")
     }
 }
 
-
 Write-Host "Environment initialization done."
-

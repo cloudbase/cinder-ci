@@ -40,10 +40,10 @@ if (! (Test-Path -Path c:\qemu2))
 {
 	mkdir c:\qemu2
 }
-else
-{
-	Remove-Item -Force -Recurse c:\qemu2
-}
+#else
+#{
+#	Remove-Item -Force -Recurse c:\qemu2
+#}
 unzip c:\qemu-img\qemu-img-cbsl-build.zip c:\qemu2
 Move-Item -Path C:\qemu2\* -Destination C:\qemu-img\ -Force
 

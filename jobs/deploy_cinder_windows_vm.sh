@@ -7,7 +7,7 @@ join_cinder(){
     PARAMS="$WIN_IP $WIN_USER $WIN_PASS"
     # set -e
     echo "Set paths for windows"
-    run_ps_cmd_with_retry $PARAMS "\$env:Path += ';C:\qemu2\qemu-img;C:\Python27;C:\Python27\Scripts;C:\OpenSSL-Win32\bin;C:\Program Files (x86)\Git\cmd;C:\MinGW\mingw32\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\qemu-img'; setx PATH \$env:Path "
+    run_ps_cmd_with_retry $PARAMS "\$env:Path += ';C:\Python27;C:\Python27\Scripts;C:\OpenSSL-Win32\bin;C:\Program Files (x86)\Git\cmd;C:\MinGW\mingw32\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\qemu-img'; setx PATH \$env:Path "
     echo "Ensure c:\cinder-ci folder exists and is empty."
     run_ps_cmd_with_retry $PARAMS "if (Test-Path -Path C:\cinder-ci) {Remove-Item -Force -Recurse C:\cinder-ci\*} else {New-Item -Path C:\ -Name cinder-ci -Type directory}"
     echo "git clone cinder-ci"
@@ -22,7 +22,28 @@ join_cinder(){
     run_ps_cmd_with_retry $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase $JOB_TYPE -winUser $WINDOWS_USER -winPasswd $WINDOWS_PASSWORD"
 }
 
-export CINDER_VM_NAME="cinder-windows-$ZUUL_UUID-$JOB_TYPE"
+CINDER_VM_NAME="cnd-win-$ZUUL_CHANGE-$ZUUL_PATCHSET"
+
+case "$JOB_TYPE" in
+        iscsi)
+            CINDER_VM_NAME="$CINDER_VM_NAME-is"
+            ;;
+
+        smb3_windows)
+            CINDER_VM_NAME="$CINDER_VM_NAME-sw"
+            ;;
+
+        smb3_linux)
+            CINDER_VM_NAME="$CINDER_VM_NAME-sl"
+            ;;
+esac
+
+if [[ ! -z $DEBUG_JOB ]] && [[ $DEBUG_JOB = "yes" ]]; then 
+        CINDER_VM_NAME="$CINDER_VM_NAME-dbg"
+fi
+
+export CINDER_VM_NAME=$CINDER_VM_NAME
+
 echo CINDER_VM_NAME=$CINDER_VM_NAME >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 echo "Deploying cinder windows VM $CINDER_VM_NAME"
@@ -45,7 +66,7 @@ do
         nova show "$CINDER_VM_NAME"
         break
     fi
-
+    
     #work around restart issue
     echo "Fetching cinder VM status "
     export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
@@ -63,13 +84,17 @@ do
         COUNT=$(($COUNT + 1))
     done
     sleep 5
+    echo "Printing details about $CINDER_VM_NAME "
     nova show "$CINDER_VM_NAME"
-    echo "Starting $CINDER_VM_NAME"
-    nova start $CINDER_VM_NAME
-    sleep 5
-    nova show "$CINDER_VM_NAME"
-    export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
-    echo "Cinder VM Status is: $CINDER_STATUS"
+    if [ $CINDER_STATUS != "ACTIVE" ]
+    then
+        echo "Starting $CINDER_VM_NAME"
+        nova start $CINDER_VM_NAME
+        sleep 15
+        nova show "$CINDER_VM_NAME"
+        export CINDER_STATUS=$(nova show $CINDER_VM_NAME | grep "status" | awk '{print $4}')
+        echo "Cinder VM Status is: $CINDER_STATUS"
+    fi
 
     echo "Fetching cinder VM fixed IP address"
     export CINDER_FIXED_IP=$(nova show "$CINDER_VM_NAME" | grep "private network" | awk '{print $5}')
@@ -157,7 +182,7 @@ echo WINDOWS_USER=$WINDOWS_USER
 echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD
 
 echo "Waiting for answer on winrm port for windows VM"
-wait_for_listening_port $CINDER_FLOATING_IP 5986 10 || { nova console-log "$CINDER_VM_NAME" ; exit 1; }
+wait_for_listening_port $CINDER_FLOATING_IP 5986 20 || { nova console-log "$CINDER_VM_NAME" ; exit 1; }
 sleep 5
 
 #join cinder host

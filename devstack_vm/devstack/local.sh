@@ -34,3 +34,10 @@ iniset $TEMPEST_CONFIG boto build_timeout 300
 
 iniset $TEMPEST_CONFIG compute ssh_timeout 180
 iniset $TEMPEST_CONFIG compute allow_tenant_isolation True
+
+# Disable STP on bridge
+# ovs-vsctl set bridge br-eth1 stp_enable=true
+
+# Workaround for the missing volume type id. TODO: remove this after it's fixed.
+# This is also used for the wrong extra_specs format issue
+cinder type-create blank
