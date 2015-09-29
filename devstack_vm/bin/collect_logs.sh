@@ -73,16 +73,23 @@ function archive_devstack() {
     done
     $GZIP -c /home/ubuntu/devstack/local.conf > "$CONFIG_DST_DEVSTACK/local.conf.gz" || emit_warning "Failed to archive local.conf"
     $GZIP -c /opt/stack/tempest/etc/tempest.conf > "$CONFIG_DST_DEVSTACK/tempest.conf.gz"|| emit_warning "Failed to archive tempest.conf"
-    df -h > "$CONFIG_DST_DEVSTACK/df.txt" 2>&1 && $GZIP "$CONFIG_DST_DEVSTACK/df.txt"
+    df -h > "$CONFIG_DST_DEVSTACK/df.txt" 2>&1 || emit_warning "Failed to generate df.txt.txt"
+    $GZIP "$CONFIG_DST_DEVSTACK/df.txt" || emit_warning "Failed to archive df.txt"
     
     cp /home/ubuntu/bin/excluded-tests.txt "$CONFIG_DST_DEVSTACK/excluded-tests.txt"
     cp /home/ubuntu/bin/isolated-tests.txt "$CONFIG_DST_DEVSTACK/isolated-tests.txt"
-    iptables-save > "$CONFIG_DST_DEVSTACK/iptables.txt" 2>&1 && $GZIP "$CONFIG_DST_DEVSTACK/iptables.txt"
-    dpkg-query -l > "$CONFIG_DST_DEVSTACK/dpkg-l.txt" 2>&1 && $GZIP "$CONFIG_DST_DEVSTACK/dpkg-l.txt"
-    pip freeze > "$CONFIG_DST_DEVSTACK/pip-freeze.txt" 2>&1 && $GZIP "$CONFIG_DST_DEVSTACK/pip-freeze.txt"
-    ps axwu > "$CONFIG_DST_DEVSTACK/pidstat.txt" 2>&1 && $GZIP "$CONFIG_DST_DEVSTACK/pidstat.txt"
-    ifconfig -a -v > "$CONFIG_DST_DEVSTACK/ifconfig.txt" 2>&1 && $GZIP "$CONFIG_DST_DEVSTACK/ifconfig.txt"
-    sudo ovs-vsctl -v show > "$CONFIG_DST_DEVSTACK/ovs_bridges.txt" 2>&1 && $GZIP "$CONFIG_DST_DEVSTACK/ovs_bridges.txt"
+    iptables-save > "$CONFIG_DST_DEVSTACK/iptables.txt" 2>&1 || emit_warning "Failed to generate iptables.txt"
+    $GZIP "$CONFIG_DST_DEVSTACK/iptables.txt" || emit_warning "Failed to archive iptables.txt"
+    dpkg-query -l > "$CONFIG_DST_DEVSTACK/dpkg-l.txt" 2>&1 || emit_warning "Failed to generate dpkg.txt"
+    $GZIP "$CONFIG_DST_DEVSTACK/dpkg-l.txt" || emit_warning "Failed to archive dpkg.txt"
+    pip freeze > "$CONFIG_DST_DEVSTACK/pip-freeze.txt" 2>&1 || emit_warning "Failed to generate pip-freeze.txt"
+    $GZIP "$CONFIG_DST_DEVSTACK/pip-freeze.txt" || emit_warning "Failed to archive pip-freeze.txt"
+    ps axwu > "$CONFIG_DST_DEVSTACK/pidstat.txt" 2>&1 || emit_warning "Failed to generate pidstat.txt"
+    $GZIP "$CONFIG_DST_DEVSTACK/pidstat.txt" || emit_warning "Failed to archive pidstat.txt"
+    ifconfig -a -v > "$CONFIG_DST_DEVSTACK/ifconfig.txt" 2>&1 || emit_warning "Failed to generate ifconfig.txt"
+    $GZIP "$CONFIG_DST_DEVSTACK/ifconfig.txt" || emit_warning "Failed to archive ifconfig.txt"
+    sudo ovs-vsctl -v show > "$CONFIG_DST_DEVSTACK/ovs_bridges.txt" 2>&1 || emit_warning "Failed to generate ovs_bridges.txt"
+    $GZIP "$CONFIG_DST_DEVSTACK/ovs_bridges.txt" || emit_warning "Failed to archive ovs_bridges.txt"
     #/var/log/kern.log
     #/var/log/rabbitmq/
     #/var/log/syslog
