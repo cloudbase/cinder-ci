@@ -60,9 +60,12 @@ then
 
     echo NAME=$NAME
     echo NET_ID=$NET_ID
-
+    
+    devstack_image="devstack-63v1"
+    echo "Image used is: $devstack_image"
+    
     echo "Deploying devstack $NAME"
-    nova boot --availability-zone cinder --flavor cinder.linux --image devstack-62v3 --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll
+    nova boot --availability-zone cinder --flavor cinder.linux --image $devstack_image --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll
 
     if [ $? -ne 0 ]
     then
