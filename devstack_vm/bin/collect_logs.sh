@@ -40,7 +40,6 @@ function archive_devstack() {
         fi
     done
     $GZIP -c "$DEVSTACK_BUILD_LOG" > "$LOG_DST_DEVSTACK/stack.sh.log.gz" || emit_warning "Failed to archive devstack log"
-    $GZIP -c "$MEMORY_STATS" > "$LOG_DST_DEVSTACK/memory_usage.log.gz" || emit_warning "Failed to archive memory_stat.log"
     sudo iostat > "$LOG_DST_DEVSTACK/iostat.log" 2>&1 || emit_warning "Failed to create iostat.log"
     $GZIP "$LOG_DST_DEVSTACK/iostat.log" || emit_warning "Failed to archive iostat.log"
     $GZIP -c /var/log/mysql/error.log > "$LOG_DST_DEVSTACK/mysql_error.log.gz" || emit_warning "Failed to archive mysql_error.log"
