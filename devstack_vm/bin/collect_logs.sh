@@ -41,17 +41,17 @@ function archive_devstack() {
     done
     $GZIP -c "$DEVSTACK_BUILD_LOG" > "$LOG_DST_DEVSTACK/stack.sh.log.gz" || emit_warning "Failed to archive devstack log"
     $GZIP -c "$MEMORY_STATS" > "$LOG_DST_DEVSTACK/memory_usage.log.gz" || emit_warning "Failed to archive memory_stat.log"
-    $GZIP -c "$IOSTAT_LOG" > "$LOG_DST_DEVSTACK/iostat.log.gz" || emit_warning "Failed to archive iostat.log"
-    
+    sudo iostat > "$LOG_DST_DEVSTACK/iostat.log" 2>&1 || emit_warning "Failed to create iostat.log"
+    $GZIP "$LOG_DST_DEVSTACK/iostat.log" || emit_warning "Failed to archive iostat.log"
     $GZIP -c /var/log/mysql/error.log > "$LOG_DST_DEVSTACK/mysql_error.log.gz" || emit_warning "Failed to archive mysql_error.log"
     $GZIP -c /var/log/cloud-init.log > "$LOG_DST_DEVSTACK/cloud-init.log.gz" || emit_warning "Failed to archive cloud-init.log"
     $GZIP -c /var/log/cloud-init-output.log > "$LOG_DST_DEVSTACK/cloud-init-output.log.gz" || emit_warning "Failed to archive cloud-init-output.log"
     $GZIP -c /var/log/dmesg > "$LOG_DST_DEVSTACK/dmesg.log.gz" || emit_warning "Failed to archive dmesg.log"
     $GZIP -c /var/log/kern.log > "$LOG_DST_DEVSTACK/kern.log.gz" || emit_warning "Failed to archive kern.log"
     $GZIP -c /var/log/syslog > "$LOG_DST_DEVSTACK/syslog.log.gz" || emit_warning "Failed to archive syslog.log"
-    mkdir -p "$LOG_DST_DEVSTACK/rabbitmq"
-    cp /var/log/rabbitmq/* "$LOG_DST_DEVSTACK/rabbitmq"
-    sudo rabbitmqctl status > "$LOG_DST_DEVSTACK/rabbitmq/status.txt" 2>&1
+    mkdir -p "$LOG_DST_DEVSTACK/rabbitmq" || emit_warning "Failed to create rabbitmq directory"
+    cp /var/log/rabbitmq/* "$LOG_DST_DEVSTACK/rabbitmq" || emit_warning "Failed to copy rabbitmq logs"
+    sudo rabbitmqctl status > "$LOG_DST_DEVSTACK/rabbitmq/status.txt" 2>&1 || emit_warning "Failed to create rabbitmq stats"
     $GZIP $LOG_DST_DEVSTACK/rabbitmq/*
     mkdir -p "$LOG_DST_DEVSTACK/openvswitch"
     cp /var/log/openvswitch/* "$LOG_DST_DEVSTACK/openvswitch"
@@ -63,7 +63,7 @@ function archive_devstack() {
         mkdir -p $CONFIG_DST_DEVSTACK/$i
         for j in `ls -A /etc/$i`
         do
-            if [ -d /etc/$i/$j ]
+            if [ -d "/etc/$i/$j" ]
             then
                 $TAR cvzf "$CONFIG_DST_DEVSTACK/$i/$j.tar.gz" "/etc/$i/$j"
             else
