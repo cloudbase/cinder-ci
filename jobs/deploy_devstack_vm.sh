@@ -125,7 +125,7 @@ echo ZUUL_SITE=$ZUUL_SITE >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID
 # Set ZUUL IP in hosts file
 ZUUL_CINDER="10.21.7.213"
 if  ! grep -qi zuul /etc/hosts ; then
-    echo "$ZUUL_CINDER zuul-cinder.openstack.tld" >> /etc/hosts
+    run_ssh_cmd_with_retry ubuntu@$FLOATING_IP $DEVSTACK_SSH_KEY "echo '$ZUUL_CINDER zuul-cinder.openstack.tld' | sudo tee -a /etc/hosts"
 fi
 
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p -m 777 /openstack/volumes"
