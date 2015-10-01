@@ -177,6 +177,12 @@ then
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p /home/ubuntu/devstack/files/images/" 6
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "wget http://dl.openstack.tld/cirros-0.3.3-x86_64.img -O /home/ubuntu/devstack/files/images/cirros-0.3.3-x86_64.img" 6
 
+    # Set ZUUL IP in hosts file
+    ZUUL_CINDER="10.21.7.213"
+    if  ! grep -qi zuul /etc/hosts ; then
+        run_ssh_cmd_with_retry ubuntu@$FLOATING_IP $DEVSTACK_SSH_KEY "echo '$ZUUL_CINDER zuul-cinder.openstack.tld' | sudo tee -a /etc/hosts"
+    fi
+
     echo "Run gerrit-git-prep on devstack"
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY  "/home/ubuntu/bin/gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT" 6
 
