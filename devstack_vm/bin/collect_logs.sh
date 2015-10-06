@@ -2,6 +2,7 @@
 TAR=$(which tar)
 GZIP=$(which gzip)
 
+DEVSTACK_LOG_DIR="/opt/stack/logs"
 DEVSTACK_LOGS="/opt/stack/logs/screen"
 DEVSTACK_BUILD_LOG="/opt/stack/logs/stack.sh.txt"
 MEMORY_STATS="/opt/stack/logs/memory_usage.log"
@@ -40,7 +41,12 @@ function archive_devstack() {
                 $GZIP -c "$REAL" > "$LOG_DST_DEVSTACK/$i.gz" || emit_warning "Failed to archive devstack logs"
         fi
     done
-    $GZIP -c "$DEVSTACK_BUILD_LOG" > "$LOG_DST_DEVSTACK/stack.sh.log.gz" || emit_warning "Failed to archive devstack log"
+
+    for stack_log in `ls -A $DEVSTACK_LOG_DIR | grep "stack.sh.txt" | grep -v "gz"`
+    do
+        $GZIP -c "$DEVSTACK_LOG_DIR/$stack_log" > "$LOG_DST_DEVSTACK/$stack_log.gz" || emit_warning "Failed to archive devstack log"
+    done
+
     $GZIP -c "$MEMORY_STATS" > "$LOG_DST_DEVSTACK/memory_usage.log.gz" || emit_warning "Failed to archive memory_stat.log"
     $GZIP -c "$IOSTAT_LOG" > "$LOG_DST_DEVSTACK/iostat.log.gz" || emit_warning "Failed to archive iostat.log"
     for i in cinder glance keystone neutron nova openvswitch openvswitch-switch
