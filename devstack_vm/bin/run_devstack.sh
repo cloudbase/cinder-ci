@@ -38,8 +38,8 @@ LOCALRC="/home/ubuntu/devstack/localrc"
 LOCALCONF="/home/ubuntu/devstack/local.conf"
 PBR_LOC="/opt/stack/pbr"
 # Clean devstack logs
-rm -f "$DEVSTACK_LOGS/*"
-rm -rf "$PBR_LOC"
+sudo rm -f "$DEVSTACK_LOGS/*"
+sudo rm -rf "$PBR_LOC"
 
 MYIP=$(/sbin/ifconfig eth0 2>/dev/null| grep "inet addr:" 2>/dev/null| sed 's/.*inet addr://g;s/ .*//g' 2>/dev/null)
 
@@ -63,6 +63,26 @@ git pull
 cd /opt/stack/cinder
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
+
+rotate_log () {
+    local file="$1"
+    local limit=$2
+    if [ -f $file ] ; then
+        if [ -f ${file}.${limit} ] ; then
+            rm ${file}.${limit}
+        fi
+
+        for (( CNT=$limit; CNT > 1; CNT-- )) ; do
+            if [ -f ${file}.$(($CNT-1)) ]; then
+                mv ${file}.$(($CNT-1)) ${file}.${CNT} || echo "Failed to run: mv ${file}.$(($CNT-1)) ${file}.${CNT}"
+            fi
+        done
+
+        # Renames current log to .1
+        mv $file ${file}.1
+        touch $file
+    fi
+}
 
 function cherry_pick(){
     commit=$1
@@ -98,5 +118,12 @@ cherry_pick FETCH_HEAD
 cd /home/ubuntu/devstack
 
 ./unstack.sh
+
+# stack.sh output log
+STACK_LOG="/opt/stack/logs/stack.sh.txt"
+# keep this many rotated stack.sh logs
+STACK_ROTATE_LIMIT=6
+rotate_log $STACK_LOG $STACK_ROTATE_LIMIT
+
 set -o pipefail
-./stack.sh 2>&1 | tee /opt/stack/logs/stack.sh.txt
+./stack.sh 2>&1 | tee $STACK_LOG
