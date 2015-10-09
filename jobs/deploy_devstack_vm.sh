@@ -129,11 +129,11 @@ then
     echo "Copy scripts to devstack VM"
     scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/
 
-    # hack for pbr issue in case: branch != master ; don't install from git
-    if [ $ZUUL_BRANCH != "master" ]
-    then
-        run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i 's/LIBS_FROM_GIT=pbr/#LIBS_FROM_GIT=pbr/g' /home/ubuntu/devstack/local.conf" 3
-    fi
+    ## hack for pbr issue in case: branch != master ; don't install from git
+    #if [ $ZUUL_BRANCH != "master" ]
+    #then
+    #    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i 's/LIBS_FROM_GIT=pbr/#LIBS_FROM_GIT=pbr/g' /home/ubuntu/devstack/local.conf" 3
+    #fi
     
     # Repository section
     echo "setup apt-cacher-ng:"
