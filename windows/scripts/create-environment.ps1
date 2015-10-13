@@ -79,6 +79,7 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install -U setuptools
 & pip install -U distribute
 & pip install --use-wheel --no-index --find-links=http://dl.openstack.tld/wheels cffi
+& pip install -U oslo.log==1.11.0
 
 popd
 
