@@ -79,7 +79,6 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install -U setuptools
 & pip install -U distribute
 & pip install --use-wheel --no-index --find-links=http://dl.openstack.tld/wheels cffi
-& pip install -U oslo.log==1.11.0
 
 popd
 
@@ -150,7 +149,8 @@ pip install -r requirements.txt
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
 
-function cherry_pick($commit){
+function cherry_pick($commit) {
+    $eapSet = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     git cherry-pick $commit
 
@@ -158,6 +158,7 @@ function cherry_pick($commit){
         echo "Ignoring failed git cherry-pick $commit"
         git checkout --force
     }
+    $ErrorActionPreference = $eapSet
 }
 
 if ($testCase -ne "iscsi"){
