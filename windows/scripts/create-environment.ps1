@@ -29,11 +29,9 @@ $hostname = hostname
 
 $pip_conf_content = @"
 [global]
-index-url = http://dl.openstack.tld:8080/root/pypi/+simple/
+index-url = http://dl.openstack.tld:8080/cloudbase/CI/+simple/
 [install]
 trusted-host = dl.openstack.tld
-find-links = 
-    http://dl.openstack.tld/wheels
 "@
 
 # Replace Python dir with the archived template
@@ -78,7 +76,7 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install -U virtualenv
 & pip install -U setuptools
 & pip install -U distribute
-& pip install --use-wheel --no-index --find-links=http://dl.openstack.tld/wheels cffi
+& pip install cffi
 
 popd
 
