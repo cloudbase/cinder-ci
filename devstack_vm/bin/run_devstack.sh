@@ -104,8 +104,6 @@ if [ $job_type != "iscsi" ]; then
     git fetch downstream
     git checkout -b testBranch
     set -e
-    git fetch https://plucian@review.openstack.org/openstack/cinder refs/changes/13/158713/18
-    cherry_pick FETCH_HEAD
     cherry_pick 82f169a0aec3fe5ba3f4fa87f36fe365ecf8f108
     cherry_pick 4fef430adbd6c1e40a885040b347e4c9c394c161
 fi
