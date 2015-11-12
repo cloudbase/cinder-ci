@@ -65,17 +65,20 @@ then
     echo "Image used is: $devstack_image"
     
     echo "Deploying devstack $NAME"
-    nova boot --availability-zone cinder --flavor cinder.linux --image $devstack_image --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll
+    VMID=$(nova boot --availability-zone cinder --flavor cinder.linux --image $devstack_image --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll | awk '{if (NR == 21) {print $4}}')
+    export VMID=$VMID
+    echo VMID=$VMID >>  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo VMID=$VMID
 
     if [ $? -ne 0 ]
     then
-        echo "Failed to create devstack VM: $NAME"
-       nova show "$NAME"
+        echo "Failed to create devstack VM: $VMID"
+       nova show "$VMID"
        exit 1
     fi
 
     echo "Fetching devstack VM fixed IP address"
-    export FIXED_IP=$(nova show "$NAME" | grep "private network" | awk '{print $5}')
+    export FIXED_IP=$(nova show "$VMID" | grep "private network" | awk '{print $5}')
 
     COUNTER=0
     while [ -z "$FIXED_IP" ]
@@ -84,15 +87,15 @@ then
         then
            echo "Failed to get fixed IP"
             echo "nova show output:"
-            nova show "$NAME"
+            nova show "$VMID"
             echo "nova console-log output:"
-            nova console-log "$NAME"
+            nova console-log "$VMID"
             echo "neutron port-list output:"
-            neutron port-list -D -c device_id -c fixed_ips | grep $VM_ID
+            neutron port-list -D -c device_id -c fixed_ips | grep $VMID
             exit 1
         fi
         sleep 15
-        export FIXED_IP=$(nova show "$NAME" | grep "private network" | awk '{print $5}')
+        export FIXED_IP=$(nova show "$VMID" | grep "private network" | awk '{print $5}')
         COUNTER=$(($COUNTER + 1))
     done
 
@@ -105,35 +108,24 @@ then
     fi
     echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-    export VMID=`nova show $NAME | grep -w id | awk '{print $4}'`
+    exec_with_retry 15 5 "nova add-floating-ip $VMID $DEVSTACK_FLOATING_IP"
 
-    echo VM_ID=$VMID >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo VM_ID=$VMID
-
-    exec_with_retry 15 5 "nova add-floating-ip $NAME $DEVSTACK_FLOATING_IP"
-
-    nova show "$NAME"
+    nova show "$VMID"
 
     echo "Wait for answer on port 22 on devstack"
     exec_with_retry 25 30 "nc -z -w3 $DEVSTACK_FLOATING_IP 22"
     if [ $? -ne 0 ]
     then
         echo "Failed listening for ssh port on devstack."
-        nova console-log "$NAME"
+        nova console-log "$VMID"
         exit 1
     fi
 
     # Add 1 more interface after successful SSH
-    nova interface-attach --net-id "$NET_ID" "$NAME"
+    nova interface-attach --net-id "$NET_ID" "$VMID"
 
     echo "Copy scripts to devstack VM"
     scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/
-
-    ## hack for pbr issue in case: branch != master ; don't install from git
-    #if [ $ZUUL_BRANCH != "master" ]
-    #then
-    #    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i 's/LIBS_FROM_GIT=pbr/#LIBS_FROM_GIT=pbr/g' /home/ubuntu/devstack/local.conf" 3
-    #fi
     
     # Repository section
     echo "setup apt-cacher-ng:"
