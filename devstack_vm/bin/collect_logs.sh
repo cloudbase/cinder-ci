@@ -151,9 +151,11 @@ archive_windows_configs
 archive_windows_logs
 archive_tempest_files
 
-pushd "$LOG_DST"
-$TAR -czf "$LOG_DST.tar.gz" . || emit_error "Failed to archive aggregate logs"
-popd
+if [[ -z $1 ]] || [[ $1 != "yes" ]]; then
+  pushd "$LOG_DST"
+  $TAR -czf "$LOG_DST.tar.gz" . || emit_error "Failed to archive aggregate logs"
+  popd
+fi
 
 exit 0
 
