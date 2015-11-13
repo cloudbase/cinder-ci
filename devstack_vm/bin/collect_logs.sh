@@ -139,9 +139,12 @@ function archive_tempest_files() {
 
 # Clean
 
-pushd /home/ubuntu/devstack
-./unstack.sh
-popd
+
+if [[ -z $1 ]] || [[ $1 != "yes" ]]; then
+  pushd "$LOG_DST"
+  $TAR -czf "$LOG_DST.tar.gz" . || emit_error "Failed to archive aggregate logs"
+  popd
+fi
 
 [ -d "$LOG_DST" ] && rm -rf "$LOG_DST"
 mkdir -p "$LOG_DST"
@@ -151,11 +154,6 @@ archive_windows_configs
 archive_windows_logs
 archive_tempest_files
 
-if [[ -z $1 ]] || [[ $1 != "yes" ]]; then
-  pushd "$LOG_DST"
-  $TAR -czf "$LOG_DST.tar.gz" . || emit_error "Failed to archive aggregate logs"
-  popd
-fi
 
 exit 0
 
