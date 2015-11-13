@@ -12,7 +12,7 @@ RUN_TESTS_LIST="$TEMPEST_DIR/test_list.txt"
 mkdir -p "$TEMPEST_DIR"
 
 if [ $job_type = "iscsi" ]; then
-    testr list-tests | grep volume | grep -v "tempest.api.volume.test_volumes_actions.VolumesV" > "$RUN_TESTS_LIST"
+    testr list-tests | grep volume | grep -v "tempest.api.volume.test_volumes_actions.VolumesV\|volume.admin.test_volume_types.VolumeTypes" > "$RUN_TESTS_LIST"
     res=$?
     if [ $res -ne 0 ]; then
         echo "failed to generate list of tests"
