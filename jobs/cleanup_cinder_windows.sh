@@ -1,5 +1,8 @@
 #!/bin/bash
 source $KEYSTONERC
+source utils.sh
+
+get_hyperv_logs
 
 if [[ -z $DEBUG_JOB ]] || [[ $DEBUG_JOB != 'yes' ]] ;then
     set +e
