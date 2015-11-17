@@ -108,3 +108,4 @@ function get_hyperv_logs() {
   run_wsmancmd_with_retry $WIN_IP $WINDOWS_USER $WINDOWS_PASS 'sc qc neutron-hyperv-agent >> \\'$CINDER_FLOATING_IP'\openstack\logs\windows\neutron_hyperv_agent_service.log'
 
 }
+
