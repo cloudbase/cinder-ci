@@ -1,5 +1,8 @@
 #!/bin/bash
 source $KEYSTONERC
+source utils.sh
+
+get_hyperv_logs
 
 set +e
 
