@@ -27,7 +27,7 @@ else
     fi
 fi
 
-testr run --parallel --subunit  --load-list=$RUN_TESTS_LIST |  subunit-2to1  > /home/ubuntu/tempest/subunit-output.log 2>&1
+testr run --parallel --subunit  --load-list=$RUN_TESTS_LIST  > /home/ubuntu/tempest/subunit-output.log 2>&1
 cat /home/ubuntu/tempest/subunit-output.log | subunit-trace -n -f > /home/ubuntu/tempest/tempest-output.log 2>&1
 # testr exits with status 0. colorizer.py actually sets correct exit status
 RET=$?
