@@ -28,7 +28,7 @@ echo "Started unning tests."
 
 echo "Activating virtual env."
 set +u
-source $testdir/.tox/full/bin/activate
+source $tests_dir/.tox/full/bin/activate
 set -u
 
 if [ ! -d "$tests_dir/.testrepository" ]; then
