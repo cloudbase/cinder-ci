@@ -21,6 +21,10 @@ tests_dir=$2
 test_suite=${3:-"default"}
 job_type=$4
 
+include_tests_file="/home/ubuntu/bin/included-tests.txt"
+include_tests=(`awk 'NF && $1!~/^#/' $include_tests_file`)
+include_regex=$(array_to_regex ${include_tests[@]})
+
 #determine which tests to exclude/isolate based on the job type
 if [ $job_type = "iscsi" ]; then
 	exclude_tests_file="/home/ubuntu/bin/excluded-tests-"$job_type".txt"
@@ -48,13 +52,4 @@ if [ ! "$exclude_regex" ]; then
     exclude_regex='^$'
 fi
 
-
-#if [[ $project == "nova" ]]; then
-    testr list-tests | grep -v $exclude_regex
-#elif [[ $project == "neutron" ]]; then
-
-#    testr list-tests | grep "tempest.api.network" | grep -v $exclude_regex
-#else
-#    echo "ERROR: Cannot test for project $project"
-#    exit 1
-#fi
+testr list-tests | grep $include_regex | grep -v $exclude_regex
