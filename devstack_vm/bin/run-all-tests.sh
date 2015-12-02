@@ -24,18 +24,24 @@ pushd $basedir
 
 . $basedir/utils.sh
 
-tests_file=$(tempfile)
-$basedir/get-tests.sh $project_name $tests_dir $test_suite $job_type  > $tests_file
-
-echo "Started running tests."
+echo "Started unning tests."
 
 if [ ! -d "$tests_dir/.testrepository" ]; then
     push_dir
     cd $tests_dir
+
+    echo "Activating virtual env."
+    set +u
+    . .tox/full/bin/activate
+    set -u
+
     echo "Initializing testr"
     testr init
     pop_dir
 fi
+
+tests_file=$(tempfile)
+$basedir/get-tests.sh $project_name $tests_dir $test_suite > $tests_file
 
 $basedir/parallel-test-runner.sh $tests_file $tests_dir $log_file \
     $parallel_tests $max_attempts || true
