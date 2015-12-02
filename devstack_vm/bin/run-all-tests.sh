@@ -71,6 +71,8 @@ rm $tests_file
 echo "Generating HTML report..."
 python $basedir/subunit2html.py $log_file $results_html_file
 
+cat $log_file | subunit-trace -n -f > $tempest_output_file 2>&1 || true
+
 subunit-stats $log_file > $subunit_stats_file
 exit_code=$?
 
