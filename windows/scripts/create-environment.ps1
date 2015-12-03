@@ -29,11 +29,9 @@ $hostname = hostname
 
 $pip_conf_content = @"
 [global]
-index-url = http://dl.openstack.tld:8080/root/pypi/+simple/
+index-url = http://dl.openstack.tld:8080/cloudbase/CI/+simple/
 [install]
 trusted-host = dl.openstack.tld
-find-links = 
-    http://dl.openstack.tld/wheels
 "@
 
 # Replace Python dir with the archived template
@@ -78,7 +76,7 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install -U virtualenv
 & pip install -U setuptools
 & pip install -U distribute
-& pip install --use-wheel --no-index --find-links=http://dl.openstack.tld/wheels cffi
+& pip install cffi
 
 popd
 
@@ -149,7 +147,8 @@ pip install -r requirements.txt
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
 
-function cherry_pick($commit){
+function cherry_pick($commit) {
+    $eapSet = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     git cherry-pick $commit
 
@@ -157,6 +156,7 @@ function cherry_pick($commit){
         echo "Ignoring failed git cherry-pick $commit"
         git checkout --force
     }
+    $ErrorActionPreference = $eapSet
 }
 
 if ($testCase -ne "iscsi"){
@@ -169,9 +169,6 @@ if ($testCase -ne "iscsi"){
 	}
 
     git checkout -b "testBranch"
-
-    git fetch https://plucian@review.openstack.org/openstack/cinder refs/changes/13/158713/18
-    cherry_pick FETCH_HEAD
     cherry_pick 82f169a0aec3fe5ba3f4fa87f36fe365ecf8f108
     cherry_pick 4fef430adbd6c1e40a885040b347e4c9c394c161
 }
