@@ -41,7 +41,7 @@ if [ ! -d "$tests_dir/.testrepository" ]; then
 fi
 
 tests_file=$(tempfile)
-$basedir/get-tests.sh $project_name $tests_dir $test_suite $JOB_TYPE > $tests_file
+$basedir/get-tests.sh $project_name $tests_dir $test_suite $job_type > $tests_file
 
 $basedir/parallel-test-runner.sh $tests_file $tests_dir $log_file \
     $parallel_tests $max_attempts || true
