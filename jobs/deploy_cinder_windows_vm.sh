@@ -192,6 +192,8 @@ echo "Waiting for answer on winrm port for windows VM"
 wait_for_listening_port $CINDER_FLOATING_IP 5986 20 || { nova console-log "$WIN_VMID" ; exit 1; }
 sleep 5
 
+ZUUL_SITE=`echo "$ZUUL_URL" |sed 's/.\{2\}$//'`
+
 #join cinder host
 echo "Start cinder on windows and register with devstack"
 join_cinder $WINDOWS_USER $WINDOWS_PASSWORD $CINDER_FLOATING_IP
