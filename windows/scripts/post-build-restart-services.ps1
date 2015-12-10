@@ -1,4 +1,3 @@
-
 $openstackDir = "C:\Openstack"
 $scriptdir = "C:\cinder-ci"
 $configDir = "$openstackDir\etc"
@@ -60,5 +59,4 @@ if ($(get-service cinder-volume).Status -eq "Stopped")
         Throw "Can not start the cinder-volume service. The manual run failed as well."
     }
 }
-
 
