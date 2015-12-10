@@ -1,4 +1,7 @@
 #!/bin/bash
+
+source /usr/local/src/cinder-ci/jobs/utils.sh
+
 # Functions section
 update_local_conf (){
     if [ $JOB_TYPE = "smb3_linux" ]

@@ -1,4 +1,7 @@
 #!/bin/bash
+
+source /usr/local/src/cinder-ci/jobs/utils.sh
+
 join_cinder(){
     WIN_USER=$1
     WIN_PASS=$2
