@@ -20,7 +20,7 @@ Stop-Service cinder-volume
 
 Write-Host "post-build: Cleaning previous logs!"
 
-Remove-Item -Force C:\OpenStack\Log\*.log
+Remove-Item -Force C:\OpenStack\logs\*
 
 Write-Host "Starting the services"
 
