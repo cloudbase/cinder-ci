@@ -1,4 +1,7 @@
 #!/bin/bash
+
+source /usr/local/src/cinder-ci/jobs/utils.sh
+
 join_cinder(){
     WIN_USER=$1
     WIN_PASS=$2
@@ -121,7 +124,7 @@ do
             break
         fi
         sleep 10
-        export FIXED_IP=$(nova show "$WIN_VMID" | grep "private network" | awk '{print $5}')
+        export CINDER_FIXED_IP=$(nova show "$WIN_VMID" | grep "private network" | awk '{print $5}')
         COUNT=$(($COUNT + 1))
     done
 
@@ -191,6 +194,10 @@ echo WINDOWS_PASSWORD=$WINDOWS_PASSWORD
 echo "Waiting for answer on winrm port for windows VM"
 wait_for_listening_port $CINDER_FLOATING_IP 5986 20 || { nova console-log "$WIN_VMID" ; exit 1; }
 sleep 5
+
+ZUUL_SITE=`echo "$ZUUL_URL" |sed 's/.\{2\}$//'`
+
+#source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 #join cinder host
 echo "Start cinder on windows and register with devstack"

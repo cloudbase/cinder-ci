@@ -109,3 +109,7 @@ function get_hyperv_logs() {
 
 }
 
+post_build_restart_cinder_windows_services (){
+    run_wsmancmd_with_retry $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\cinder-ci\windows\scripts\post-build-restart-services.ps1 2>&1"'
+}
+
