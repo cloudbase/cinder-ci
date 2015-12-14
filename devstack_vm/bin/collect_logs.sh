@@ -54,11 +54,12 @@ function archive_devstack() {
     $GZIP -c /var/log/mysql/error.log > "$LOG_DST_DEVSTACK/mysql_error.log.gz" || emit_warning "Failed to archive mysql_error.log"
     $GZIP -c /var/log/cloud-init.log > "$LOG_DST_DEVSTACK/cloud-init.log.gz" || emit_warning "Failed to archive cloud-init.log"
     $GZIP -c /var/log/cloud-init-output.log > "$LOG_DST_DEVSTACK/cloud-init-output.log.gz" || emit_warning "Failed to archive cloud-init-output.log"
-    $GZIP -c /var/log/dmesg > "$LOG_DST_DEVSTACK/dmesg.log.gz" || emit_warning "Failed to archive dmesg.log"
-    $GZIP -c /var/log/kern.log > "$LOG_DST_DEVSTACK/kern.log.gz" || emit_warning "Failed to archive kern.log"
-    $GZIP -c /var/log/syslog > "$LOG_DST_DEVSTACK/syslog.log.gz" || emit_warning "Failed to archive syslog.log"
-    $GZIP -c /etc/hosts > "$LOG_DST_DEVSTACK/hosts.log.gz" || emit_warning "Failed to archive hosts.log"	
-
+    if [[ ! -z $1 ]] || [[ $1 == "yes" ]]; then
+        $GZIP -c /var/log/dmesg > "$LOG_DST_DEVSTACK/dmesg.log.gz" || emit_warning "Failed to archive dmesg.log"
+        $GZIP -c /var/log/kern.log > "$LOG_DST_DEVSTACK/kern.log.gz" || emit_warning "Failed to archive kern.log"
+        $GZIP -c /var/log/syslog > "$LOG_DST_DEVSTACK/syslog.log.gz" || emit_warning "Failed to archive syslog.log"
+        $GZIP -c /etc/hosts > "$LOG_DST_DEVSTACK/hosts.log.gz" || emit_warning "Failed to archive hosts.log"	
+    fi
     mkdir -p "$LOG_DST_DEVSTACK/rabbitmq" || emit_warning "Failed to create rabbitmq directory"
     cp /var/log/rabbitmq/* "$LOG_DST_DEVSTACK/rabbitmq" || emit_warning "Failed to copy rabbitmq logs"
     sudo rabbitmqctl status > "$LOG_DST_DEVSTACK/rabbitmq/status.txt" 2>&1 || emit_warning "Failed to create rabbitmq stats"
@@ -150,7 +151,11 @@ fi
 [ -d "$LOG_DST" ] && rm -rf "$LOG_DST"
 mkdir -p "$LOG_DST"
 
-archive_devstack
+if [[ ! -z $1 ]]; then
+    archive_devstack $1
+else
+    archive_devstack
+fi
 archive_windows_configs
 archive_windows_logs
 archive_tempest_files
