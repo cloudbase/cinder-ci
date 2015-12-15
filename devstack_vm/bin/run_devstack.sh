@@ -125,8 +125,5 @@ rotate_log $STACK_LOG $STACK_ROTATE_LIMIT
 
 sed -i "s#PIP_GET_PIP_URL=https://bootstrap.pypa.io/get-pip.py#PIP_GET_PIP_URL=http://dl.openstack.tld/get-pip.py#g" /home/ubuntu/devstack/tools/install_pip.sh
 
-# temporary fix for https://bugs.launchpad.net/devstack/+bug/1525187
-sudo pip install tox==2.2.1
-
 set -o pipefail
 ./stack.sh 2>&1 | tee $STACK_LOG
