@@ -4,3 +4,7 @@ TEMPEST_VOLUME_VENDOR="Microsoft"
 TEMPEST_STORAGE_PROTOCOL=iSCSI
 
 disable_service c-vol
+
+[[post-config|$CINDER_CONF]]
+[DEFAULT]
+default_volume_type=blank
