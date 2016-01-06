@@ -107,9 +107,6 @@ function get_hyperv_logs() {
   run_wsmancmd_with_retry $WIN_IP $WINDOWS_USER $WINDOWS_PASS 'sc qc nova-compute >> \\'$CINDER_FLOATING_IP'\openstack\logs\windows\nova_compute_service.log'
   run_wsmancmd_with_retry $WIN_IP $WINDOWS_USER $WINDOWS_PASS 'sc qc neutron-hyperv-agent >> \\'$CINDER_FLOATING_IP'\openstack\logs\windows\neutron_hyperv_agent_service.log'
 
-  if [[ ! -z $1 ]] || [[ $1 = 'YES' ]] ;then
-    run_wsmancmd_with_retry $WIN_IP $WINDOWS_USER $WINDOWS_PASS 'powershell -executionpolicy remotesigned Get-Content C:\Windows\System32\drivers\etc\hosts ^| Select-object * >> \\'$CINDER_FLOATING_IP'\openstack\logs\windows\hosts.log'
-  fi
 }
 
 post_build_restart_cinder_windows_services (){
