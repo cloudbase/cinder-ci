@@ -17,6 +17,8 @@ join_cinder(){
     run_wsmancmd_with_retry $PARAMS "git clone https://github.com/cloudbase/cinder-ci C:\cinder-ci"
     echo "cinder-ci: checkout master and pull latest"
     run_ps_cmd_with_retry $PARAMS "cd C:\cinder-ci; git checkout cambridge; git pull"
+    echo "Adding zuul to hosts"
+    run_ps_cmd_with_retry $PARAMS 'Add-Content C:\Windows\System32\drivers\etc\hosts \"`n10.21.7.213  zuul-cinder.openstack.tld\"'
     echo "Run gerrit-git-prep"
     run_wsmancmd_with_retry $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT"
     echo "Ensure service is configured"
