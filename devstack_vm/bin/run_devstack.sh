@@ -118,6 +118,15 @@ cd /home/ubuntu/devstack
 
 ./unstack.sh
 
+#Fix for unproper ./unstack.sh
+screen_pid=$(ps auxw | grep -i screen | grep -v grep | awk '{print $2}')
+if [[ -n $screen_pid ]] 
+then
+    kill -9 $screen_pid
+    #In case there are "DEAD ????" screens, we remove them
+    screen -wipe
+fi
+
 # stack.sh output log
 STACK_LOG="/opt/stack/logs/stack.sh.txt"
 # keep this many rotated stack.sh logs
