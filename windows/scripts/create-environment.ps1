@@ -21,7 +21,6 @@ $cinderTemplate = "$templateDir\cinder.conf"
 $pythonDir = "C:\Python27"
 $pythonExec = "python.exe"
 $pythonArchive = "python27.tar.gz"
-$pythonTar = "python27.tar"
 $lockPath = "C:\Openstack\locks"
 $remoteLogs="\\"+$devstackIP+"\openstack\logs"
 $remoteConfigs="\\"+$devstackIP+"\openstack\config"
@@ -47,17 +46,9 @@ if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 
 . "$scriptdir\windows\scripts\utils.ps1"
 
-if (Test-Path $pythonArchive)
-{
-    Remove-Item -Force $pythonArchive
-}
 ExecRetry {
     Invoke-WebRequest -Uri http://dl.openstack.tld/python27.tar.gz -OutFile $pythonArchive
     if ($LastExitCode) { Throw "Failed fetching python27.tar.gz" }
-}
-if (Test-Path $pythonTar)
-{
-    Remove-Item -Force $pythonTar
 }
 if (Test-Path $pythonDir)
 {
@@ -66,8 +57,7 @@ if (Test-Path $pythonDir)
 
 Write-Host "Ensure Python folder is up to date"
 Write-Host "Extracting archive.."
-& "C:\Program Files\7-Zip\7z.exe" x -y "$pythonArchive"
-& "C:\Program Files\7-Zip\7z.exe" x -y "$pythonTar"
+& C:\MinGW\msys\1.0\bin\tar.exe -xzf "$pythonArchive"
 Write-Host "Removing the python archive.."
 Remove-Item -Force -Recurse $pythonArchive
 
