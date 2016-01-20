@@ -71,7 +71,7 @@ else
 }
 Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 
-& easy_install -U pip
+& easy_install -U pip==7.1.2
 & pip install -U wmi
 & pip install -U virtualenv
 & pip install -U setuptools
