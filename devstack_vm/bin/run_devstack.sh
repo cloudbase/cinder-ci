@@ -102,7 +102,6 @@ if [ $job_type != "iscsi" ]; then
     git fetch downstream
     git checkout -b testBranch
     set -e
-    cherry_pick 60a3131e952f5cee54e44c6b3c5364a6fe9c4921
     cherry_pick e9ed3587a5900534b5eac82ac4ec7c38a035eccb
     cherry_pick 52da278c944a208ea3b740177f2e6f97d3660584
 fi
