@@ -1,6 +1,6 @@
 #!/bin/bash
 source $KEYSTONERC
-source utils.sh
+source /usr/local/src/cinder-ci/jobs/utils.sh
 
 get_hyperv_logs
 
