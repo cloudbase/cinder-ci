@@ -175,8 +175,10 @@ if ($testCase -ne "iscsi"){
 }
 
 ExecRetry {
-    cmd.exe /C "$pythonDir\$pythonExec" setup.py install
+    pushd C:\OpenStack\cinder
+    & pip install C:\OpenStack\cinder
     if ($LastExitCode) { Throw "Failed to install cinder from repo" }
+    popd
 }
 popd
 
