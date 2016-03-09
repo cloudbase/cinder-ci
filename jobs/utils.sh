@@ -93,6 +93,8 @@ function get_hyperv_logs() {
         ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "sudo chmod -R 777 /openstack/logs/windows"
         set -f
 
+
+
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'systeminfo >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\systeminfo.log'
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'wmic qfe list >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\windows_hotfixes.log'
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'pip freeze >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\pip_freeze.log'
@@ -104,8 +106,7 @@ function get_hyperv_logs() {
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-process ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_process.log'
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-service ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_service.log'
 
-  run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'sc qc nova-compute >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\nova_compute_service.log'
-  run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'sc qc neutron-hyperv-agent >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\neutron_hyperv_agent_service.log'
+  run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'sc qc cinder-volume >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\cinder-volume.log'
 
 }
 
