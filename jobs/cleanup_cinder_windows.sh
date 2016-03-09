@@ -1,8 +1,5 @@
 #!/bin/bash
 source $KEYSTONERC
-source /usr/local/src/cinder-ci/jobs/utils.sh
-
-get_hyperv_logs
 
 if [[ -z $DEBUG_JOB ]] || [[ $DEBUG_JOB != 'yes' ]] ;then
     set +e
