@@ -94,8 +94,10 @@ function get_hyperv_logs() {
         set -f
 
 
+
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned C:\cinder-ci\windows\scripts\export-eventlog.ps1'
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned cp -Recurse -Container  C:\OpenStack\Logs\Eventlog \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\'
+
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'systeminfo >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\systeminfo.log'
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'wmic qfe list >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\windows_hotfixes.log'
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'pip freeze >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\pip_freeze.log'
@@ -107,8 +109,7 @@ function get_hyperv_logs() {
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-process ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_process.log'
   run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-service ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_service.log'
 
-  run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'sc qc nova-compute >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\nova_compute_service.log'
-  run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'sc qc neutron-hyperv-agent >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\neutron_hyperv_agent_service.log'
+  run_wsmancmd_with_retry $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'sc qc cinder-volume >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\cinder-volume.log'
 
 }
 
