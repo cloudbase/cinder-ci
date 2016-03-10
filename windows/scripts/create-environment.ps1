@@ -77,7 +77,7 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install -U setuptools
 & pip install -U distribute
 & pip install cffi
-& pip install 'os-win==0.2.2'
+#& pip install 'os-win==0.2.2'
 
 popd
 
@@ -220,6 +220,14 @@ pip install python-novaclient==2.28.1
 #pip install decorator==3.4.2
 # Fix for the __qualname__ attribute issue appended to decorated methods, impacting osprofiler
 # TODO(lpetrut): send a fix for the latest decorator lib
+
+pushd C:\
+git clone https://github.com/openstack/os-win
+pushd C:\os-win\
+git cherry-pick 09bba86fae031c3750c2a8923bc280e41ed839bb
+popd
+&pip install C:\os-win
+popd 
 
 Write-Host "Starting the services"
 Try
