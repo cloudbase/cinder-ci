@@ -41,16 +41,16 @@ gzip -9 -v $CONSOLE_LOG
 echo "After gzip:"
 ls -lia `dirname $CONSOLE_LOG`
 
-scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY $CONSOLE_LOG* logs@logs.openstack.tld:$LOGSDEST/ && rm -f $CONSOLE_LOG*
+scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY $CONSOLE_LOG.gz logs@logs.openstack.tld:$LOGSDEST/ && rm -f $CONSOLE_LOG*
 
 echo "Extracting logs"
 ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY logs@logs.openstack.tld "tar -xzf $LOGSDEST/aggregate-logs.tar.gz -C $LOGSDEST/"
 
-echo "Uploading threaded logs"
-set +e
-scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY /home/jenkins-slave/logs/devstack-build-log-$JOB_TYPE-$ZUUL_UUID logs@logs.openstack.tld:$LOGSDEST/
-scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY /home/jenkins-slave/logs/cinder-windows-build-log-$JOB_TYPE-$ZUUL_UUID logs@logs.openstack.tld:$LOGSDEST/
-set -e
+#echo "Uploading threaded logs"
+#set +e
+#scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY /home/jenkins-slave/logs/devstack-build-log-$JOB_TYPE-$ZUUL_UUID logs@logs.openstack.tld:$LOGSDEST/
+#scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY /home/jenkins-slave/logs/cinder-windows-build-log-$JOB_TYPE-$ZUUL_UUID logs@logs.openstack.tld:$LOGSDEST/
+#set -e
 
 echo "Fixing permissions on all log files"
 ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY logs@logs.openstack.tld "chmod a+rx -R $LOGSDEST/"
