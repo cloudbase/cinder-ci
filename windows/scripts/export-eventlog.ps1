@@ -4,7 +4,7 @@ function exporteventlog(){
 	rm $path\*.txt
 	get-eventlog -list | ForEach-Object {
 		$logname = $_.LogDisplayName
-		$logfilename = $_.LogDisplayName + ".txt"
+		$logfilename = "eventlog_" + $_.LogDisplayName + ".txt"
 		Get-EventLog -Logname $logname | fl | out-file $path\$logfilename
 	}
 }
