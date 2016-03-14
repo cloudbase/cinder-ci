@@ -170,8 +170,9 @@ if ($testCase -ne "iscsi"){
 	}
 
     git checkout -b "testBranch"
-    cherry_pick e9ed3587a5900534b5eac82ac4ec7c38a035eccb
-    cherry_pick 52da278c944a208ea3b740177f2e6f97d3660584
+    cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
+    cherry_pick 19341815884e235704f672ec377cdef9b1b5cb73
+    cherry_pick 6f2fbf3fbef0f0bc3a21a495a2e60825adf8b848
 }
 
 ExecRetry {
