@@ -1,3 +1,15 @@
+function dumpeventlog(){
+
+	get-eventlog -list | ForEach-Object {
+		$logFileName = $_.LogDisplayName
+		$path = "C:\OpenStack\Logs\Eventlog"
+		$exportFileName = "eventlog_" + $logFileName + (get-date -f yyyyMMdd) + ".evt"
+		$logFile = Get-WmiObject Win32_NTEventlogFile | Where-Object {$_.logfilename -eq $logFileName}
+		$logFile.backupeventlog($path + $exportFileName)
+	}
+
+}
+
 function exporteventlog(){
 	$path = "C:\OpenStack\Logs\Eventlog"
 	mkdir $path
@@ -9,3 +21,4 @@ function exporteventlog(){
 	}
 }
 exporteventlog
+dumpeventlog
