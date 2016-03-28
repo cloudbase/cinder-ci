@@ -170,7 +170,7 @@ if ($testCase -ne "iscsi"){
 	}
 
     git checkout -b "testBranch"
-    cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
+    #cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
     cherry_pick 19341815884e235704f672ec377cdef9b1b5cb73
     cherry_pick 6f2fbf3fbef0f0bc3a21a495a2e60825adf8b848
 }
