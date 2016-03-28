@@ -224,13 +224,13 @@ pip install python-novaclient==2.28.1
 
 pushd C:\
 GitClonePull "C:\os-win\" "https://github.com/openstack/os-win" "master"
-pushd C:\os-win\
-ExecRetry {
-    git fetch https://review.openstack.org/openstack/os-win refs/changes/72/289872/2
-    if ($LastExitCode) {throw "git fetch failed"}
-}
-cherry_pick 09bba86fae031c3750c2a8923bc280e41ed839bb
-popd
+#pushd C:\os-win\
+#ExecRetry {
+#    git fetch https://review.openstack.org/openstack/os-win refs/changes/72/289872/2
+#    if ($LastExitCode) {throw "git fetch failed"}
+#}
+#cherry_pick 09bba86fae031c3750c2a8923bc280e41ed839bb
+#popd
 &pip install C:\os-win
 popd 
 
