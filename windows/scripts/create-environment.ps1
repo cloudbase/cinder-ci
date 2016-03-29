@@ -77,7 +77,7 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install -U setuptools
 & pip install -U distribute
 & pip install cffi
-& pip install oslo.messaging==4.5.0
+#& pip install oslo.messaging==4.5.0
 #& pip install 'os-win==0.2.2'
 
 popd
@@ -174,6 +174,11 @@ if ($testCase -ne "iscsi"){
     #cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
     cherry_pick 19341815884e235704f672ec377cdef9b1b5cb73
     cherry_pick 6f2fbf3fbef0f0bc3a21a495a2e60825adf8b848
+    
+    GitClonePull "C:\cinder_repo\" "https://github.com/openstack/cinder" "master"
+    pushd C:\cinder_repo\
+    git fetch https://review.openstack.org/openstack/cinder refs/changes/98/289298/5 && cherry_pick 5e1af8932435d5c8a718788f0828a66f412f32e5
+    popd
 }
 
 ExecRetry {
