@@ -162,6 +162,10 @@ function cherry_pick($commit) {
 }
 
 if ($testCase -ne "iscsi"){
+
+	git fetch https://review.openstack.org/openstack/cinder refs/changes/98/289298/5 
+	cherry_pick 5e1af8932435d5c8a718788f0828a66f412f32e5
+
 	git remote add downstream https://github.com/petrutlucian94/cinder
 	# git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
 	
@@ -174,11 +178,6 @@ if ($testCase -ne "iscsi"){
     #cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
     cherry_pick 19341815884e235704f672ec377cdef9b1b5cb73
     cherry_pick 6f2fbf3fbef0f0bc3a21a495a2e60825adf8b848
-    
-    GitClonePull "C:\cinder_repo\" "https://github.com/openstack/cinder" "master"
-    pushd C:\cinder_repo\
-    git fetch https://review.openstack.org/openstack/cinder refs/changes/98/289298/5 && cherry_pick 5e1af8932435d5c8a718788f0828a66f412f32e5
-    popd
 }
 
 ExecRetry {
