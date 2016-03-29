@@ -77,6 +77,7 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install -U setuptools
 & pip install -U distribute
 & pip install cffi
+#& pip install oslo.messaging==4.5.0
 #& pip install 'os-win==0.2.2'
 
 popd
@@ -161,6 +162,10 @@ function cherry_pick($commit) {
 }
 
 if ($testCase -ne "iscsi"){
+
+	git fetch https://review.openstack.org/openstack/cinder refs/changes/98/289298/5 
+	cherry_pick 5e1af8932435d5c8a718788f0828a66f412f32e5
+
 	git remote add downstream https://github.com/petrutlucian94/cinder
 	# git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
 	
@@ -170,7 +175,7 @@ if ($testCase -ne "iscsi"){
 	}
 
     git checkout -b "testBranch"
-    cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
+    #cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
     cherry_pick 19341815884e235704f672ec377cdef9b1b5cb73
     cherry_pick 6f2fbf3fbef0f0bc3a21a495a2e60825adf8b848
 }
@@ -224,13 +229,13 @@ pip install python-novaclient==2.28.1
 
 pushd C:\
 GitClonePull "C:\os-win\" "https://github.com/openstack/os-win" "master"
-pushd C:\os-win\
-ExecRetry {
-    git fetch https://review.openstack.org/openstack/os-win refs/changes/72/289872/2
-    if ($LastExitCode) {throw "git fetch failed"}
-}
-cherry_pick 09bba86fae031c3750c2a8923bc280e41ed839bb
-popd
+#pushd C:\os-win\
+#ExecRetry {
+#    git fetch https://review.openstack.org/openstack/os-win refs/changes/72/289872/2
+#    if ($LastExitCode) {throw "git fetch failed"}
+#}
+#cherry_pick 09bba86fae031c3750c2a8923bc280e41ed839bb
+#popd
 &pip install C:\os-win
 popd 
 
