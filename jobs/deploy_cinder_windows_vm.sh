@@ -66,7 +66,7 @@ do
     set -e
     sleep 20
 
-    WIN_VMID=$(nova boot --availability-zone cinder --flavor cinder.windows --image cinder --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll | awk '{if (NR == 21) {print $4}}')
+    WIN_VMID=$(nova boot --availability-zone cinder --flavor cinder.windows --image cinder2012R2 --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll | awk '{if (NR == 21) {print $4}}')
     export WIN_VMID=$WIN_VMID
     echo WIN_VMID=$WIN_VMID >>  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
     echo WIN_VMID=$WIN_VMID
