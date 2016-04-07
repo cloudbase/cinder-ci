@@ -5,8 +5,9 @@ Param(
     [string]$servicePassword
 )
 
-. "C:\cinder-ci\windows\scripts\config.ps1"
-. "$scriptdir\windows\scripts\utils.ps1"
+$scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
+. "$scriptLocation\config.ps1"
+. "$scriptLocation\utils.ps1"
 
 $cinderServiceName = "cinder-volume"
 $cinderServiceDescription = "OpenStack Cinder Volume Service"

@@ -13,7 +13,8 @@ if ($projectName -ne "cinder")
     Throw "Error: Incorrect project $projectName. This setup is for testing Cinder patches."
 }
 
-. "C:\cinder-ci\windows\scripts\config.ps1"
+$scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
+. "$scriptLocation\config.ps1"
 
 $rabbitUser = "stackrabbit"
 $hostname = hostname
