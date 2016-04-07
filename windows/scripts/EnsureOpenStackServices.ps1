@@ -5,12 +5,7 @@ Param(
     [string]$servicePassword
 )
 
-$openstackDir = "C:\OpenStack"
-$pythonDir = "C:\Python27"
-$configDir = "$openstackDir\etc"
-$downloadLocation = "http://dl.openstack.tld/"
-$scriptdir = "C:\cinder-ci"
-
+. "C:\cinder-ci\windows\scripts\config.ps1"
 . "$scriptdir\windows\scripts\utils.ps1"
 
 $cinderServiceName = "cinder-volume"
