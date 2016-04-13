@@ -13,17 +13,9 @@ if ($projectName -ne "cinder")
     Throw "Error: Incorrect project $projectName. This setup is for testing Cinder patches."
 }
 
-$openstackDir = "C:\Openstack"
-$scriptdir = "C:\cinder-ci"
-$configDir = "$openstackDir\etc"
-$templateDir = "$scriptdir\windows\templates"
-$cinderTemplate = "$templateDir\cinder.conf"
-$pythonDir = "C:\Python27"
-$pythonExec = "python.exe"
-$pythonArchive = "python27.tar.gz"
-$lockPath = "C:\Openstack\locks"
-$remoteLogs="\\"+$devstackIP+"\openstack\logs"
-$remoteConfigs="\\"+$devstackIP+"\openstack\config"
+$scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
+. "$scriptLocation\config.ps1"
+
 $rabbitUser = "stackrabbit"
 $hostname = hostname
 
