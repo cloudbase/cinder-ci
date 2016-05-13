@@ -5,7 +5,9 @@ job_type=$1
 set -x
 set -e
 sudo ifconfig eth0 promisc up
-# sudo ifconfig eth1 promisc up
+sudo ifconfig eth1 promisc up
+sudo dhclient -v eth1
+
 # sudo ifconfig eth2 promisc up
 
 HOSTNAME=$(hostname)
