@@ -16,3 +16,6 @@ tempest.api.volume.admin.test_volume_types.VolumeTypesV2Test.test_volume_type_cr
 tempest.api.volume.admin.test_volume_types.VolumeTypesV2Test.test_volume_type_encryption_create_get_delete
 tempest.api.volume.admin.test_volume_types.VolumeTypesV2Test.test_volume_type_list
 
+#16 may 2016
+tempest.api.volume.test_volumes_snapshots.VolumesV1SnapshotTestJSON.test_snapshot_create_with_volume_in_use
+tempest.api.volume.test_volumes_snapshots.VolumesV2SnapshotTestJSON.test_snapshot_create_with_volume_in_use
