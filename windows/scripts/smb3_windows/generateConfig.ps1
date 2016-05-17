@@ -35,7 +35,7 @@ Write-Host $config
 sc $configFile $config
 
 # FIX FOR qmeu-img - fetch locally compiled one
-Invoke-WebRequest -Uri http://dl.openstack.tld/qemu-img-cbsl-build.zip -OutFile c:\qemu-img\qemu-img-cbsl-build.zip
+Invoke-WebRequest -Uri http://10.0.110.1/qemu-img-cbsl-build.zip -OutFile c:\qemu-img\qemu-img-cbsl-build.zip
 if (! (Test-Path -Path c:\qemu2))
 {
 	mkdir c:\qemu2
