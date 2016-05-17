@@ -21,9 +21,9 @@ $hostname = hostname
 
 $pip_conf_content = @"
 [global]
-index-url = http://dl.openstack.tld:8080/cloudbase/CI/+simple/
+index-url = http://10.0.110.1:8080/cloudbase/CI/+simple/
 [install]
-trusted-host = dl.openstack.tld
+trusted-host = 10.0.110.1
 "@
 
 # Replace Python dir with the archived template
@@ -39,7 +39,7 @@ if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 . "$scriptdir\windows\scripts\utils.ps1"
 
 ExecRetry {
-    Invoke-WebRequest -Uri http://dl.openstack.tld/python27.tar.gz -OutFile $pythonArchive
+    Invoke-WebRequest -Uri http://10.0.110.1/python27.tar.gz -OutFile $pythonArchive
     if ($LastExitCode) { Throw "Failed fetching python27.tar.gz" }
 }
 if (Test-Path $pythonDir)
