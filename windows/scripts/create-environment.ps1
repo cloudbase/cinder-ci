@@ -69,6 +69,7 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install -U setuptools
 & pip install -U distribute
 & pip install cffi
+& pip install amqp==1.4.9
 #& pip install oslo.messaging==4.5.0
 #& pip install 'os-win==0.2.2'
 
@@ -155,8 +156,8 @@ function cherry_pick($commit) {
 
 if ($testCase -ne "iscsi"){
 
-	git fetch https://review.openstack.org/openstack/cinder refs/changes/98/289298/5 
-	cherry_pick 5e1af8932435d5c8a718788f0828a66f412f32e5
+	#git fetch https://review.openstack.org/openstack/cinder refs/changes/98/289298/5 
+	#cherry_pick 5e1af8932435d5c8a718788f0828a66f412f32e5
 
 	git remote add downstream https://github.com/petrutlucian94/cinder
 	# git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
