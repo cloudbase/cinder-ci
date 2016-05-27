@@ -69,6 +69,7 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install -U setuptools
 & pip install -U distribute
 & pip install cffi
+& pip install amqp==1.4.9
 #& pip install oslo.messaging==4.5.0
 #& pip install 'os-win==0.2.2'
 
