@@ -26,10 +26,10 @@ pushd $basedir
 
 echo "Started unning tests."
 
-#echo "Activating virtual env."
-#set +u
-#source $tests_dir/.tox/full/bin/activate
-#set -u
+echo "Activating virtual env."
+set +u
+source $tests_dir/.tox/tempest/bin/activate
+set -u
 
 if [ ! -d "$tests_dir/.testrepository" ]; then
     push_dir
