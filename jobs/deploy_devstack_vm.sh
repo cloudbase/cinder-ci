@@ -81,7 +81,8 @@ then
     fi
 
     echo "Fetching devstack VM fixed IP address"
-    export FIXED_IP=$(nova show "$VMID" | grep "private network" | awk '{print $5}')
+    FIXED_IP=$(nova show "$VMID" | grep "private network" | awk '{print $5}')
+    export FIXED_IP="${FIXED_IP//,}"
 
     COUNTER=0
     while [ -z "$FIXED_IP" ]
@@ -98,7 +99,8 @@ then
             exit 1
         fi
         sleep 15
-        export FIXED_IP=$(nova show "$VMID" | grep "private network" | awk '{print $5}')
+        FIXED_IP=$(nova show "$VMID" | grep "private network" | awk '{print $5}')
+	export FIXED_IP="${FIXED_IP//,}"
         COUNTER=$(($COUNTER + 1))
     done
 
