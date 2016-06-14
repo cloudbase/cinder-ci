@@ -30,6 +30,7 @@ sudo chown -R root:root /root/.pip
 sudo easy_install -U pip
 sudo pip install -U six
 sudo pip install -U kombu
+sudo pip install -U os-testr
 
 DEVSTACK_LOGS="/opt/stack/logs/screen"
 LOCALRC="/home/ubuntu/devstack/localrc"

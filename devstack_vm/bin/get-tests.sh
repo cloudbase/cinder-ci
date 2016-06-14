@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DIR=$( dirname "$DIR" )
+
 array_to_regex()
 {
     local ar=(${@})
@@ -21,17 +24,17 @@ tests_dir=$2
 test_suite=${3:-"default"}
 job_type=$4
 
-include_tests_file="/home/ubuntu/bin/included-tests.txt"
+include_tests_file="$DIR/testLists/included-tests.txt"
 include_tests=(`awk 'NF && $1!~/^#/' $include_tests_file`)
 include_regex=$(array_to_regex ${include_tests[@]})
 
 #determine which tests to exclude/isolate based on the job type
 if [ "$job_type" == "iscsi" ]; then
-	exclude_tests_file="/home/ubuntu/bin/excluded-tests-"$job_type".txt"
-	isolated_tests_file="/home/ubuntu/bin/isolated-tests-"$job_type".txt"
+	exclude_tests_file="$DIR/testLists/excluded-tests-"$job_type".txt"
+	isolated_tests_file="$DIR/testLists/isolated-tests-"$job_type".txt"
 else
-	exclude_tests_file="/home/ubuntu/bin/excluded-tests.txt"
-	isolated_tests_file="/home/ubuntu/bin/isolated-tests.txt"
+	exclude_tests_file="$DIR/testLists/excluded-tests.txt"
+	isolated_tests_file="$DIR/testLists/isolated-tests.txt"
 fi
 
 
