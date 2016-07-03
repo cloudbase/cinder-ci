@@ -32,14 +32,8 @@ scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK
 echo "Uploading logs"
 scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY "aggregate-$NAME.tar.gz" logs@logs.openstack.tld:$LOGSDEST/aggregate-logs.tar.gz
 
-echo "Before gzip:"
-ls -lia `dirname $CONSOLE_LOG`
-
 echo "GZIP:"
 gzip -9 -v $CONSOLE_LOG
-
-echo "After gzip:"
-ls -lia `dirname $CONSOLE_LOG`
 
 scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY $CONSOLE_LOG.gz logs@logs.openstack.tld:$LOGSDEST/ && rm -f $CONSOLE_LOG.gz
 
