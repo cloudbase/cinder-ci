@@ -101,33 +101,38 @@ function get_hyperv_logs() {
     echo "Windows user: $WINDOWS_USER"
     echo "Windows password: $WINDOWS_PASSWORD"
     echo "Devstack floating IP: $DEVSTACK_FLOATING_IP"
-    echo "Export eventlog entries to files"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned C:\cinder-ci\windows\scripts\export-eventlog.ps1'
-    echo "Copy eventlog files"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned cp -Recurse -Container  C:\OpenStack\Log\Eventlog\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\'
+
+    if exec_with_retry 3 30 "nc -z $CINDER_FLOATING_IP 5986"
+    then
+        echo "Export eventlog entries to files"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned C:\cinder-ci\windows\scripts\export-eventlog.ps1'
+        echo "Copy eventlog files"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned cp -Recurse -Container  C:\OpenStack\Log\Eventlog\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\'
     
-    echo "Copy systeminfo"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'systeminfo >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\systeminfo.log'
-    echo "Copy windows updates status"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'wmic qfe list >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\windows_hotfixes.log'
-    echo "Copy pip freeze list"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'pip freeze >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\pip_freeze.log'
-    echo "Copy network configuration info"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'ipconfig /all >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\ipconfig.log'
+        echo "Copy systeminfo"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'systeminfo >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\systeminfo.log'
+        echo "Copy windows updates status"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'wmic qfe list >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\windows_hotfixes.log'
+        echo "Copy pip freeze list"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'pip freeze >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\pip_freeze.log'
+        echo "Copy network configuration info"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'ipconfig /all >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\ipconfig.log'
     
-    echo "Copy network addapter information"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-netadapter ^| Select-object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_netadapter.log'
-    echo "Copy disk partition info"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-WmiObject win32_logicaldisk ^| Select-object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\disk_free.log'
-    echo "Copy firewall status"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-netfirewallprofile ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\firewall.log'
-    echo "Copy list of running processes"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-process ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_process.log'
-    echo "Copy list of windows services"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-service ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_service.log'
-    echo "Copy cinder volume service details"
-    run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'sc qc cinder-volume >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\cinder-volume.log'
-    
+        echo "Copy network addapter information"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-netadapter ^| Select-object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_netadapter.log'
+        echo "Copy disk partition info"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-WmiObject win32_logicaldisk ^| Select-object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\disk_free.log'
+        echo "Copy firewall status"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-netfirewallprofile ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\firewall.log'
+        echo "Copy list of running processes"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-process ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_process.log'
+        echo "Copy list of windows services"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-service ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_service.log'
+        echo "Copy cinder volume service details"
+        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'sc qc cinder-volume >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\cinder-volume.log'
+    else 
+        echo "Windows VM unreachable!"
+    fi    
 }
 
 post_build_restart_cinder_windows_services (){
