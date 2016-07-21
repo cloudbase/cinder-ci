@@ -188,6 +188,14 @@ then
         run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo '10.9.1.29 zuul-ssd-1.openstack.tld' | sudo tee -a /etc/hosts"
     fi
 
+    echo "Reserve VLAN range for test"
+    set +e
+    VLAN_RANGE=`/usr/local/src/cinder-ci/vlan_allocation.py -a $VMID`
+    echo "VLAN range selected is $VLAN_RANGE"
+    if [ ! -z "$VLAN_RANGE" ]; then
+        run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i 's/TENANT_VLAN_RANGE.*/TENANT_VLAN_RANGE='$VLAN_RANGE'/g' /home/ubuntu/devstack/local.conf" 3
+    fi
+    set -e
 
     echo "Run gerrit-git-prep on devstack"
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY  "/home/ubuntu/bin/gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT" 6
