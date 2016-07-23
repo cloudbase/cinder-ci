@@ -71,8 +71,6 @@ Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 & pip install cffi
 & pip install pymysql
 & pip install amqp==1.4.9
-#& pip install oslo.messaging==4.5.0
-#& pip install 'os-win==0.2.2'
 
 popd
 
@@ -119,7 +117,6 @@ if (!(Test-Path $remoteLogs)){
 if (!(Test-Path $remoteConfigs)){
     mkdir $remoteConfigs
 }
-#!!! Binary pre-reqs????
 
 #copy distutils.cfg
 Copy-Item $scriptdir\windows\templates\distutils.cfg $pythonDir\Lib\distutils\distutils.cfg
@@ -132,11 +129,11 @@ pip install networkx
 pip install futures
 
 # TODO: remove this after the clone volume bug is fixed
-$windows_utils = "$openstackDir\cinder\cinder\volume\drivers\windows\windows.py"
-$content = gc $windows_utils
-sc $windows_utils $content.Replace("self.create_volume(volume)", "self.create_volume(volume);os.unlink(self.local_path(volume))")
-pushd $openstackDir\cinder
+#$windows_utils = "$openstackDir\cinder\cinder\volume\drivers\windows\windows.py"
+#$content = gc $windows_utils
+#sc $windows_utils $content.Replace("self.create_volume(volume)", "self.create_volume(volume);os.unlink(self.local_path(volume))")
 
+pushd $openstackDir\cinder
 pip install -r requirements.txt
 
 # Revert the driver disable patch
@@ -157,16 +154,16 @@ function cherry_pick($commit) {
 
 if ($testCase -ne "iscsi"){
 
-	#git fetch https://review.openstack.org/openstack/cinder refs/changes/98/289298/5 
-	#cherry_pick 5e1af8932435d5c8a718788f0828a66f412f32e5
+    #git fetch https://review.openstack.org/openstack/cinder refs/changes/98/289298/5 
+    #cherry_pick 5e1af8932435d5c8a718788f0828a66f412f32e5
 
-	git remote add downstream https://github.com/petrutlucian94/cinder
-	# git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
+    git remote add downstream https://github.com/petrutlucian94/cinder
+    # git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
 	
-	ExecRetry {
-	    git fetch downstream
-	    if ($LastExitCode) { Throw "Failed fetching remote downstream petrutlucian94" }
-	}
+    ExecRetry {
+       git fetch downstream
+        if ($LastExitCode) { Throw "Failed fetching remote downstream petrutlucian94" }
+    }
 
     git checkout -b "testBranch"
     #cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
@@ -191,23 +188,18 @@ popd
 Copy-Item "$templateDir\policy.json" "$configDir\" 
 Copy-Item "$templateDir\interfaces.template" "$configDir\"
 
-if (($branchName.ToLower().CompareTo($('stable/juno').ToLower()) -eq 0) -or ($branchName.ToLower().CompareTo($('stable/icehouse').ToLower()) -eq 0)) {
-    $rabbitUser = "guest"
-}
-
 & $scriptdir\windows\scripts\$testCase\generateConfig.ps1 $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath $winUser $winPasswd  > "$remoteLogs\generateConfig_error.txt" 2>&1
 if ($LastExitCode -ne 0) {
  echo "generateConfig has failed!"
 }
 
-#$hasCinderExec = Test-Path "$pythonDir\Scripts\cinder-volume.exe"
-#if ($hasCinderExec -eq $false){
-#    Throw "No nova exe found"
-#}else{
-#    $cindesExec = "$pythonDir\Scripts\nova-compute.exe"
-#}
+$hasCinderExec = Test-Path "$pythonDir\Scripts\cinder-volume.exe"
+if ($hasCinderExec -eq $false){
+    Throw "No cinder-volume.exe found"
+}else{
+    $cindesExec = "$pythonDir\Scripts\cinder-volume.exe"
+}
 
-#FixExecScript "$pythonDir\Scripts\cinder-volume.py"
 
 Remove-Item -Recurse -Force "$remoteConfigs\*"
 Copy-Item -Recurse $configDir "$remoteConfigs\"
@@ -219,23 +211,9 @@ $filter = 'Name=' + "'" + $serviceName + "'" + ''
 Get-WMIObject -namespace "root\cimv2" -class Win32_Service -Filter $filter | Select *
 
 & pip install -U "Jinja2>=2.6"
-pip install python-novaclient==2.28.1
-#Fix for bug in monotonic pip package
-#(Get-Content "C:\Python27\Lib\site-packages\monotonic.py") | foreach-object {$_ -replace ">= 0", "> 0"} | Set-Content  "C:\Python27\Lib\site-packages\monotonic.py"
-
-#pip install decorator==3.4.2
-# Fix for the __qualname__ attribute issue appended to decorated methods, impacting osprofiler
-# TODO(lpetrut): send a fix for the latest decorator lib
 
 pushd C:\
 GitClonePull "C:\os-win\" "https://github.com/openstack/os-win" "master"
-#pushd C:\os-win\
-#ExecRetry {
-#    git fetch https://review.openstack.org/openstack/os-win refs/changes/72/289872/2
-#    if ($LastExitCode) {throw "git fetch failed"}
-#}
-#cherry_pick 09bba86fae031c3750c2a8923bc280e41ed839bb
-#popd
 &pip install C:\os-win
 popd 
 
