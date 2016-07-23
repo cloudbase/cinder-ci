@@ -11,7 +11,7 @@ $scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Def
 
 $cinderServiceName = "cinder-volume"
 $cinderServiceDescription = "OpenStack Cinder Volume Service"
-$cinderServiceExecutable = $pythonDir+'\python.exe -c "from ctypes import wintypes; from cinder.cmd import volume; volume.main()"'
+$cinderServiceExecutable = "$pythonDir\Scripts\cinder-volume.exe"
 $cinderServiceConfig = "$configDir\cinder.conf"
 
 Check-Service $cinderServiceName $cinderServiceDescription $cinderServiceExecutable $cinderServiceConfig
