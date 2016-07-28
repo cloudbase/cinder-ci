@@ -104,6 +104,11 @@ then
         COUNTER=$(($COUNTER + 1))
     done
 
+    echo "nova show output:"
+    nova show "$VMID"
+    echo "nova console-log output:"
+    nova console-log "$VMID"
+
     echo FIXED_IP=$FIXED_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
     DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP"
