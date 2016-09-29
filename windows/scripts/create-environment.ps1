@@ -176,6 +176,18 @@ if ($testCase -ne "iscsi"){
         cherry_pick 06ee0b259daf13e8c0028a149b3882f1e3373ae1
     }
 }
+if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/newton"){
+    ExecRetry {
+        GitClonePull "C:\OpenStack\oslo.concurrency\" "https://github.com/openstack/oslo.concurrency" "master"
+        pushd C:\OpenStack\oslo.concurrency\
+    	
+        git fetch git://git.openstack.org/openstack/oslo.concurrency refs/changes/22/376622/2
+        cherry_pick FETCH_HEAD
+        & pip install C:\OpenStack\oslo.concurrency\
+        if ($LastExitCode) { Throw "Failed to install oslo.concurrency from repo" }
+        popd
+    }
+}
 
 ExecRetry {
     pushd C:\OpenStack\cinder
