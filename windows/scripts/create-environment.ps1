@@ -167,7 +167,7 @@ if ($testCase -ne "iscsi"){
 
     git checkout -b "testBranch"
     #cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
-    if ($branchName.ToLower() -eq "master") {
+    if ($branchName.ToLower() -in @("master", "stable/newton")) {
         cherry_pick dcd839978ca8995cada8a62a5f19d21eaeb399df
         cherry_pick f711195367ead9a2592402965eb7c7a73baebc9f
     }
