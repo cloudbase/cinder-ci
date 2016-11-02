@@ -42,6 +42,11 @@ ExecRetry {
     Invoke-WebRequest -Uri http://10.0.110.1/python27.tar.gz -OutFile $pythonArchive
     if ($LastExitCode) { Throw "Failed fetching python27.tar.gz" }
 }
+
+ExecRetry {
+    GitClonePull "C:\requirements" "https://git.openstack.org/openstack/requirements.git" $branchName
+}
+
 if (Test-Path $pythonDir)
 {
     Remove-Item -Recurse -Force $pythonDir
@@ -125,6 +130,14 @@ if (!(Test-Path $lockPath)){
 	mkdir $lockPath
 }
 
+ExecRetry {
+    pushd "C:\requirements"
+    & pip install -c upper-constraints.txt -U pbr virtualenv httplib2 prettytable>=0.7 setuptools
+    & pip install -c upper-constraints.txt -U .
+    if ($LastExitCode) { Throw "Failed to install openstack/requirements from repo" }
+    popd
+}
+
 pip install networkx
 pip install futures
 
@@ -181,9 +194,10 @@ if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/new
         GitClonePull "C:\OpenStack\oslo.concurrency\" "https://github.com/openstack/oslo.concurrency" "master"
         pushd C:\OpenStack\oslo.concurrency\
     	
-        git fetch git://git.openstack.org/openstack/oslo.concurrency refs/changes/22/376622/2
-        cherry_pick FETCH_HEAD
-        & pip install C:\OpenStack\oslo.concurrency\
+        #git fetch git://git.openstack.org/openstack/oslo.concurrency refs/changes/22/376622/2
+        #cherry_pick FETCH_HEAD
+        #& update-requirements.exe --source C:\requirements .
+        & pip install -U .
         if ($LastExitCode) { Throw "Failed to install oslo.concurrency from repo" }
         popd
     }
@@ -191,7 +205,8 @@ if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/new
 
 ExecRetry {
     pushd C:\OpenStack\cinder
-    & pip install C:\OpenStack\cinder
+    & update-requirements.exe --source C:\requirements .
+    & pip install -c C:\requirements\upper-constraints.txt -U .
     if ($LastExitCode) { Throw "Failed to install cinder from repo" }
     popd
 }
@@ -226,7 +241,11 @@ Get-WMIObject -namespace "root\cimv2" -class Win32_Service -Filter $filter | Sel
 
 pushd C:\
 GitClonePull "C:\os-win\" "https://github.com/openstack/os-win" "master"
-&pip install C:\os-win
+ExecRetry {
+    pushd C:\os-win\
+    pip install .
+    popd
+}
 popd 
 
 Write-Host "Starting the services"
