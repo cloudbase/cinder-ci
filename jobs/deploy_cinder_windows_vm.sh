@@ -10,7 +10,7 @@ join_cinder(){
     PARAMS="$WIN_IP $WIN_USER $WIN_PASS"
     # set -e
     echo "Set paths for windows"
-    run_ps_cmd_with_retry 10 $PARAMS "\$env:Path += ';C:\Python27;C:\Python27\Scripts;C:\OpenSSL-Win32\bin;C:\Program Files (x86)\Git\cmd;C:\MinGW\mingw32\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\qemu-img'; setx PATH \$env:Path "
+    run_ps_cmd_with_retry 10 $PARAMS "\$env:Path += ';C:\Python27;C:\Python27\Scripts;C:\Program Files\OpenSSL\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\bin;C:\qemu-img'; setx PATH \$env:Path "
     echo "Ensure c:\cinder-ci folder exists and is empty."
     run_ps_cmd_with_retry 10 $PARAMS "if (Test-Path -Path C:\cinder-ci) {Remove-Item -Force -Recurse C:\cinder-ci\*} else {New-Item -Path C:\ -Name cinder-ci -Type directory}"
     echo "git clone cinder-ci"
@@ -66,7 +66,7 @@ do
     set -e
     sleep 20
 
-    WIN_VMID=$(nova boot --availability-zone cinder --flavor cinder.windows --image cinder2012R2 --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll | awk '{if (NR == 21) {print $4}}')
+    WIN_VMID=$(nova boot --availability-zone cinder --flavor cinder.windows --image cinderWin3108 --key-name default --security-groups default --nic net-id="$NET_ID" "$CINDER_VM_NAME" --poll | awk '{if (NR == 21) {print $4}}')
     export WIN_VMID=$WIN_VMID
     echo WIN_VMID=$WIN_VMID >>  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
     echo WIN_VMID=$WIN_VMID
