@@ -64,7 +64,7 @@ then
     echo NAME=$NAME
     echo NET_ID=$NET_ID
     
-    devstack_image="devstack-78v1"
+    devstack_image="devstack-78v2"
     echo "Image used is: $devstack_image"
     
     echo "Deploying devstack $NAME"
