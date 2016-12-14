@@ -124,7 +124,7 @@ if (!(Test-Path $remoteConfigs)){
 }
 
 #copy distutils.cfg
-Copy-Item $scriptdir\windows\templates\distutils.cfg $pythonDir\Lib\distutils\distutils.cfg
+#Copy-Item $scriptdir\windows\templates\distutils.cfg $pythonDir\Lib\distutils\distutils.cfg
 
 if (!(Test-Path $lockPath)){
 	mkdir $lockPath
@@ -212,8 +212,10 @@ ExecRetry {
 }
 popd
 
-Copy-Item "$templateDir\policy.json" "$configDir\" 
-Copy-Item "$templateDir\interfaces.template" "$configDir\"
+#Copy-Item "$templateDir\policy.json" "$configDir\" 
+Copy-Item \\$devstackIP\openstack\policy.json "$configDir\"
+
+#Copy-Item "$templateDir\interfaces.template" "$configDir\"
 
 & $scriptdir\windows\scripts\$testCase\generateConfig.ps1 $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath $winUser $winPasswd  > "$remoteLogs\generateConfig_error.txt" 2>&1
 if ($LastExitCode -ne 0) {

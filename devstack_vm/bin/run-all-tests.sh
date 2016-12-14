@@ -21,6 +21,9 @@ iniset $TEMPEST_CONFIG boto build_timeout 300
 iniset $TEMPEST_CONFIG compute ssh_timeout 180
 iniset $TEMPEST_CONFIG compute allow_tenant_isolation True
 
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DIR=$( dirname "$DIR" )
+
 #cinder-specific job type parameter 
 job_type=$1
 
@@ -68,7 +71,7 @@ $basedir/parallel-test-runner.sh $tests_file $tests_dir $log_file \
     $parallel_tests $max_attempts || true
 
 if [[ $job_type == "iscsi" ]]; then
-    isolated_tests_file=$basedir/isolated-tests-iscsi.txt
+    isolated_tests_file=$DIR/testLists/isolated-tests-iscsi.txt
     if [ -f "$isolated_tests_file" ]; then
         echo "Running isolated tests from: $isolated_tests_file"
         log_tmp=$(tempfile)
@@ -79,7 +82,7 @@ if [[ $job_type == "iscsi" ]]; then
         rm $log_tmp
     fi
 else
-	isolated_tests_file=$basedir/isolated-tests.txt
+	isolated_tests_file=$DIR/testLists/isolated-tests.txt
 	if [ -f "$isolated_tests_file" ]; then
 		echo "running isolated tests from: $isolated_tests_file"
 		log_tmp=$(tempfile)
@@ -96,7 +99,7 @@ fi
 rm $tests_file
 
 echo "Generating HTML report..."
-python $basedir/subunit2html.py $log_file $results_html_file
+subunit2html $log_file $results_html_file
 
 cat $log_file | subunit-trace -n -f > $tempest_output_file 2>&1 || true
 
