@@ -5,7 +5,7 @@
 $openstackDir = "C:\OpenStack"
 $pythonDir = "C:\Python27"
 $configDir = "$openstackDir\etc"
-$downloadLocation = "http://10.0.110.1/"
+#$downloadLocation = "http://10.0.110.1/"
 $scriptdir = "C:\cinder-ci"
 
 $templateDir = "$scriptdir\windows\templates"
