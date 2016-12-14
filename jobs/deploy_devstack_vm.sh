@@ -55,6 +55,7 @@ then
     if (`nova list | grep "$NAME" > /dev/null 2>&1`); then nova delete "$NAME"; fi
     set -e
     echo NAME=$NAME > /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo ZUUL_BRANCH=$ZUUL_BRANCH >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
     echo DEVSTACK_SSH_KEY=$DEVSTACK_SSH_KEY >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
@@ -211,7 +212,10 @@ then
 
     # Update local conf
     update_local_conf
-
+    
+    # Add zuul branch to local.sh
+    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i '3 i\branch=$ZUUL_BRANCH' /home/ubuntu/devstack/local.sh"
+    
     # Run devstack
     echo "Run stack.sh on devstack"
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/keystonerc && /home/ubuntu/bin/run_devstack.sh $JOB_TYPE $ZUUL_BRANCH" 6
