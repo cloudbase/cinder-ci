@@ -4,10 +4,12 @@ set -e
 source /home/ubuntu/devstack/functions
 source /home/ubuntu/devstack/functions-common
 
-nova flavor-delete 42
+if [ "$branch" == "stable/newton" ] || [ "$branch" == "stable/liberty" ] || [ "$branch" == "stable/mitaka" ]; then
+    nova flavor-delete 42
+    nova flavor-delete 84
+fi
 nova flavor-create m1.nano 42 96 1 1
 
-nova flavor-delete 84
 nova flavor-create m1.micro 84 128 2 1
 
 # Add DNS config to the private network
