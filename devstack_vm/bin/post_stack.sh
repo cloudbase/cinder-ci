@@ -2,7 +2,7 @@
 
 set -x
 
-nova quota-class-update --instances 50 --cores 100 --ram $((51200*4)) --floating-ips 50 --security-groups 50 --security-group-rules 100 default
+nova quota-class-update --instances 50 --cores 100 --ram $((51200*4)) --floating-ips 50 --security-groups 50 --security-group-rules 100 default --os-compute-api-version 2.35
 cinder quota-class-update --snapshots 50 --volumes 50 --gigabytes 2000 default
 
 #NAT

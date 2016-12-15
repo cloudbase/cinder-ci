@@ -29,6 +29,15 @@ exec_with_retry () {
     exec_with_retry2 $MAX_RETRIES $INTERVAL $CMD
 }
 
+function run_wsman_cmd() {
+    local host=$1
+    local win_user=$2
+    local win_password=$3
+    local cmd=$4
+
+    python /home/jenkins-slave/tools/wsman.py -u $win_user -p $win_password -U https://$host:5986/wsman $cmd
+}
+
 run_wsmancmd_with_retry () {
     MAX_RETRIES=$1
     HOST=$2
@@ -36,7 +45,7 @@ run_wsmancmd_with_retry () {
     PASSWORD=$4
     CMD=${@:5}
 
-    exec_with_retry $MAX_RETRIES 10 "python /var/lib/jenkins/jenkins-master/wsman.py -U https://$HOST:5986/wsman -u $USERNAME -p $PASSWORD $CMD"
+    exec_with_retry $MAX_RETRIES 10 "python /home/jenkins-slave/tools/wsman.py -U https://$HOST:5986/wsman -u $USERNAME -p $PASSWORD $CMD"
 }
 
 wait_for_listening_port () {
@@ -85,6 +94,14 @@ run_ps_cmd_with_retry () {
     PS_EXEC_POLICY='-ExecutionPolicy RemoteSigned'
 
     run_wsmancmd_with_retry $MAX_RETRIES $HOST $USERNAME $PASSWORD "powershell $PS_EXEC_POLICY $CMD"
+}
+
+function join_hyperv (){
+    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/herciunichita/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout newci >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1'
+    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\teardown.ps1'
+    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\EnsureOpenStackServices.ps1 Administrator H@rd24G3t >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1'
+    [ "$IS_DEBUG_JOB" == "yes" ] && run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell Write-Host Calling create-environment with devstackIP='$FIXED_IP' branchName=master buildFor=openstack/neutron '$IS_DEBUG_JOB' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1"'
+    run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\create-environment.ps1 -devstackIP '$FIXED_IP' -branchName master -buildFor openstack/neutron '$IS_DEBUG_JOB' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1"'
 }
 
 function get_hyperv_logs() {

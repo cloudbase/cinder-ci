@@ -2,6 +2,9 @@
 
 source /usr/local/src/cinder-ci/jobs/utils.sh
 
+hyperv01=$1
+hyperv02=$2
+
 # Functions section
 update_local_conf (){
     if [ $JOB_TYPE = "smb3_linux" ]
@@ -64,11 +67,11 @@ then
     echo NAME=$NAME
     echo NET_ID=$NET_ID
     
-    devstack_image="devstack-78v2"
+    devstack_image="devstack-80v4"
     echo "Image used is: $devstack_image"
     
     echo "Deploying devstack $NAME"
-    VMID=$(nova boot --availability-zone cinder --flavor cinder.linux --image $devstack_image --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll | awk '{if (NR == 21) {print $4}}')
+    VMID=$(nova boot --config-drive true --flavor cinder.linux --image $devstack_image --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll | awk '{if (NR == 21) {print $4}}')
     export VMID=$VMID
     echo VMID=$VMID >>  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
     echo VMID=$VMID
@@ -111,19 +114,21 @@ then
 
     echo FIXED_IP=$FIXED_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-    DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP"
-    if [ -z "$DEVSTACK_FLOATING_IP" ]
-    then
-        exit 1
-    fi
-    echo DEVSTACK_FLOATING_IP=$DEVSTACK_FLOATING_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    #DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP"
+    #if [ -z "$DEVSTACK_FLOATING_IP" ]
+    #then
+        #exit 1
+    #fi
+    DEVSTACK_FLOATING_IP=$FIXED_IP
+    echo DEVSTACK_FLOATING_IP=$FIXED_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-    exec_with_retry 15 5 "nova add-floating-ip $VMID $DEVSTACK_FLOATING_IP"
+    #exec_with_retry 15 5 "nova add-floating-ip $VMID $DEVSTACK_FLOATING_IP"
 
     nova show "$VMID"
 
     echo "Wait for answer on port 22 on devstack"
-    exec_with_retry 25 30 "nc -z -w3 $DEVSTACK_FLOATING_IP 22"
+    #exec_with_retry 25 30 "nc -z -w3 $DEVSTACK_FLOATING_IP 22"
+    wait_for_listening_port $FIXED_IP 22 30
     if [ $? -ne 0 ]
     then
         echo "Failed listening for ssh port on devstack."
@@ -139,7 +144,7 @@ then
     
     # Repository section
     echo "setup apt-cacher-ng:"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'echo "Acquire::http { Proxy \"http://10.0.110.1:3142\" };" | sudo tee --append /etc/apt/apt.conf.d/90-apt-proxy.conf' 12
+    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'echo "Acquire::http { Proxy \"http://10.21.7.214:3142\" };" | sudo tee --append /etc/apt/apt.conf.d/90-apt-proxy.conf' 12
     echo "clean any apt files:"
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo rm -rfv /var/lib/apt/lists/*" 12
     echo "apt-get update:"
@@ -183,7 +188,7 @@ then
     #get locally the vhdx files used by tempest
     echo "Downloading the images for devstack"
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p /home/ubuntu/devstack/files/images/" 6
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "wget http://10.20.1.14:8080/cirros-0.3.3-x86_64.img -O /home/ubuntu/devstack/files/images/cirros-0.3.3-x86_64.img" 6
+    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "wget http://10.20.1.14:8080/cirros-0.3.3-x86_64.vhdx -O /home/ubuntu/devstack/files/images/cirros-0.3.3-x86_64.vhdx" 6
 
     # Set ZUUL IP in hosts file
     ZUUL_CINDER="10.21.7.213"
@@ -208,13 +213,14 @@ then
     # Set up the smbfs shares list
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo mkdir -p /etc/cinder && sudo chown ubuntu /etc/cinder" 6
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo echo //$DEVSTACK_FLOATING_IP/openstack/volumes -o guest > /etc/cinder/smbfs_shares_config" 6
+    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'mkdir -p /openstack/logs; chmod 777 /openstack/logs; sudo chown nobody:nogroup /openstack/logs' 6
 
     # Update local conf
     update_local_conf
-    run_ssh_cmd_with_retry ubuntu@$FLOATING_IP $DEVSTACK_SSH_KEY "sed -i '3 i\branch=$ZUUL_BRANCH' /home/ubuntu/devstack/local.sh"
+    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i '3 i\branch=$ZUUL_BRANCH' /home/ubuntu/devstack/local.sh"
     # Run devstack
     echo "Run stack.sh on devstack"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/keystonerc && /home/ubuntu/bin/run_devstack.sh $JOB_TYPE $ZUUL_BRANCH" 6
+    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/keystonerc && /home/ubuntu/bin/run_devstack.sh $JOB_TYPE $ZUUL_BRANCH $hyperv01 $hyperv02" 6
     if [ $? -ne 0 ]
     then
         echo "Failed to install devstack on cinder vm!"

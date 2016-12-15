@@ -1,7 +1,11 @@
 #!/bin/bash
+basedir="/home/ubuntu/bin"
+. $basedir/utils.sh
 
 job_type=$1
 branch=$2
+hyperv01=$3
+hyperv02=$4
 
 set -x
 set -e
@@ -143,3 +147,7 @@ sed -i "s#PIP_GET_PIP_URL=https://bootstrap.pypa.io/get-pip.py#PIP_GET_PIP_URL=h
 
 set -o pipefail
 ./stack.sh 2>&1 | tee $STACK_LOG
+
+TCP_PORTS=(80 443 3260 3306 5000 5672 6000 6001 6002 8000 8003 8004 8080 8773 8774 8775 8776 8777 9191 9292 9696 35357)
+firewall_manage_ports $hyperv01 add enable ${TCP_PORTS[@]}
+firewall_manage_ports $hyperv02 add enable ${TCP_PORTS[@]}
