@@ -104,6 +104,34 @@ function join_hyperv (){
     run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\create-environment.ps1 -devstackIP '$FIXED_IP' -branchName master -buildFor openstack/neutron '$IS_DEBUG_JOB' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1"'
 }
 
+join_windows(){
+    WIN_IP=$1
+    WIN_USER=$2
+    WIN_PASS=$3
+
+    PARAMS="$WIN_IP $WIN_USER $WIN_PASS"
+    # set -e
+    #echo "Set paths for windows"
+    #run_ps_cmd_with_retry 3 $PARAMS "\$env:Path += ';C:\Python27;C:\Python27\Scripts;C:\OpenSSL-Win32\bin;C:\Program Files (x86)\Git\cmd;C:\MinGW\mingw32\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\qemu-img'; setx PATH \$env:Path "
+    echo "Joining cinder windows node: $WIN_IP"
+    echo "Ensure c:\cinder-ci folder exists and is empty."
+    run_ps_cmd_with_retry 3 $PARAMS "if (Test-Path -Path C:\cinder-ci) {Remove-Item -Force -Recurse C:\cinder-ci\*} else {New-Item -Path C:\ -Name cinder-ci -Type directory}"
+    echo "git clone cinder-ci"
+    run_wsmancmd_with_retry 3 $PARAMS "git clone https://github.com/herciunichita/cinder-ci C:\cinder-ci"
+    echo "cinder-ci: checkout newci and pull latest"
+    run_ps_cmd_with_retry 3 $PARAMS "cd C:\cinder-ci; git checkout newci; git pull"
+    echo "Adding zuuls to hosts"
+    run_ps_cmd_with_retry 3 $PARAMS 'Add-Content C:\Windows\System32\drivers\etc\hosts \"`n10.21.7.213  zuul-cinder.openstack.tld\"'
+    run_ps_cmd_with_retry 3 $PARAMS 'Add-Content C:\Windows\System32\drivers\etc\hosts \"`n10.9.1.27  zuul-ssd-0.openstack.tld\"'
+    run_ps_cmd_with_retry 3 $PARAMS 'Add-Content C:\Windows\System32\drivers\etc\hosts \"`n10.9.1.29  zuul-ssd-1.openstack.tld\"'
+    echo "Run gerrit-git-prep with zuul-site=$ZUUL_SITE zuul-ref=$ZUUL_REF zuul-change=$ZUUL_CHANGE zuul-project=$ZUUL_PROJECT"
+    run_wsmancmd_with_retry 3 $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT"
+    echo "Ensure service is configured with winuser=$WIN_USER and winpass=$WIN_PASS"
+    run_ps_cmd_with_retry 3 $PARAMS "C:\cinder-ci\windows\scripts\EnsureOpenStackServices.ps1 $WIN_USER $WIN_PASS"
+    echo "create cinder env on windows"
+    run_ps_cmd_with_retry 3 $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase $JOB_TYPE -winUser $WIN_USER -winPasswd $WIN_PASS"
+}
+
 function get_hyperv_logs() {
     
     echo "Prepare target folder on devstack VM"

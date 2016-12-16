@@ -35,3 +35,4 @@ source /usr/local/src/cinder-ci/jobs/deploy_devstack_vm.sh $hyperv01_ip $hyperv0
 
 source /usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv01 $JOB_TYPE
 source /usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv02 $JOB_TYPE
+source /usr/local/src/cinder-ci/jobs/build_windows.sh $ws2012r2 $JOB_TYPE
