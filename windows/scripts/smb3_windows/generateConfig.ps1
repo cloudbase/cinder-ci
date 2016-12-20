@@ -56,6 +56,6 @@ if (! (Test-Path -Path C:\SMBShare))
 if (!(Get-SMBShare -Name SMBShare))
 {
     $hostname=hostname
-    New-SMBShare -Name SMBShare -Path C:\SMBShare -FullAccess "$hostname\Admin"
+    New-SMBShare -Name SMBShare -Path C:\SMBShare -FullAccess "$hostname\Administrator"
 }
-Grant-SmbShareAccess -Name SMBShare -AccountName Admin -AccessRight Full -Force
+Grant-SmbShareAccess -Name SMBShare -AccountName Administrator -AccessRight Full -Force

@@ -18,6 +18,7 @@ $scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Def
 
 $rabbitUser = "stackrabbit"
 $hostname = hostname
+Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 $pip_conf_content = @"
 [global]
@@ -39,7 +40,7 @@ if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 . "$scriptdir\windows\scripts\utils.ps1"
 
 ExecRetry {
-    Invoke-WebRequest -Uri http://10.20.1.14:8080/python27.tar.gz -OutFile $pythonArchive
+    Invoke-WebRequest -Uri http://10.20.1.14:8080/python.zip -OutFile $pythonArchive
     if ($LastExitCode) { Throw "Failed fetching python27.tar.gz" }
 }
 
@@ -54,7 +55,7 @@ if (Test-Path $pythonDir)
 
 Write-Host "Ensure Python folder is up to date"
 Write-Host "Extracting archive.."
-& C:\MinGW\msys\1.0\bin\tar.exe -xzf "$pythonArchive"
+[System.IO.Compression.ZipFile]::ExtractToDirectory("C:\$pythonArchive", "C:\")
 Write-Host "Removing the python archive.."
 Remove-Item -Force -Recurse $pythonArchive
 
@@ -165,30 +166,30 @@ function cherry_pick($commit) {
     $ErrorActionPreference = $eapSet
 }
 
-if ($testCase -ne "iscsi"){
-
-    #git fetch https://review.openstack.org/openstack/cinder refs/changes/98/289298/5 
-    #cherry_pick 5e1af8932435d5c8a718788f0828a66f412f32e5
-
-    git remote add downstream https://github.com/petrutlucian94/cinder
-    # git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
-	
-    ExecRetry {
-       git fetch downstream
-        if ($LastExitCode) { Throw "Failed fetching remote downstream petrutlucian94" }
-    }
-
-    git checkout -b "testBranch"
-    #cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
-    if ($branchName.ToLower() -in @("master", "stable/newton")) {
-        cherry_pick dcd839978ca8995cada8a62a5f19d21eaeb399df
-        cherry_pick f711195367ead9a2592402965eb7c7a73baebc9f
-    }
-    else {
-        cherry_pick 0c13ba732eb5b44e90a062a1783b29f2718f3da8
-        cherry_pick 06ee0b259daf13e8c0028a149b3882f1e3373ae1
-    }
-}
+#if ($testCase -ne "iscsi"){
+#
+#    #git fetch https://review.openstack.org/openstack/cinder refs/changes/98/289298/5 
+#    #cherry_pick 5e1af8932435d5c8a718788f0828a66f412f32e5
+#
+#    git remote add downstream https://github.com/petrutlucian94/cinder
+#    # git remote add downstream https://github.com/alexpilotti/cinder-ci-fixes
+#	
+#    ExecRetry {
+#       git fetch downstream
+#        if ($LastExitCode) { Throw "Failed fetching remote downstream petrutlucian94" }
+#    }
+#
+#    git checkout -b "testBranch"
+#    #cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
+#    if ($branchName.ToLower() -in @("master", "stable/newton")) {
+#        cherry_pick dcd839978ca8995cada8a62a5f19d21eaeb399df
+#        cherry_pick f711195367ead9a2592402965eb7c7a73baebc9f
+#    }
+#    else {
+#        cherry_pick 0c13ba732eb5b44e90a062a1783b29f2718f3da8
+#        cherry_pick 06ee0b259daf13e8c0028a149b3882f1e3373ae1
+#    }
+#}
 if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/newton"){
     ExecRetry {
         GitClonePull "C:\OpenStack\oslo.concurrency\" "https://github.com/openstack/oslo.concurrency" "master"
@@ -240,8 +241,8 @@ Get-WMIObject -namespace "root\cimv2" -class Win32_Service -Filter $filter | Sel
 & pip install -U "Jinja2>=2.6"
 
 pushd C:\
-GitClonePull "C:\os-win\" "https://github.com/openstack/os-win" "master"
 ExecRetry {
+    GitClonePull "C:\os-win\" "https://github.com/openstack/os-win" "master"
     pushd C:\os-win\
     pip install .
     popd
