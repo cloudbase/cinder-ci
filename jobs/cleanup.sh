@@ -4,11 +4,7 @@ source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 echo "Collecting logs"
 
-if [ -z "$DEBUG_JOB" ] || [ "$DEBUG_JOB" != "yes" ]; then
-    LOGSDEST="/srv/logs/cinder/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE"
-else
-    LOGSDEST="/srv/logs/debug/cinder/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE"
-fi
+/usr/local/src/cinder-ci/jobs/collect_logs.sh
 
 if [ -z "$DEBUG_JOB" ] || [ "$DEBUG_JOB" != "yes" ]; then
     echo "Not a debug job, cleaning up environment."
