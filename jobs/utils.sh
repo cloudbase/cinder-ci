@@ -97,7 +97,7 @@ run_ps_cmd_with_retry () {
 }
 
 function join_hyperv (){
-    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/herciunichita/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout newci >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1'
+    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/cloudbase/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-test >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1'
     run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\teardown.ps1'
     run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\EnsureOpenStackServices.ps1 Administrator H@rd24G3t >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1'
     [ "$IS_DEBUG_JOB" == "yes" ] && run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell Write-Host Calling create-environment with devstackIP='$FIXED_IP' branchName=master buildFor=openstack/neutron '$IS_DEBUG_JOB' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1"'
@@ -117,9 +117,9 @@ join_windows(){
     echo "Ensure c:\cinder-ci folder exists and is empty."
     run_ps_cmd_with_retry 3 $PARAMS "if (Test-Path -Path C:\cinder-ci) {Remove-Item -Force -Recurse C:\cinder-ci\*} else {New-Item -Path C:\ -Name cinder-ci -Type directory}"
     echo "git clone cinder-ci"
-    run_wsmancmd_with_retry 3 $PARAMS "git clone https://github.com/herciunichita/cinder-ci C:\cinder-ci"
-    echo "cinder-ci: checkout newci and pull latest"
-    run_ps_cmd_with_retry 3 $PARAMS "cd C:\cinder-ci; git checkout newci; git pull"
+    run_wsmancmd_with_retry 3 $PARAMS "git clone https://github.com/cloudbase/cinder-ci C:\cinder-ci"
+    echo "cinder-ci: checkout cambridge-test and pull latest"
+    run_ps_cmd_with_retry 3 $PARAMS "cd C:\cinder-ci; git checkout cambridge-test; git pull"
     echo "Adding zuuls to hosts"
     run_ps_cmd_with_retry 3 $PARAMS 'Add-Content C:\Windows\System32\drivers\etc\hosts \"`n10.21.7.213  zuul-cinder.openstack.tld\"'
     run_ps_cmd_with_retry 3 $PARAMS 'Add-Content C:\Windows\System32\drivers\etc\hosts \"`n10.9.1.27  zuul-ssd-0.openstack.tld\"'
