@@ -38,7 +38,7 @@ then
     exit 1
 fi
 
-BUILD_DIR="c:/OpenStack/"
+BUILD_DIR="c:/OpenStack/build"
 BUILD_SUBDIR=`basename $ZUUL_PROJECT`
 PROJECT_DIR="$BUILD_DIR/$BUILD_SUBDIR"
 
@@ -121,7 +121,7 @@ if ! git clean -x -f -d -q ; then
 fi
 
 echo "We are on host:` hostname` in folder: `pwd`"
-echo "WINDOWS Before doing git checkout:"
+echo "Before doing git checkout:"
 echo "Git branch output:"
 git branch 2>&1
 echo "Git log output:"

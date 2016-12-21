@@ -35,7 +35,7 @@ pushd C:\
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
     Remove-Item -Force -Recurse "$scriptdir\* -ErrorAction SilentlyContinue"
-    GitClonePull "$scriptdir" "https://github.com/cloudbase/cinder-ci" "cambridge"
+    GitClonePull "$scriptdir" "https://github.com/cloudbase/cinder-ci" "cambridge-test"
 }
 
 . "$scriptdir\windows\scripts\utils.ps1"
@@ -46,7 +46,7 @@ ExecRetry {
 }
 
 ExecRetry {
-    GitClonePull "C:\requirements" "https://git.openstack.org/openstack/requirements.git" $branchName
+    GitClonePull "$buildDir\requirements" "https://git.openstack.org/openstack/requirements.git" $branchName
 }
 
 if (Test-Path $pythonDir)
@@ -109,7 +109,7 @@ if (!(Test-Path $configDir)) {
     Remove-Item -Recurse -Force $configDir\* -ErrorAction SilentlyContinue
 }
 
-if (!(Test-Path "$openstackDir\cinder\setup.py")){
+if (!(Test-Path "$buildDir\cinder\setup.py")){
     Throw "$projectName repository was not found. Please run gerrit-git-prep for this project first"
 }
 
@@ -133,7 +133,7 @@ if (!(Test-Path $lockPath)){
 }
 
 ExecRetry {
-    pushd "C:\requirements"
+    pushd "$buildDir\requirements"
     & pip install -c upper-constraints.txt -U pbr virtualenv httplib2 prettytable>=0.7 setuptools
     & pip install -c upper-constraints.txt -U .
     if ($LastExitCode) { Throw "Failed to install openstack/requirements from repo" }
@@ -143,14 +143,8 @@ ExecRetry {
 pip install networkx
 pip install futures
 
-# TODO: remove this after the clone volume bug is fixed
-#$windows_utils = "$openstackDir\cinder\cinder\volume\drivers\windows\windows.py"
-#$content = gc $windows_utils
-#sc $windows_utils $content.Replace("self.create_volume(volume)", "self.create_volume(volume);os.unlink(self.local_path(volume))")
-
-write-host "cd to $openstackDir\cinder"
-pushd $openstackDir\cinder
-git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
+pushd $buildDir\cinder
+& git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
 pip install -r requirements.txt
 
 # Revert the driver disable patch
@@ -195,19 +189,16 @@ function cherry_pick($commit) {
 #}
 if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/newton"){
     ExecRetry {
-        GitClonePull "C:\OpenStack\oslo.concurrency\" "https://github.com/openstack/oslo.concurrency" "master"
-        pushd C:\OpenStack\oslo.concurrency\
+        GitClonePull "$buildDir\oslo.concurrency\" "https://github.com/openstack/oslo.concurrency" "master"
+        pushd $buildDir\oslo.concurrency
     	
-        #git fetch git://git.openstack.org/openstack/oslo.concurrency refs/changes/22/376622/2
-        #cherry_pick FETCH_HEAD
-        #& update-requirements.exe --source C:\requirements .
         & pip install -U .
         if ($LastExitCode) { Throw "Failed to install oslo.concurrency from repo" }
         popd
     }
 
     ExecRetry {
-        pushd C:\OpenStack\cinder
+        pushd $buildDir\cinder
         git fetch git://git.openstack.org/openstack/cinder refs/changes/41/403641/4
         cherry_pick FETCH_HEAD
         popd
@@ -215,9 +206,11 @@ if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/new
 }
 
 ExecRetry {
-    pushd C:\OpenStack\cinder
-    & update-requirements.exe --source C:\requirements .
-    & pip install -c C:\requirements\upper-constraints.txt -U .
+    pushd $buildDir\cinder
+    & update-requirements.exe --source $buildDir\requirements .
+    & pip install -c $buildDir\requirements\upper-constraints.txt -U .
+    Write-Host "After install:"
+    & git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
     if ($LastExitCode) { Throw "Failed to install cinder from repo" }
     popd
 }
@@ -252,8 +245,8 @@ Get-WMIObject -namespace "root\cimv2" -class Win32_Service -Filter $filter | Sel
 
 pushd C:\
 ExecRetry {
-    GitClonePull "C:\os-win\" "https://github.com/openstack/os-win" "master"
-    pushd C:\os-win\
+    GitClonePull "$buildDir\os-win\" "https://github.com/openstack/os-win" "master"
+    pushd $buildDir\os-win
     pip install .
     popd
 }
