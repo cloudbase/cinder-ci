@@ -108,6 +108,7 @@ join_windows(){
     WIN_IP=$1
     WIN_USER=$2
     WIN_PASS=$3
+    HYPERV_NODES=$4
 
     PARAMS="$WIN_IP $WIN_USER $WIN_PASS"
     # set -e
@@ -120,16 +121,12 @@ join_windows(){
     run_wsmancmd_with_retry 3 $PARAMS "git clone https://github.com/cloudbase/cinder-ci C:\cinder-ci"
     echo "cinder-ci: checkout cambridge-test and pull latest"
     run_ps_cmd_with_retry 3 $PARAMS "cd C:\cinder-ci; git checkout cambridge-test; git pull"
-    echo "Adding zuuls to hosts"
-    run_ps_cmd_with_retry 3 $PARAMS 'Add-Content C:\Windows\System32\drivers\etc\hosts \"`n10.21.7.213  zuul-cinder.openstack.tld\"'
-    run_ps_cmd_with_retry 3 $PARAMS 'Add-Content C:\Windows\System32\drivers\etc\hosts \"`n10.9.1.27  zuul-ssd-0.openstack.tld\"'
-    run_ps_cmd_with_retry 3 $PARAMS 'Add-Content C:\Windows\System32\drivers\etc\hosts \"`n10.9.1.29  zuul-ssd-1.openstack.tld\"'
     echo "Run gerrit-git-prep with zuul-site=$ZUUL_SITE zuul-ref=$ZUUL_REF zuul-change=$ZUUL_CHANGE zuul-project=$ZUUL_PROJECT"
     run_wsmancmd_with_retry 3 $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT"
     echo "Ensure service is configured with winuser=$WIN_USER and winpass=$WIN_PASS"
     run_ps_cmd_with_retry 3 $PARAMS "C:\cinder-ci\windows\scripts\EnsureOpenStackServices.ps1 $WIN_USER $WIN_PASS"
     echo "create cinder env on windows"
-    run_ps_cmd_with_retry 3 $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase $JOB_TYPE -winUser $WIN_USER -winPasswd $WIN_PASS"
+    run_ps_cmd_with_retry 3 $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase $JOB_TYPE -winUser $WIN_USER -winPasswd $WIN_PASS -hypervNodes $HYPERV_NODES"
 }
 
 function get_hyperv_logs() {

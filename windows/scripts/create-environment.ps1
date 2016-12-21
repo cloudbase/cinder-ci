@@ -4,7 +4,8 @@ Param(
     [string]$buildFor='openstack/cinder',
     [Parameter(Mandatory=$true)][string]$testCase,
     [Parameter(Mandatory=$true)][string]$winUser,
-    [Parameter(Mandatory=$true)][string]$winPasswd
+    [Parameter(Mandatory=$true)][string]$winPasswd,
+    [Parameter(Mandatory=$true)][string]$hypervNodes
 )
 
 $projectName = $buildFor.split('/')[-1]
@@ -216,7 +217,7 @@ popd
 Copy-Item "$templateDir\policy.json" "$configDir\" 
 Copy-Item "$templateDir\interfaces.template" "$configDir\"
 
-& $scriptdir\windows\scripts\$testCase\generateConfig.ps1 $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath $winUser $winPasswd  > "$remoteLogs\generateConfig_error.txt" 2>&1
+& $scriptdir\windows\scripts\$testCase\generateConfig.ps1 $configDir $cinderTemplate $devstackIP $rabbitUser $remoteLogs $lockPath $winUser $winPasswd $hypervNodes > "$remoteLogs\generateConfig_error.txt" 2>&1
 if ($LastExitCode -ne 0) {
  echo "generateConfig has failed!"
 }

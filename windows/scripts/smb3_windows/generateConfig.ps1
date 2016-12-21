@@ -6,7 +6,8 @@ Param(
     [Parameter(Mandatory=$true)][string]$logDir,
     [Parameter(Mandatory=$true)][string]$lockPath,
     [Parameter(Mandatory=$true)][string]$username,
-    [Parameter(Mandatory=$true)][string]$password
+    [Parameter(Mandatory=$true)][string]$password,
+    [Parameter(Mandatory=$true)][string]$hypervNodes
 )
 
 function unzip($src, $dest) {
@@ -19,7 +20,10 @@ function unzip($src, $dest) {
 	}
 
 }
-$serverIP =  (Get-NetIPAddress -AddressFamily IPv4 -PrefixOrigin Dhcp).IPAddress
+$serverIP = (Get-NetIPAddress | Where-Object {$_.IPAddress -like "10.250*" -and $_.AddressFamily -like "IPv4"}).IPAddress
+if (!$serverIP) {
+    Throw "Could not get windows machine dataplane IP"
+}
 $volumeDriver = 'cinder.volume.drivers.windows.smbfs.WindowsSmbfsDriver'
 $smbSharesConfigPath = "$configDir\smbfs_shares_config.txt"
 $configFile = "$configDir\cinder.conf"
@@ -53,9 +57,18 @@ if (! (Test-Path -Path C:\SMBShare))
     mkdir c:\SMBShare
 }
 
+if ((Get-WMIObject -namespace "root\cimv2" -class Win32_ComputerSystem).partofdomain -eq $true) 
+{
+    $hostname = (Get-WmiObject Win32_ComputerSystem).Domain
+} else {
+    $hostname = hostname
+}
+
 if (!(Get-SMBShare -Name SMBShare))
 {
-    $hostname=hostname
     New-SMBShare -Name SMBShare -Path C:\SMBShare -FullAccess "$hostname\Administrator"
 }
-Grant-SmbShareAccess -Name SMBShare -AccountName Administrator -AccessRight Full -Force
+
+$hypervNodes.split(",") | foreach {
+    Grant-SmbShareAccess -Name SMBShare -AccountName "$hostname\$_$" -AccessRight Full -Force
+}

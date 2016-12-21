@@ -3,6 +3,7 @@ source /home/ubuntu/devstack/functions
 TEMPEST_CONFIG=/opt/stack/tempest/etc/tempest.conf
 
 #iniset $TEMPEST_CONFIG compute volume_device_name "sdb"
+iniset $TEMPEST_CONFIG compute min_compute_nodes 2
 iniset $TEMPEST_CONFIG compute-feature-enabled rdp_console true
 iniset $TEMPEST_CONFIG compute-feature-enabled block_migrate_cinder_iscsi False
 
@@ -24,9 +25,9 @@ iniset $TEMPEST_CONFIG compute allow_tenant_isolation True
 #cinder-specific job type parameter 
 job_type=$1
 
-project=${1:-"openstack/cinder"}
+project="openstack/cinder"
 tests_dir=${2:-"/opt/stack/tempest"}
-parallel_tests=${3:-4}
+parallel_tests=${3:-8}
 max_attempts=${4:-3}
 test_suite=${5:-"default"}
 log_file=${6:-"/home/ubuntu/tempest/subunit-output.log"}
