@@ -120,7 +120,8 @@ if ! git clean -x -f -d -q ; then
     git clean -x -f -d -q
 fi
 
-echo "Before doing git checkout:"
+echo "We are on host:` hostname` in folder: `pwd`"
+echo "WINDOWS Before doing git checkout:"
 echo "Git branch output:"
 git branch 2>&1
 echo "Git log output:"

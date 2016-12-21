@@ -148,7 +148,9 @@ pip install futures
 #$content = gc $windows_utils
 #sc $windows_utils $content.Replace("self.create_volume(volume)", "self.create_volume(volume);os.unlink(self.local_path(volume))")
 
+write-host "cd to $openstackDir\cinder"
 pushd $openstackDir\cinder
+git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
 pip install -r requirements.txt
 
 # Revert the driver disable patch

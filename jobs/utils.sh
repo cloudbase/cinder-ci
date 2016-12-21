@@ -121,7 +121,7 @@ join_windows(){
     run_wsmancmd_with_retry 3 $PARAMS "git clone https://github.com/cloudbase/cinder-ci C:\cinder-ci"
     echo "cinder-ci: checkout cambridge-test and pull latest"
     run_ps_cmd_with_retry 3 $PARAMS "cd C:\cinder-ci; git checkout cambridge-test; git pull"
-    echo "Run gerrit-git-prep with zuul-site=$ZUUL_SITE zuul-ref=$ZUUL_REF zuul-change=$ZUUL_CHANGE zuul-project=$ZUUL_PROJECT"
+    echo "Run gerrit-git-prep on $PARAMS with zuul-site=$ZUUL_SITE zuul-ref=$ZUUL_REF zuul-change=$ZUUL_CHANGE zuul-project=$ZUUL_PROJECT"
     run_wsmancmd_with_retry 3 $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT"
     echo "Ensure service is configured with winuser=$WIN_USER and winpass=$WIN_PASS"
     run_ps_cmd_with_retry 3 $PARAMS "C:\cinder-ci\windows\scripts\EnsureOpenStackServices.ps1 $WIN_USER $WIN_PASS"
