@@ -63,6 +63,6 @@ if (!(Get-SMBShare -Name SMBShare))
     New-SMBShare -Name SMBShare -Path C:\SMBShare -FullAccess "$hostname\Administrator"
 }
 
-$hypervNodes.split(",") | foreach {
+$hypervNodes.split("|") | foreach {
     Grant-SmbShareAccess -Name SMBShare -AccountName "$hostname\$_$" -AccessRight Full -Force
 }
