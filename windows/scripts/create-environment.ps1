@@ -203,6 +203,13 @@ if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/new
         if ($LastExitCode) { Throw "Failed to install oslo.concurrency from repo" }
         popd
     }
+
+    ExecRetry {
+        pushd C:\OpenStack\cinder
+        git fetch git://git.openstack.org/openstack/cinder refs/changes/41/403641/4
+        cherry_pick FETCH_HEAD
+        popd
+    }
 }
 
 ExecRetry {
