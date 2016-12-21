@@ -5,7 +5,7 @@ Param(
     [Parameter(Mandatory=$true)][string]$testCase,
     [Parameter(Mandatory=$true)][string]$winUser,
     [Parameter(Mandatory=$true)][string]$winPasswd,
-    [Parameter(Mandatory=$true)][string]$hypervNodes
+    [Parameter(Mandatory=$true)][array]$hypervNodes
 )
 
 $projectName = $buildFor.split('/')[-1]

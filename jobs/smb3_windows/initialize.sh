@@ -35,4 +35,4 @@ fi
 
 /usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv01_ip $JOB_TYPE
 /usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv02_ip $JOB_TYPE
-/usr/local/src/cinder-ci/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01|$hyperv02"
+/usr/local/src/cinder-ci/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02"
