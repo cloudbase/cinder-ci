@@ -123,13 +123,9 @@ join_windows(){
     run_ps_cmd_with_retry 3 $PARAMS "cd C:\cinder-ci; git checkout cambridge-test; git pull"
     echo "Run gerrit-git-prep on $PARAMS with zuul-site=$ZUUL_SITE zuul-ref=$ZUUL_REF zuul-change=$ZUUL_CHANGE zuul-project=$ZUUL_PROJECT"
     run_wsmancmd_with_retry 3 $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT"
-    echo "Cinder folder after gerrit-git-prep:"
-    run_wsmancmd_with_retry 3 $PARAMS 'cd c:\OpenStack\cinder; git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"'
     echo "Ensure service is configured with winuser=$WIN_USER and winpass=$WIN_PASS"
     run_ps_cmd_with_retry 3 $PARAMS "C:\cinder-ci\windows\scripts\EnsureOpenStackServices.ps1 $WIN_USER $WIN_PASS"
     echo "create cinder env on windows"
-    echo "cinder folder just before calling create-environment.ps1"
-    run_wsmancmd_with_retry 3 $PARAMS 'cd c:\OpenStack\cinder; git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"'
     run_ps_cmd_with_retry 3 $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase $JOB_TYPE -winUser $WIN_USER -winPasswd $WIN_PASS -hypervNodes \"$HYPERV_NODES\""
 }
 
