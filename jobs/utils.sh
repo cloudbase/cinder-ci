@@ -126,7 +126,7 @@ join_windows(){
     echo "Ensure service is configured with winuser=$WIN_USER and winpass=$WIN_PASS"
     run_ps_cmd_with_retry 3 $PARAMS "C:\cinder-ci\windows\scripts\EnsureOpenStackServices.ps1 $WIN_USER $WIN_PASS"
     echo "create cinder env on windows"
-    run_ps_cmd_with_retry 3 $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase $JOB_TYPE -winUser $WIN_USER -winPasswd $WIN_PASS -hypervNodes $HYPERV_NODES"
+    run_ps_cmd_with_retry 3 $PARAMS "C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase $JOB_TYPE -winUser $WIN_USER -winPasswd $WIN_PASS -hypervNodes \"$HYPERV_NODES\""
 }
 
 function get_hyperv_logs() {

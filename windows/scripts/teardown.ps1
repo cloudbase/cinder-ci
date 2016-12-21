@@ -53,4 +53,6 @@ Write-Host "Cleaning the Instances folder."
 Remove-Item -Recurse -Force $openstackDir\Instances\*
 Write-Host "Cleaning eventlog"
 cleareventlog
+Write-Host "Removing SMBShare"
+Remove-SmbShare -name smbshare -force
 Write-Host "Cleaning up process finished."
