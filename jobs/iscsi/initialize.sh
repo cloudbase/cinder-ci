@@ -29,10 +29,10 @@ if [[ ! $hyperv02_ip =~ ^10\.250\.[0-9]{1,2}\.[0-9]{1,3} ]]; then
 fi
 
 # Deploy devstack vm
-source /usr/local/src/cinder-ci/jobs/deploy_devstack_vm.sh $hyperv01_ip $hyperv02_ip
+/usr/local/src/cinder-ci/jobs/deploy_devstack_vm.sh $hyperv01_ip $hyperv02_ip
 # Deploy Windows Cinder vm
 #source /usr/local/src/cinder-ci/jobs/deploy_cinder_windows_vm.sh
 
-source /usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv01 $JOB_TYPE
-source /usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv02 $JOB_TYPE
-source /usr/local/src/cinder-ci/jobs/build_windows.sh $ws2012r2 $JOB_TYPE
+/usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv01_ip $JOB_TYPE
+/usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv02_ip $JOB_TYPE
+/usr/local/src/cinder-ci/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02"

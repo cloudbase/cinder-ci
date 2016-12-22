@@ -6,7 +6,8 @@ Param(
     [Parameter(Mandatory=$true)][string]$logDir,
     [Parameter(Mandatory=$true)][string]$lockPath,
     [Parameter(Mandatory=$true)][string]$username,
-    [Parameter(Mandatory=$true)][string]$password
+    [Parameter(Mandatory=$true)][string]$password,
+    [Parameter(Mandatory=$true)][array]$hypervNodes
 )
 
 $volumeDriver = 'cinder.volume.drivers.windows.windows.WindowsDriver'
