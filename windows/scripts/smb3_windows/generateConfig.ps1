@@ -61,6 +61,7 @@ if ((Get-WMIObject -namespace "root\cimv2" -class Win32_ComputerSystem).partofdo
 if (!(Get-SMBShare -Name SMBShare))
 {
     New-SMBShare -Name SMBShare -Path C:\SMBShare -FullAccess "$hostname\Administrator"
+    Grant-SmbShareAccess -Name SMBShare -AccountName "Administrator" -AccessRight Full -Force
 }
 
 $hypervNodes.split(",") | foreach {
