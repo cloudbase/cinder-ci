@@ -562,6 +562,10 @@ function exporthtmleventlog($path){
 	}
 }
 
+function log_message($message){
+    echo "[$(Get-Date)] $message"
+}
+
 function cleareventlog(){
 	Get-Eventlog -list | ForEach-Object {
 		Clear-Eventlog $_.LogDisplayName -ErrorAction SilentlyContinue
