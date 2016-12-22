@@ -39,7 +39,7 @@ if (Get-Process -Name python){
 #Remove-VM * -Force
 
 #destroy_planned_vms
-#cleanup_iscsi_targets
+cleanup_iscsi_targets
 
 Write-Host "Cleaning the build folder."
 Remove-Item -Recurse -Force $buildDir\*
@@ -55,4 +55,8 @@ Write-Host "Cleaning eventlog"
 cleareventlog
 Write-Host "Removing SMBShare"
 Remove-SmbShare -name smbshare -force
+# iscsi cleanup
+get-iscsivirtualdisksnapshot | Remove-IscsiVirtualDiskSnapshot
+get-iscsivirtualdisk | remove-iscsivirtualdisk
+Get-IscsiServerTarget | remove-IscsiServerTarget
 Write-Host "Cleaning up process finished."
