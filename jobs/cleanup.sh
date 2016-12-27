@@ -18,3 +18,6 @@ if [ -z "$DEBUG_JOB" ] || [ "$DEBUG_JOB" != "yes" ]; then
 else
     echo "Not cleaning up because debug job variable is set to true."
 fi
+
+echo "Cleaning up devstack params file"
+rm -f /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt

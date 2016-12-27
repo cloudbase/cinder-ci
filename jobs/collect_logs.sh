@@ -126,3 +126,6 @@ ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH
 
 echo "Fixing permissions on all log files on the logs server"
 ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY logs@logs.openstack.tld "chmod a+rx -R $LOGSDEST/"
+
+echo "Clean up local copy of aggregate archive"
+rm -f "aggregate-$NAME.tar.gz"
