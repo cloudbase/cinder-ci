@@ -64,6 +64,8 @@ iniset $TEMPEST_CONFIG scenario img_disk_format vhd
 iniset $TEMPEST_CONFIG orchestration build_timeout 45
 iniset $TEMPEST_CONFIG boto build_timeout 30
 
+set +e
+
 tests_file=$(tempfile)
 $basedir/get-tests.sh $project_name $tests_dir $test_suite $job_type > $tests_file
 cp $tests_file $basedir/normal_tests.txt
@@ -107,5 +109,6 @@ exit_code=$?
 echo "Total execution time: $SECONDS seconds."
 
 popd
+set -e
 
 exit $exit_code
