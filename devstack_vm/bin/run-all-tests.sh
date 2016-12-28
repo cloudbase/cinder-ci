@@ -1,29 +1,10 @@
 #!/bin/bash
-source /home/ubuntu/devstack/functions
-TEMPEST_CONFIG=/opt/stack/tempest/etc/tempest.conf
-
-iniset $TEMPEST_CONFIG compute volume_device_name "sdb"
-iniset $TEMPEST_CONFIG compute min_compute_nodes 2
-iniset $TEMPEST_CONFIG compute-feature-enabled rdp_console true
-iniset $TEMPEST_CONFIG compute-feature-enabled block_migrate_cinder_iscsi False
-
-iniset $TEMPEST_CONFIG scenario img_dir "/home/ubuntu/devstack/files/images"
-iniset $TEMPEST_CONFIG scenario img_file "cirros-0.3.3-x86_64.vhdx"
-iniset $TEMPEST_CONFIG scenario img_disk_format vhd
-
-IMAGE_REF=`iniget $TEMPEST_CONFIG compute image_ref`
-iniset $TEMPEST_CONFIG compute image_ref_alt $IMAGE_REF
-
-iniset $TEMPEST_CONFIG compute build_timeout 30
-iniset $TEMPEST_CONFIG orchestration build_timeout 45
-iniset $TEMPEST_CONFIG volume build_timeout 30
-iniset $TEMPEST_CONFIG boto build_timeout 30
-
-iniset $TEMPEST_CONFIG compute ssh_timeout 45
-iniset $TEMPEST_CONFIG compute allow_tenant_isolation True
 
 #cinder-specific job type parameter 
 job_type=$1
+
+source /home/ubuntu/devstack/functions
+TEMPEST_CONFIG=/opt/stack/tempest/etc/tempest.conf
 
 project="openstack/cinder"
 tests_dir=${2:-"/opt/stack/tempest"}
@@ -62,8 +43,30 @@ if [ ! -d "$tests_dir/.testrepository" ]; then
     pop_dir
 fi
 
+#Set tempest config options:
+IMAGE_REF=`iniget $TEMPEST_CONFIG compute image_ref`
+iniset $TEMPEST_CONFIG compute image_ref_alt $IMAGE_REF
+iniset $TEMPEST_CONFIG compute volume_device_name "sdb"
+iniset $TEMPEST_CONFIG compute min_compute_nodes 2
+iniset $TEMPEST_CONFIG compute build_timeout 30
+iniset $TEMPEST_CONFIG compute ssh_timeout 45
+iniset $TEMPEST_CONFIG compute allow_tenant_isolation True
+
+iniset $TEMPEST_CONFIG compute-feature-enabled rdp_console true
+iniset $TEMPEST_CONFIG compute-feature-enabled block_migrate_cinder_iscsi False
+
+iniset $TEMPEST_CONFIG volume build_timeout 30
+
+iniset $TEMPEST_CONFIG scenario img_dir "/home/ubuntu/devstack/files/images"
+iniset $TEMPEST_CONFIG scenario img_file "cirros-0.3.3-x86_64.vhdx"
+iniset $TEMPEST_CONFIG scenario img_disk_format vhd
+
+iniset $TEMPEST_CONFIG orchestration build_timeout 45
+iniset $TEMPEST_CONFIG boto build_timeout 30
+
 tests_file=$(tempfile)
 $basedir/get-tests.sh $project_name $tests_dir $test_suite $job_type > $tests_file
+cp $tests_file $basedir/normal_tests.txt
 
 $basedir/parallel-test-runner.sh $tests_file $tests_dir $log_file \
     $parallel_tests $max_attempts || true
@@ -90,9 +93,6 @@ else
 		rm $log_tmp
 	fi
 fi
-
-
-
 
 rm $tests_file
 
