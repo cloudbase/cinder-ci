@@ -33,6 +33,6 @@ fi
 # Deploy Windows Cinder vm
 #source /usr/local/src/cinder-ci/jobs/deploy_cinder_windows_vm.sh
 
-/usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv01_ip $JOB_TYPE
-/usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv02_ip $JOB_TYPE
+/usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv01_ip $JOB_TYPE 1
+/usr/local/src/cinder-ci/jobs/build_hyperv.sh $hyperv02_ip $JOB_TYPE 2
 /usr/local/src/cinder-ci/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02"
