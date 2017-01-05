@@ -43,6 +43,8 @@ cleanup_iscsi_targets
 
 Write-Host "Cleaning the build folder."
 Remove-Item -Recurse -Force $buildDir\*
+Write-Host "Cleaning the iSCSIVHDLocation folder."
+Remove-Item -Recurse -Force C:\iSCSIVHDLocation\*
 #Write-Host "Cleaning the virtualenv folder."
 #Remove-Item -Recurse -Force $virtualenv
 Write-Host "Cleaning the logs folder."
