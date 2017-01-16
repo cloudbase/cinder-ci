@@ -111,7 +111,16 @@ function archive_windows_logs() {
                 mkdir -p "$LOG_DST_WIN/$i"
                 for j in `ls -A "$WIN_LOGS/$i"`;
                 do
-                    $GZIP -c "$WIN_LOGS/$i/$j" > "$LOG_DST_WIN/$i/$j.gz" || emit_warning "Failed to archive $WIN_LOGS/$i/$j"
+                    if [ -d "$WIN_LOGS/$i/$j" ]
+                    then
+                        mkdir -p "LOG_DST_WIN/$i/$j"
+                        for k in `ls -A "$WIN_LOGS/$i/$j"`;
+                        do
+                            $GZIP -c "$WIN_LOGS/$i/$j/$k" > "$LOG_DST_WIN/$i/$j/$k.gz" || emit_warning "Failed to archive $WIN_LOGS/$i/$j/$k"
+                        done
+                    else
+                        $GZIP -c "$WIN_LOGS/$i/$j/$k" > "$LOG_DST_WIN/$i/$j.gz" || emit_warning "Failed to archive $WIN_LOGS/$i/$j"
+                    fi
                 done
             else
                 $GZIP -c "$WIN_LOGS/$i" > "$LOG_DST_WIN/$i.gz" || emit_warning "Failed to archive $WIN_LOGS/$i"
