@@ -520,7 +520,7 @@ function expand_template($template)
 function dumpeventlog($path){
 
     foreach ($i in (get-winevent -ListLog * |  ? {$_.RecordCount -gt 0 })) {
-                Write-Host "exporting $i.LogName as evtx"
+                Write-Host "exporting "$i.LogName" as evtx"
         $logName = "eventlog_" + $i.LogName + ".evtx"
         $logName = $logName.replace(" ","_").replace("/", "_").replace("\", "_")
         $bkup = Join-Path $path $logName
@@ -539,7 +539,7 @@ function exporthtmleventlog($path){
 
     foreach ($i in (get-winevent -ListLog * |  ? {$_.RecordCount -gt 0 })) {
         $Report = (get-winevent -LogName $i.LogName)
-                Write-Host "exporting $i.LogName as html"
+                Write-Host "exporting "$i.LogName" as html"
         $Report = $Report | ConvertTo-Html -Title "${i}" -Head $HTMLHeader -As Table
         $Report = $Report | ForEach-Object {$_ -replace "<body>", '<body id="body">'}
         $Report = $Report | ForEach-Object {$_ -replace "<table>", '<table class="sortable" id="table" cellspacing="0">'}
