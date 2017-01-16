@@ -56,8 +56,8 @@ run_wsmancmd_with_retry 3 $hyperv02 $WIN_USER $WIN_PASS 'sc qc neutron-hyperv-ag
 
 echo "Export eventlog entries to files"
 run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'powershell -executionpolicy remotesigned C:\cinder-ci\windows\scripts\export-eventlog.ps1'
-echo "Copy eventlog files"
-run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'powershell -executionpolicy remotesigned cp -Recurse -Container  C:\OpenStack\Log\Eventlog\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\'
+# echo "Copy eventlog files"
+# run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'powershell -executionpolicy remotesigned cp -Recurse -Container  C:\OpenStack\Log\Eventlog\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\'
     
 echo "Copy systeminfo"
 run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'systeminfo >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\systeminfo.log'

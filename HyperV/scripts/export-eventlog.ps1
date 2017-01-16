@@ -10,6 +10,5 @@ if (Test-Path $eventlogPath){
 
 New-Item -ItemType Directory -Force -Path $eventlogPath
 
-#exporteventlog $eventlogPath
 dumpeventlog $eventlogPath
 exporthtmleventlog $eventlogPath
