@@ -8,9 +8,9 @@ logs_project=cinder
 
 set +e
 
-ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "mkdir -p /openstack/logs/${hyperv01%%[.]*}"
-ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "mkdir -p /openstack/logs/${hyperv02%%[.]*}"
-ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "mkdir -p /openstack/logs/windows"
+ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "mkdir -p /openstack/logs/${hyperv01%%[.]*}/eventlog"
+ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "mkdir -p /openstack/logs/${hyperv02%%[.]*}/eventlog"
+ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "mkdir -p /openstack/logs/windows/eventlog"
 ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "sudo chown -R nobody:nogroup /openstack/logs"
 ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "sudo chmod -R 777 /openstack/logs"
 
@@ -20,7 +20,7 @@ echo "Processing logs for $hyperv01"
 
 run_wsmancmd_with_retry 3 $hyperv01 $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned Copy-Item -Recurse C:\OpenStack\Log\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\'${hyperv01%%[.]*}'\'
 run_wsmancmd_with_retry 3 $hyperv01 $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\export-eventlog.ps1'
-run_wsmancmd_with_retry 3 $hyperv01 $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned cp -Recurse -Container  C:\OpenStack\Logs\Eventlog\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\'${hyperv01%%[.]*}'\'
+run_wsmancmd_with_retry 3 $hyperv01 $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned cp -Recurse -Container  C:\OpenStack\Logs\Eventlog\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\'${hyperv01%%[.]*}'\eventlog'
 
 run_wsmancmd_with_retry 3 $hyperv01 $WIN_USER $WIN_PASS 'systeminfo >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\'${hyperv01%%[.]*}'\systeminfo.log'
 run_wsmancmd_with_retry 3 $hyperv01 $WIN_USER $WIN_PASS 'wmic qfe list >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\'${hyperv01%%[.]*}'\windows_hotfixes.log'
@@ -41,7 +41,7 @@ echo "Processing logs for $hyperv02"
 
 run_wsmancmd_with_retry 3 $hyperv02 $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned Copy-Item -Recurse C:\OpenStack\Log\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\'${hyperv02%%[.]*}'\'
 run_wsmancmd_with_retry 3 $hyperv02 $WIN_USER $WIN_PASS 'powershell -executionpolicy remotesigned C:\OpenStack\cinder-ci\HyperV\scripts\export-eventlog.ps1'
-run_wsmancmd_with_retry 3 $hyperv02 $WIN_USER $WIN_PASS 'powershell -executionpolicy remotesigned cp -Recurse -Container  C:\OpenStack\Logs\Eventlog\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\'${hyperv02%%[.]*}'\'
+run_wsmancmd_with_retry 3 $hyperv02 $WIN_USER $WIN_PASS 'powershell -executionpolicy remotesigned cp -Recurse -Container  C:\OpenStack\Logs\Eventlog\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\'${hyperv02%%[.]*}'\eventlog'
 
 run_wsmancmd_with_retry 3 $hyperv02 $WIN_USER $WIN_PASS 'systeminfo >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\'${hyperv02%%[.]*}'\systeminfo.log'
 run_wsmancmd_with_retry 3 $hyperv02 $WIN_USER $WIN_PASS 'wmic qfe list >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\'${hyperv02%%[.]*}'\windows_hotfixes.log'
@@ -59,10 +59,12 @@ run_wsmancmd_with_retry 3 $hyperv02 $WIN_USER $WIN_PASS 'sc qc nova-compute >> \
 run_wsmancmd_with_retry 3 $hyperv02 $WIN_USER $WIN_PASS 'sc qc neutron-hyperv-agent >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\'${hyperv02%%[.]*}'\neutron_hyperv_agent_service.log'
 
 echo "Processing logs for $ws2012r2"
+
+run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned Copy-Item -Recurse C:\OpenStack\Log\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows'
 echo "Export eventlog entries to files"
 run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'powershell -executionpolicy remotesigned C:\cinder-ci\windows\scripts\export-eventlog.ps1'
 echo "Copy eventlog files"
-run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'powershell -executionpolicy remotesigned cp -Recurse -Container  C:\OpenStack\Log\Eventlog\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\'
+run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'powershell -executionpolicy remotesigned cp -Recurse -Container  C:\OpenStack\Log\Eventlog\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\eventlog'
 echo "Copy systeminfo"
 run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'systeminfo >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\systeminfo.log'
 echo "Copy windows updates status"
@@ -83,7 +85,7 @@ run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'powershell -executionpo
 echo "Copy list of windows services"
 run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'powershell -executionpolicy remotesigned get-service ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_service.log'
 echo "Copy cinder volume service details"
-run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'sc qc cinder-volume >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\cinder-volume.log'
+run_wsmancmd_with_retry 3 $ws2012r2 $WIN_USER $WIN_PASS 'sc qc cinder-volume >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\cinder-volume_service.log'
 
 set +f
 
