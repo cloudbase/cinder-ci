@@ -9,8 +9,7 @@ function run_test_retry(){
     local i=0
     local exit_code=0
 
-    pushd . > /dev/null
-    cd $tests_dir
+    pushd $tests_dir > /dev/null
 
     while : ; do
         > $tmp_log_file

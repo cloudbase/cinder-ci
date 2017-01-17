@@ -54,33 +54,25 @@ function set_win_config_file_entry() {
     run_wsman_ps $win_host "cd $repo_dir\\windows; Import-Module .\ini.psm1; Set-IniFileValue -Path \\\"$host_config_file_path\\\" -Section $config_section -Key $entry_name -Value $entry_value"
 }
 
-function push_dir() {
-    pushd . > /dev/null
-}
-
-function pop_dir() {
-    popd > /dev/null
-}
-
 function clone_pull_repo() {
     local repo_dir=$1
     local repo_url=$2
     local repo_branch=${3:-"master"}
 
-    push_dir
     if [ -d "$repo_dir/.git" ]; then
-        cd $repo_dir
+        pushd $repo_dir > /dev/null
         git checkout $repo_branch
         git pull
+        popd > /dev/null
     else
-        cd `dirname $repo_dir`
+        pushd `dirname $repo_dir` > /dev/null
         git clone $repo_url
         cd $repo_dir
         if [ "$repo_branch" != "master" ]; then
             git checkout -b $repo_branch origin/$repo_branch
         fi
+        popd > /dev/null
     fi
-    pop_dir
 }
 
 function check_get_image() {

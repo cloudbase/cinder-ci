@@ -150,14 +150,17 @@ function archive_windows_configs(){
 }
 
 function archive_tempest_files() {
-    pushd "$TEMPEST_LOGS"
-    find . -type f -exec gzip "{}" \;
-    popd
-    cp -r "$TEMPEST_LOGS" "$LOG_DST"
-    # for i in `ls -A $TEMPEST_LOGS`
-    # do
-    #     $GZIP "$TEMPEST_LOGS/$i" -c > "$LOG_DST/$i.gz" || emit_error "Failed to archive tempest logs"
-    # done
+    if [ -d "$TEMPEST_LOGS" ]
+    then
+        pushd "$TEMPEST_LOGS"
+        find . -type f -exec gzip "{}" \;
+        popd
+        cp -r "$TEMPEST_LOGS" "$LOG_DST"
+        # for i in `ls -A $TEMPEST_LOGS`
+        # do
+        #     $GZIP "$TEMPEST_LOGS/$i" -c > "$LOG_DST/$i.gz" || emit_error "Failed to archive tempest logs"
+        # done
+    fi
 }
 
 # Clean
