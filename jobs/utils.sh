@@ -188,3 +188,7 @@ post_build_restart_cinder_windows_services (){
     run_wsmancmd_with_retry 18 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\cinder-ci\windows\scripts\post-build-restart-services.ps1 2>&1"'
 }
 
+function timestamp(){
+    echo `date -u +%H:%M:%S`
+}
+

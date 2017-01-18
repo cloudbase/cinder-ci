@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /usr/local/src/cinder-ci/jobs/utils.sh
+source /usr/local/src/cinder-ci-2016/jobs/utils.sh
 
 hyperv01=$1
 hyperv02=$2
@@ -9,13 +9,13 @@ hyperv02=$2
 update_local_conf (){
     if [ $JOB_TYPE = "smb3_linux" ]
     then 
-        EXTRA_OPTS_PATH="/usr/local/src/cinder-ci/jobs/smb3_linux/local-conf-extra"
+        EXTRA_OPTS_PATH="/usr/local/src/cinder-ci-2016/jobs/smb3_linux/local-conf-extra"
     elif [ $JOB_TYPE = "smb3_windows" ]
         then
-            EXTRA_OPTS_PATH="/usr/local/src/cinder-ci/jobs/smb3_windows/local-conf-extra"
+            EXTRA_OPTS_PATH="/usr/local/src/cinder-ci-2016/jobs/smb3_windows/local-conf-extra"
         elif [ $JOB_TYPE = "iscsi" ]
             then            
-                EXTRA_OPTS_PATH="/usr/local/src/cinder-ci/jobs/iscsi/local-conf-extra"
+                EXTRA_OPTS_PATH="/usr/local/src/cinder-ci-2016/jobs/iscsi/local-conf-extra"
             else 
                 echo "No proper JOB_TYPE received!"
                 exit 1
@@ -57,24 +57,29 @@ then
     set +e
     if (`nova list | grep "$NAME" > /dev/null 2>&1`); then nova delete "$NAME"; fi
     set -e
-    echo NAME=$NAME >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo ZUUL_BRANCH=$ZUUL_BRANCH >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo DEVSTACK_SSH_KEY=$DEVSTACK_SSH_KEY >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+
+    echo NAME=$NAME | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo ZUUL_PROJECT=$ZUUL_PROJECT | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo ZUUL_BRANCH=$ZUUL_BRANCH | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo ZUUL_CHANGE=$ZUUL_CHANGE | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo ZUUL_PATCHSET=$ZUUL_PATCHSET | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo ZUUL_UUID=$ZUUL_UUID | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo IS_DEBUG_JOB=$IS_DEBUG_JOB | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo DEVSTACK_SSH_KEY=$DEVSTACK_SSH_KEY | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+
+    ZUUL_SITE=`echo "$ZUUL_URL" |sed 's/.\{2\}$//'`
+    echo ZUUL_SITE=$ZUUL_SITE | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
     NET_ID=$(nova net-list | grep 'private' | awk '{print $2}')
-    echo NET_ID=$NET_ID >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo NET_ID=$NET_ID | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-    echo NAME=$NAME
-    echo NET_ID=$NET_ID
-    
-    devstack_image="devstack-80v4"
-    echo "Image used is: $devstack_image"
-    
+    DEVSTACK_IMAGE="devstack-81v1"
+    echo DEVSTACK_IMAGE=$NET_ID | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+ 
     echo "Deploying devstack $NAME"
-    VMID=$(nova boot --config-drive true --flavor cinder.linux --image $devstack_image --key-name default --security-groups devstack --nic net-id="$NET_ID" "$NAME" --poll | awk '{if (NR == 21) {print $4}}')
+    VMID=$(nova boot --config-drive true --flavor cinder.linux --image $DEVSTACK_IMAGE --key-name default --security-groups devstack --nic net-id="$NET_ID" --nic net-id="$NET_ID" "$NAME" --poll | awk '{if (NR == 21) {print $4}}')
     export VMID=$VMID
-    echo VMID=$VMID >>  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo VMID=$VMID
+    echo VMID=$VMID | tee -a  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
     if [ $? -ne 0 ]
     then
@@ -112,7 +117,7 @@ then
     echo "nova console-log output:"
     nova console-log "$VMID"
 
-    echo FIXED_IP=$FIXED_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo FIXED_IP=$FIXED_IP | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
     #DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP"
     #if [ -z "$DEVSTACK_FLOATING_IP" ]
@@ -120,7 +125,7 @@ then
         #exit 1
     #fi
     DEVSTACK_FLOATING_IP=$FIXED_IP
-    echo DEVSTACK_FLOATING_IP=$FIXED_IP >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo DEVSTACK_FLOATING_IP=$FIXED_IP | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
     #exec_with_retry 15 5 "nova add-floating-ip $VMID $DEVSTACK_FLOATING_IP"
 
@@ -137,10 +142,10 @@ then
     fi
 
     # Add 1 more interface after successful SSH
-    nova interface-attach --net-id "$NET_ID" "$VMID"
+    #nova interface-attach --net-id "$NET_ID" "$VMID"
 
     echo "Copy scripts to devstack VM"
-    scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/
+    scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci-2016/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/
     
     # Repository section
     echo "setup apt-cacher-ng:"
@@ -178,10 +183,7 @@ then
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "/home/ubuntu/bin/update_devstack_repos.sh --branch $ZUUL_BRANCH --build-for $ZUUL_PROJECT" 6
 
     echo "Ensure configs are copied over"
-    scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci/devstack_vm/devstack/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/devstack
-
-    ZUUL_SITE=`echo "$ZUUL_URL" |sed 's/.\{2\}$//'`
-    echo ZUUL_SITE=$ZUUL_SITE >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci-2016/devstack_vm/devstack/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/devstack
 
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p -m 777 /openstack/volumes" 6
 
@@ -191,12 +193,12 @@ then
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "wget http://10.20.1.14:8080/cirros-0.3.3-x86_64.vhdx -O /home/ubuntu/devstack/files/images/cirros-0.3.3-x86_64.vhdx" 6
 
     # Set ZUUL IP in hosts file
-    ZUUL_CINDER="10.21.7.213"
-    if  ! grep -qi zuul /etc/hosts ; then
-        run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo '$ZUUL_CINDER zuul-cinder.openstack.tld' | sudo tee -a /etc/hosts"
-        run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo '10.9.1.27 zuul-ssd-0.openstack.tld' | sudo tee -a /etc/hosts"
-        run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo '10.9.1.29 zuul-ssd-1.openstack.tld' | sudo tee -a /etc/hosts"
-    fi
+    #ZUUL_CINDER="10.21.7.213"
+    #if  ! grep -qi zuul /etc/hosts ; then
+    #    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo '$ZUUL_CINDER zuul-cinder.openstack.tld' | sudo tee -a /etc/hosts"
+    #    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo '10.9.1.27 zuul-ssd-0.openstack.tld' | sudo tee -a /etc/hosts"
+    #    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo '10.9.1.29 zuul-ssd-1.openstack.tld' | sudo tee -a /etc/hosts"
+    #fi
 
     echo "Reserve VLAN range for test"
     set +e
