@@ -247,6 +247,10 @@ pushd C:\
 ExecRetry {
     GitClonePull "$buildDir\os-win\" "https://github.com/openstack/os-win" "master"
     pushd $buildDir\os-win
+
+    git fetch git://git.openstack.org/openstack/os-win refs/changes/87/421787/2
+    git cherry-pick FETCH_HEAD
+
     pip install .
     popd
 }
