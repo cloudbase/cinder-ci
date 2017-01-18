@@ -59,4 +59,6 @@ Remove-SmbShare -name smbshare -force
 get-iscsivirtualdisksnapshot | Remove-IscsiVirtualDiskSnapshot
 get-iscsivirtualdisk | remove-iscsivirtualdisk
 Get-IscsiServerTarget | remove-IscsiServerTarget
+Write-Host "Cleaning the iSCSIVHDLocation folder."
+Remove-Item -Recurse -Force C:\iSCSIVHDLocation\*
 Write-Host "Cleaning up process finished."
