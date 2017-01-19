@@ -35,7 +35,7 @@ pushd C:\
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
     Remove-Item -Force -Recurse "$scriptdir\* -ErrorAction SilentlyContinue"
-    GitClonePull "$scriptdir" "https://github.com/cloudbase/cinder-ci" "cambridge-test"
+    GitClonePull "$scriptdir" "https://github.com/rbuzatu90/cinder-ci" "cambridge-2016"
 }
 
 . "$scriptdir\windows\scripts\utils.ps1"
@@ -70,6 +70,7 @@ else
 }
 Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 
+$ErrorActionPreference = "Continue"
 & easy_install -U pip
 & pip install -U --pre pymi
 & pip install -U virtualenv
@@ -115,14 +116,6 @@ if (!(Test-Path "$buildDir\cinder\setup.py")){
 
 if (!(Test-Path $cinderTemplate)){
     Throw "Cinder template not found"
-}
-
-if (!(Test-Path $remoteLogs)){
-    mkdir $remoteLogs
-}
-
-if (!(Test-Path $remoteConfigs)){
-    mkdir $remoteConfigs
 }
 
 #copy distutils.cfg
@@ -219,7 +212,7 @@ popd
 Copy-Item "$templateDir\policy.json" "$configDir\" 
 Copy-Item "$templateDir\interfaces.template" "$configDir\"
 
-& $scriptdir\windows\scripts\$testCase\generateConfig.ps1 $configDir $cinderTemplate $devstackIP $rabbitUser $openstackLogs $lockPath $winUser $winPasswd $hypervNodes > "$remoteLogs\generateConfig_error.txt" 2>&1
+& $scriptdir\windows\scripts\$testCase\generateConfig.ps1 $configDir $cinderTemplate $devstackIP $rabbitUser $openstackLogs $lockPath $winUser $winPasswd $hypervNodes > "$openstackLogs\generateConfig_error.txt" 2>&1
 if ($LastExitCode -ne 0) {
  echo "generateConfig has failed!"
 }
@@ -259,7 +252,7 @@ Try
 }
 Catch
 {
-    $proc = Start-Process -PassThru -RedirectStandardError "$remoteLogs\process_error.txt" -RedirectStandardOutput "$remoteLogs\process_output.txt" -FilePath "$pythonDir\Scripts\cinder-volume.exe" -ArgumentList "--config-file $configDir\cinder.conf"
+    $proc = Start-Process -PassThru -RedirectStandardError "$openstackLogs\process_error.txt" -RedirectStandardOutput "$openstackLogs\process_output.txt" -FilePath "$pythonDir\Scripts\cinder-volume.exe" -ArgumentList "--config-file $configDir\cinder.conf"
     Start-Sleep -s 30
     if (! $proc.HasExited) {Stop-Process -Id $proc.Id -Force}
     Throw "Can not start the cinder-volume service"
@@ -268,10 +261,10 @@ Start-Sleep -s 30
 if ($(get-service cinder-volume).Status -eq "Stopped")
 {
     Write-Host "We try to start:"
-    Write-Host Start-Process -PassThru -RedirectStandardError "$remoteLogs\process_error.txt" -RedirectStandardOutput "$remoteLogs\process_output.txt" -FilePath "$pythonDir\Scripts\cinder-volume.exe" -ArgumentList "--config-file $configDir\cinder.conf"
+    Write-Host Start-Process -PassThru -RedirectStandardError "$openstackLogs\process_error.txt" -RedirectStandardOutput "$openstackLogs\process_output.txt" -FilePath "$pythonDir\Scripts\cinder-volume.exe" -ArgumentList "--config-file $configDir\cinder.conf"
     Try
     {
-    	$proc = Start-Process -PassThru -RedirectStandardError "$remoteLogs\process_error.txt" -RedirectStandardOutput "$remoteLogs\process_output.txt" -FilePath "$pythonDir\Scripts\cinder-volume.exe" -ArgumentList "--config-file $configDir\cinder.conf"
+    	$proc = Start-Process -PassThru -RedirectStandardError "$openstackLogs\process_error.txt" -RedirectStandardOutput "$openstackLogs\process_output.txt" -FilePath "$pythonDir\Scripts\cinder-volume.exe" -ArgumentList "--config-file $configDir\cinder.conf"
     }
     Catch
     {

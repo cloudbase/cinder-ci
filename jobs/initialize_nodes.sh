@@ -1,9 +1,7 @@
 #!/bin/bash
 
 source /usr/local/src/cinder-ci-2016/jobs/utils.sh
-
-hyperv01=$1
-hyperv02=$2
+source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 # Functions section
 update_local_conf (){
@@ -45,48 +43,34 @@ esac
 if [[ ! -z $DEBUG_JOB ]] && [[ $DEBUG_JOB = "yes" ]]; then 
 	NAME="$NAME-dbg"
 fi
+
 export NAME=$NAME
+echo NAME=$NAME | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-DEVSTACK_VM_STATUS="NOT_OK"
-COUNT=0
-while [ $DEVSTACK_VM_STATUS != "OK" ]
-do
-if [ $COUNT -le 3 ]
-then
-    COUNT=$(($COUNT + 1))
-    set +e
-    if (`nova list | grep "$NAME" > /dev/null 2>&1`); then nova delete "$NAME"; fi
-    set -e
+NET_ID=$(nova net-list | grep 'private' | awk '{print $2}')
+echo NET_ID=$NET_ID | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-    echo NAME=$NAME | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo ZUUL_PROJECT=$ZUUL_PROJECT | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo ZUUL_BRANCH=$ZUUL_BRANCH | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo ZUUL_CHANGE=$ZUUL_CHANGE | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo ZUUL_PATCHSET=$ZUUL_PATCHSET | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo ZUUL_UUID=$ZUUL_UUID | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo IS_DEBUG_JOB=$IS_DEBUG_JOB | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo DEVSTACK_SSH_KEY=$DEVSTACK_SSH_KEY | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+VM_OK=1
+while [ $VM_OK -ne 0 ]; do
 
-    ZUUL_SITE=`echo "$ZUUL_URL" |sed 's/.\{2\}$//'`
-    echo ZUUL_SITE=$ZUUL_SITE | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+  #  set +e
+ #   if (`nova list | grep "$NAME" > /dev/null 2>&1`); then nova delete "$NAME"; fi
+#    set -e
 
-    NET_ID=$(nova net-list | grep 'private' | awk '{print $2}')
-    echo NET_ID=$NET_ID | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-    DEVSTACK_IMAGE="devstack-81v1"
-    echo DEVSTACK_IMAGE=$NET_ID | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
- 
+
     echo "Deploying devstack $NAME"
     VMID=$(nova boot --config-drive true --flavor cinder.linux --image $DEVSTACK_IMAGE --key-name default --security-groups devstack --nic net-id="$NET_ID" --nic net-id="$NET_ID" "$NAME" --poll | awk '{if (NR == 21) {print $4}}')
-    export VMID=$VMID
-    echo VMID=$VMID | tee -a  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    NOVABOOT_EXIT=$?
 
-    if [ $? -ne 0 ]
+    if [ $NOVABOOT_EXIT -ne 0 ]
     then
         echo "Failed to create devstack VM: $VMID"
        nova show "$VMID"
        exit 1
     fi
+
+    export VMID=$VMID
 
     echo "Fetching devstack VM fixed IP address"
     FIXED_IP=$(nova show "$VMID" | grep "private network" | awk '{print $5}')
@@ -114,10 +98,7 @@ then
 
     echo "nova show output:"
     nova show "$VMID"
-    echo "nova console-log output:"
-    nova console-log "$VMID"
 
-    echo FIXED_IP=$FIXED_IP | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
     #DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP"
     #if [ -z "$DEVSTACK_FLOATING_IP" ]
@@ -125,21 +106,66 @@ then
         #exit 1
     #fi
     DEVSTACK_FLOATING_IP=$FIXED_IP
-    echo DEVSTACK_FLOATING_IP=$FIXED_IP | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
     #exec_with_retry 15 5 "nova add-floating-ip $VMID $DEVSTACK_FLOATING_IP"
 
     nova show "$VMID"
 
     echo "Wait for answer on port 22 on devstack"
+    sleep 30
+
     #exec_with_retry 25 30 "nc -z -w3 $DEVSTACK_FLOATING_IP 22"
+    set +e
     wait_for_listening_port $FIXED_IP 22 30
-    if [ $? -ne 0 ]
-    then
-        echo "Failed listening for ssh port on devstack."
-        nova console-log "$VMID"
-        exit 1
+    status=$?
+    set -e
+    if [ $status -eq 0 ]; then
+        VM_OK=0
+    else
+        echo "VM connectivity NOT OK, rebooting VM"
+        nova reboot "$VMID"
+        sleep 90
+        set +e
+        wait_for_listening_port $FIXED_IP 22 30
+        status=$?
+        set -e
+        if [ $status -eq 0 ]; then
+            VM_OK=0
+            echo "VM connectivity OK"
+        else
+            #exec_with_retry "nova floating-ip-disassociate $VMID $FLOATING_IP" 15 5
+            echo "nova console-log $VMID:"; nova console-log "$VMID"; echo "Failed listening for ssh port on devstack"
+            echo "Deleting VM $VMID"
+            nova delete $VMID
+        fi
     fi
+done
+ 
+
+
+
+
+
+    echo DEVSTACK_FLOATING_IP=$FIXED_IP | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo FIXED_IP=$FIXED_IP | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    echo VMID=$VMID | tee -a  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+    # Since we now have all the infos necessary for building HyperV and ws2012 nodes go ahead and build em
+
+    echo "Starting building HyperV and ws2012 nodes"
+    nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv01 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv01-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+    pid_hv01=$!
+
+    nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv02 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+    pid_hv02=$!
+
+    nohup /usr/local/src/cinder-ci-2016/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02" > /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+    pid_ws2012=$!
+
+
+
+
+
+
 
     # Add 1 more interface after successful SSH
     #nova interface-attach --net-id "$NET_ID" "$VMID"
@@ -220,14 +246,67 @@ then
     # Update local conf
     update_local_conf
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i '3 i\branch=$ZUUL_BRANCH' /home/ubuntu/devstack/local.sh"
-    # Run devstack
-    echo "Run stack.sh on devstack"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/keystonerc && /home/ubuntu/bin/run_devstack.sh $JOB_TYPE $ZUUL_BRANCH $hyperv01 $hyperv02" 6
-    if [ $? -ne 0 ]
-    then
-        echo "Failed to install devstack on cinder vm!"
+    
+    nohup /usr/local/src/cinder-ci-2016/jobs/build_devstack.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02" > /home/jenkins-slave/logs/build-devstack-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+    pid_devstack=$!
+
+    TIME_COUNT=0
+    PROC_COUNT=4
+
+    echo `timestamp` "Start waiting for parallel init jobs."
+
+    finished_devstack=0;
+    finished_hv01=0;
+    finished_hv02=0;
+    finished_ws2012=0;
+
+    while [[ $TIME_COUNT -lt 60 ]] && [[ $PROC_COUNT -gt 0 ]]; do
+        if [[ $finished_devstack -eq 0 ]]; then
+            ps -p $pid_devstack > /dev/null 2>&1 || finished_devstack=$?
+            [[ $finished_devstack -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building devstack"
+        fi
+        if [[ $finished_hv01 -eq 0 ]]; then
+            ps -p $pid_hv01 > /dev/null 2>&1 || finished_hv01=$?
+            [[ $finished_hv01 -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building $hyperv01"
+        fi
+        if [[ $finished_ws2012 -eq 0 ]]; then
+            ps -p $pid_ws2012 > /dev/null 2>&1 || finished_ws2012=$?
+            [[ $finished_ws2012 -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building $ws2012r2"
+        fi
+        if [[ $finished_hv02 -eq 0 ]]; then
+            ps -p $pid_hv02 > /dev/null 2>&1 || finished_hv02=$?
+            [[ $finished_hv02 -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building $hyperv02"
+        fi
+        if [[ $PROC_COUNT -gt 0 ]]; then
+            sleep 1m
+            TIME_COUNT=$(( $TIME_COUNT +1 ))
+        fi
+    done
+
+    echo `timestamp` "Finished waiting for the parallel init jobs."
+    echo `timestamp` "We looped $TIME_COUNT times, and when finishing we have $PROC_COUNT threads still active"
+
+    OSTACK_PROJECT=`echo "$ZUUL_PROJECT" | cut -d/ -f2`
+
+    if [[ ! -z $IS_DEBUG_JOB ]] && [[ $IS_DEBUG_JOB == "yes" ]]
+        then
+            echo "All build logs can be found in http://64.119.130.115/debug/$OSTACK_PROJECT/$ZUUL_CHANGE/$ZUUL_PATCHSET/"
+        else
+            echo "All build logs can be found in http://64.119.130.115/$OSTACK_PROJECT/$ZUUL_CHANGE/$ZUUL_PATCHSET/"
+    fi
+
+    if [[ $PROC_COUNT -gt 0 ]]; then
+        kill -9 $pid_devstack > /dev/null 2>&1
+        kill -9 $pid_hv01 > /dev/null 2>&1
+        kill -9 $pid_hv02 > /dev/null 2>&1
+        echo "Not all build threads finished in time, initialization process failed."
         exit 1
     fi
+
+    echo "Doing post init stuff"
+    echo "Test that we have one cinder volume active"
+    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'source /home/ubuntu/keystonerc; CINDER_COUNT=$(cinder service-list | grep cinder-volume | grep -c -w up); if [ "$CINDER_COUNT" == 1 ];then cinder service-list; else cinder service-list; exit 1;fi' 20
+
     # Run post_stack
     echo "Run post_stack scripts on devstack"
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/keystonerc && /home/ubuntu/bin/post_stack.sh" 6
@@ -237,9 +316,5 @@ then
         exit 1
     else
         DEVSTACK_VM_STATUS="OK"
+        echo "Initialize part finished"
     fi
-else
-    echo "Counter for devstack deploy has been reached! Build has failed."
-    exit 1
-fi
-done

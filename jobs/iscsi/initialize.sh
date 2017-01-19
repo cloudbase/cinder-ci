@@ -24,18 +24,17 @@ fi
 echo `timestamp` "Started to build devstack as a threaded job"
 
 # Deploy devstack vm
-nohup /usr/local/src/cinder-ci-2016/jobs/deploy_devstack_vm.sh $hyperv01_ip $hyperv02_ip > /home/jenkins-slave/logs/devstack-build-log-$ZUUL_UUID 2>&1 &
+nohup /usr/local/src/cinder-ci-2016/jobs/deploy_devstack_vm.sh $hyperv01_ip $hyperv02_ip > /home/jenkins-slave/logs/devstack-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
 pid_devstack=$!
 # Deploy Windows Cinder vm
-#source /usr/local/src/cinder-ci/jobs/deploy_cinder_windows_vm.sh
 
-nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv01_ip $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv01-build-log-$ZUUL_UUID 2>&1 &
+nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv01_ip $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv01-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
 pid_hv1=$!
 
-nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv02_ip $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID 2>&1 &
+nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv02_ip $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
 pid_hv2=$!
 
-nohup /usr/local/src/cinder-ci-2016/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02" > /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID 2>&1 &
+nohup /usr/local/src/cinder-ci-2016/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02" > /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
 pid_ws2016=$!
 
 TIME_COUNT=0
@@ -77,9 +76,9 @@ echo `timestamp` "We looped $TIME_COUNT times, and when finishing we have $PROC_
 OSTACK_PROJECT=`echo "$ZUUL_PROJECT" | cut -d/ -f2`
 
 if [[ ! -z $IS_DEBUG_JOB ]] && [[ $IS_DEBUG_JOB == "yes" ]]; then
-        echo "All build logs can be found in http://64.119.130.115/debug/$OSTACK_PROJECT/$JOB_TYPE/$ZUUL_CHANGE/$ZUUL_PATCHSET/"
+        echo "All build logs can be found in http://64.119.130.115/debug/$OSTACK_PROJECT/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE"
     else
-        echo "All build log can be found in http://64.119.130.115/$OSTACK_PROJECT/$JOB_TYPE/$ZUUL_CHANGE/$ZUUL_PATCHSET/"
+        echo "All build log can be found in http://64.119.130.115/$OSTACK_PROJECT/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE"
 fi
 
 if [[ $PROC_COUNT -gt 0 ]]; then

@@ -97,7 +97,7 @@ echo "Collecting logs"
 if [ -z "$DEBUG_JOB" ] || [ "$DEBUG_JOB" != "yes" ]; then
     LOGSDEST="/srv/logs/cinder/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE"
 else
-    LOGSDEST="/srv/logs/cinder/debug/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE"
+    LOGSDEST="/srv/logs/debug/cinder/$ZUUL_CHANGE/$ZUUL_PATCHSET/$JOB_TYPE"
 fi
 
 echo "Creating logs destination folder"

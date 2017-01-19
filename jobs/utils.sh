@@ -97,11 +97,12 @@ run_ps_cmd_with_retry () {
 }
 
 function join_hyperv (){
-    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/cloudbase/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-test >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1'
+    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell if (-Not (test-path '$LOG_DIR')){mkdir '$LOG_DIR'}'
+    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/rbuzatu90/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-2016 >> '$LOG_DIR'\create-environment-'$1'.log 2>&1'
     run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\teardown.ps1'
-    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\EnsureOpenStackServices.ps1 Administrator H@rd24G3t >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1'
-    [ "$IS_DEBUG_JOB" == "yes" ] && run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell Write-Host Calling create-environment with devstackIP='$FIXED_IP' branchName=master buildFor=openstack/neutron '$IS_DEBUG_JOB' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1"'
-    run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\create-environment.ps1 -devstackIP '$FIXED_IP' -branchName master -buildFor openstack/neutron '$IS_DEBUG_JOB' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$1'.log 2>&1"'
+    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\EnsureOpenStackServices.ps1 Administrator H@rd24G3t >> '$LOG_DIR'\create-environment-'$1'.log 2>&1'
+    [ "$IS_DEBUG_JOB" == "yes" ] && run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell Write-Host Calling create-environment with devstackIP='$FIXED_IP' branchName=master buildFor=openstack/neutron '$IS_DEBUG_JOB' >> '$LOG_DIR'\create-environment-'$1'.log 2>&1"'
+    run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\create-environment.ps1 -devstackIP '$FIXED_IP' -branchName master -buildFor openstack/neutron '$IS_DEBUG_JOB' >> '$LOG_DIR'\create-environment-'$1'.log 2>&1"'
 }
 
 join_windows(){
@@ -118,22 +119,23 @@ join_windows(){
     echo "Ensure c:\cinder-ci folder exists and is empty."
     run_ps_cmd_with_retry 3 $PARAMS "if (Test-Path -Path C:\cinder-ci) {Remove-Item -Force -Recurse C:\cinder-ci\*} else {New-Item -Path C:\ -Name cinder-ci -Type directory}"
     echo "git clone cinder-ci"
-    run_wsmancmd_with_retry 3 $PARAMS "git clone https://github.com/cloudbase/cinder-ci C:\cinder-ci"
+    run_wsmancmd_with_retry 3 $PARAMS "git clone https://github.com/rbuzatu90/cinder-ci C:\cinder-ci"
     echo "cinder-ci: checkout cambridge-test and pull latest"
-    run_ps_cmd_with_retry 3 $PARAMS "cd C:\cinder-ci; git checkout cambridge-test; git pull"
+    run_ps_cmd_with_retry 3 $PARAMS "cd C:\cinder-ci; git checkout cambridge-2016; git pull"
     echo "Run gerrit-git-prep on $PARAMS with zuul-site=$ZUUL_SITE zuul-ref=$ZUUL_REF zuul-change=$ZUUL_CHANGE zuul-project=$ZUUL_PROJECT"
     run_wsmancmd_with_retry 3 $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT"
     echo "Ensure service is configured with winuser=$WIN_USER and winpass=$WIN_PASS"
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\EnsureOpenStackServices.ps1 '$WIN_USER' '$WIN_PASS' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$WIN_IP'.log 2>&1"'
+    run_ps_cmd_with_retry 3 $PARAMS 'if (-Not (test-path '$LOG_DIR')){mkdir '$LOG_DIR'}'
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\EnsureOpenStackServices.ps1 '$WIN_USER' '$WIN_PASS' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
     echo "create cinder env on windows"
     #run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\ensure_ci_repo.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\ensure_python.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\ensure_pip_pkgs.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\initial_cleanup.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\install_cinder.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\create_config.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\start_services.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$WIN_IP'.log 2>&1"'
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\ensure_ci_repo.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\ensure_python.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\ensure_pip_pkgs.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\initial_cleanup.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\install_cinder.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\create_config.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\start_services.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
 }
 
 function get_hyperv_logs() {
