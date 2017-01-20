@@ -6,7 +6,7 @@ echo "Collecting logs"
 
 /usr/local/src/cinder-ci-2016/jobs/collect_logs.sh
 
-if [ -z "$DEBUG_JOB" ] || [ "$DEBUG_JOB" != "yes" ]; then
+if [ -z "$IS_DEBUG_JOB" ] || [ "$IS_DEBUG_JOB" != "yes" ]; then
     echo "Not a debug job, cleaning up environment."
     source /home/jenkins-slave/tools/keystonerc_admin
     nova delete $VMID
@@ -19,5 +19,5 @@ else
     echo "Not cleaning up because debug job variable is set to true."
 fi
 
-echo "Cleaning up devstack params file"
-rm -f /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+#echo "Cleaning up devstack params file"
+#rm -f /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt

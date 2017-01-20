@@ -52,7 +52,7 @@ wait_for_listening_port () {
     HOST=$1
     PORT=$2
     TIMEOUT=$3
-    exec_with_retry 30 10 "nc -z -w$TIMEOUT $HOST $PORT"
+    exec_with_retry 15 10 "nc -z -w$TIMEOUT $HOST $PORT"
 }
 
 run_ssh_cmd () {
@@ -98,11 +98,11 @@ run_ps_cmd_with_retry () {
 
 function join_hyperv (){
     run_wsmancmd_with_retry 3 $1 $2 $3 'powershell if (-Not (test-path '$LOG_DIR')){mkdir '$LOG_DIR'}'
-    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/rbuzatu90/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-2016 >> '$LOG_DIR'\create-environment-'$1'.log 2>&1'
+    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/rbuzatu90/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-2016 >> '$LOG_DIR'\create-environment.log 2>&1'
     run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\teardown.ps1'
-    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\EnsureOpenStackServices.ps1 Administrator H@rd24G3t >> '$LOG_DIR'\create-environment-'$1'.log 2>&1'
-    [ "$IS_DEBUG_JOB" == "yes" ] && run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell Write-Host Calling create-environment with devstackIP='$FIXED_IP' branchName=master buildFor=openstack/neutron '$IS_DEBUG_JOB' >> '$LOG_DIR'\create-environment-'$1'.log 2>&1"'
-    run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\create-environment.ps1 -devstackIP '$FIXED_IP' -branchName master -buildFor openstack/neutron '$IS_DEBUG_JOB' >> '$LOG_DIR'\create-environment-'$1'.log 2>&1"'
+    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\EnsureOpenStackServices.ps1 Administrator H@rd24G3t >> '$LOG_DIR'\create-environment.log 2>&1'
+    [ "$IS_DEBUG_JOB" == "yes" ] && run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell Write-Host Calling create-environment with devstackIP='$FIXED_IP' branchName=master buildFor=openstack/neutron '$IS_DEBUG_JOB' >> '$LOG_DIR'\create-environment.log 2>&1"'
+    run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\create-environment.ps1 -devstackIP '$FIXED_IP' -branchName master -buildFor openstack/neutron '$IS_DEBUG_JOB' >> '$LOG_DIR'\create-environment.log 2>&1"'
 }
 
 join_windows(){
@@ -113,81 +113,36 @@ join_windows(){
 
     PARAMS="$WIN_IP $WIN_USER $WIN_PASS"
     # set -e
-    #echo "Set paths for windows"
-    #run_ps_cmd_with_retry 3 $PARAMS "\$env:Path += ';C:\Python27;C:\Python27\Scripts;C:\OpenSSL-Win32\bin;C:\Program Files (x86)\Git\cmd;C:\MinGW\mingw32\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\qemu-img'; setx PATH \$env:Path "
+    echo "Set paths for windows"
+    run_ps_cmd_with_retry 3 $PARAMS "\$env:Path += ';C:\qemu-img'; setx PATH \$env:Path "
     echo "Joining cinder windows node: $WIN_IP"
-    echo "Ensure c:\cinder-ci folder exists and is empty."
-    run_ps_cmd_with_retry 3 $PARAMS "if (Test-Path -Path C:\cinder-ci) {Remove-Item -Force -Recurse C:\cinder-ci\*} else {New-Item -Path C:\ -Name cinder-ci -Type directory}"
-    echo "git clone cinder-ci"
-    run_wsmancmd_with_retry 3 $PARAMS "git clone https://github.com/rbuzatu90/cinder-ci C:\cinder-ci"
-    echo "cinder-ci: checkout cambridge-test and pull latest"
-    run_ps_cmd_with_retry 3 $PARAMS "cd C:\cinder-ci; git checkout cambridge-2016; git pull"
-    echo "Run gerrit-git-prep on $PARAMS with zuul-site=$ZUUL_SITE zuul-ref=$ZUUL_REF zuul-change=$ZUUL_CHANGE zuul-project=$ZUUL_PROJECT"
-    run_wsmancmd_with_retry 3 $PARAMS "bash C:\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT"
-    echo "Ensure service is configured with winuser=$WIN_USER and winpass=$WIN_PASS"
-    run_ps_cmd_with_retry 3 $PARAMS 'if (-Not (test-path '$LOG_DIR')){mkdir '$LOG_DIR'}'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\EnsureOpenStackServices.ps1 '$WIN_USER' '$WIN_PASS' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
-    echo "create cinder env on windows"
+    run_wsmancmd_with_retry 3 $PARAMS 'powershell -ExecutionPolicy RemoteSigned if (-Not (test-path '$LOG_DIR')){mkdir '$LOG_DIR'}'
+    run_wsmancmd_with_retry 3 $PARAMS 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/rbuzatu90/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-2016 >> '$LOG_DIR'\010-clone_ci_repo.log 2>&1'
+    #echo "Teardown first"
+    run_wsmancmd_with_retry 3 $PARAMS 'powershell -ExecutionPolicy RemoteSigned C:\openstack\cinder-ci\windows\scripts\teardown.ps1'
+    echo "Disable firewall for cinder-volume"
+    run_ps_cmd_with_retry 3 $PARAMS 'netsh.exe advfirewall set allprofiles state off'
     #run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\create-environment.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >>\\'$FIXED_IP'\openstack\logs\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\ensure_ci_repo.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\ensure_python.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\ensure_pip_pkgs.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\initial_cleanup.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\install_cinder.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\create_config.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\cinder-ci\windows\scripts\start_services.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\create-environment-'$WIN_IP'.log 2>&1"'
+    echo "calling initial_cleanup.ps1 -devstackIP $FIXED_IP -branchName $ZUUL_BRANCH -buildFor $ZUUL_PROJECT -testCase $JOB_TYPE -winUser $WIN_USER -winPasswd $WIN_PASS -hypervNodes $HYPERV_NODES redir to '$LOG_DIR'"
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\initial_cleanup.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES''
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\ensure_ci_repo.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\030-ensure_ci_repo.log 2>&1"'
+    echo "Ensure service is configured with winuser=$WIN_USER and winpass=$WIN_PASS"
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\EnsureOpenStackServices.ps1 '$WIN_USER' '$WIN_PASS' >> '$LOG_DIR'\020-ensure_openstack_services.log 2>&1"'
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\ensure_python.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\040-ensure_pytong.log 2>&1"'
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\ensure_pip_pkgs.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\050-ensure_pip_pkgs.log 2>&1"'
+    echo "Run gerrit-git-prep on $PARAMS with zuul-site=$ZUUL_SITE zuul-ref=$ZUUL_REF zuul-change=$ZUUL_CHANGE zuul-project=$ZUUL_PROJECT"
+    run_wsmancmd_with_retry 3 $PARAMS "bash C:\openstack\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT"
+    echo "installin cinder"
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\install_cinder.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\060-install_cinder.log 2>&1"'
+    echo "creating config"
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\create_config.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\070-create_config.log 2>&1"'
+    echo "starting services"
+    run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\start_services.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\080-start_services.log 2>&1"'
 }
 
-function get_hyperv_logs() {
-    
-    echo "Prepare target folder on devstack VM"
-    set +e
-    ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "sudo mkdir -p /openstack/logs/windows"
-    ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "sudo chown -R nobody:nogroup /openstack/logs/windows"
-    ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $DEVSTACK_SSH_KEY ubuntu@$DEVSTACK_FLOATING_IP "sudo chmod -R 777 /openstack/logs/windows"
-    set -f
-
-    echo "WinRM connection details:"
-    echo "Windows VM floating IP: $CINDER_FLOATING_IP"
-    echo "Windows user: $WINDOWS_USER"
-    echo "Windows password: $WINDOWS_PASSWORD"
-    echo "Devstack floating IP: $DEVSTACK_FLOATING_IP"
-
-    if exec_with_retry 3 30 "nc -z $CINDER_FLOATING_IP 5986"
-    then
-        echo "Export eventlog entries to files"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned C:\cinder-ci\windows\scripts\export-eventlog.ps1'
-        echo "Copy eventlog files"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned cp -Recurse -Container  C:\OpenStack\Log\Eventlog\* \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\'
-    
-        echo "Copy systeminfo"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'systeminfo >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\systeminfo.log'
-        echo "Copy windows updates status"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'wmic qfe list >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\windows_hotfixes.log'
-        echo "Copy pip freeze list"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'pip freeze >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\pip_freeze.log'
-        echo "Copy network configuration info"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'ipconfig /all >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\ipconfig.log'
-    
-        echo "Copy network addapter information"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-netadapter ^| Select-object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_netadapter.log'
-        echo "Copy disk partition info"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-WmiObject win32_logicaldisk ^| Select-object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\disk_free.log'
-        echo "Copy firewall status"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-netfirewallprofile ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\firewall.log'
-        echo "Copy list of running processes"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-process ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_process.log'
-        echo "Copy list of windows services"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'powershell -executionpolicy remotesigned get-service ^| Select-Object * >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\get_service.log'
-        echo "Copy cinder volume service details"
-        run_wsmancmd_with_retry 3 $CINDER_FLOATING_IP $WINDOWS_USER $WINDOWS_PASSWORD 'sc qc cinder-volume >> \\'$DEVSTACK_FLOATING_IP'\openstack\logs\windows\cinder-volume.log'
-    else 
-        echo "Windows VM unreachable!"
-    fi    
-}
 
 post_build_restart_cinder_windows_services (){
-    run_wsmancmd_with_retry 18 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\cinder-ci\windows\scripts\post-build-restart-services.ps1 2>&1"'
+    run_wsmancmd_with_retry 5 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\openstack\cinder-ci\windows\scripts\post-build-restart-services.ps1 >> '$LOG_DIR'\create-environment-post-build.log 2>&1"'
 }
 
 function timestamp(){

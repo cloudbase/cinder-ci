@@ -9,8 +9,9 @@ WIN_CONFIGS="/openstack/config/etc"
 
 LOG_DST="/home/ubuntu/aggregate"
 LOG_DST_DEVSTACK="$LOG_DST/devstack_logs"
-LOG_DST_HV="$LOG_DST/Hyper-V_logs"
 LOG_DST_WIN="$LOG_DST/windows_logs"
 CONFIG_DST_DEVSTACK="$LOG_DST/devstack_config"
-CONFIG_DST_HV="$LOG_DST/Hyper-V_config"
 CONFIG_DST_WIN="$LOG_DST/windows_config"
+
+TAR=$(which tar)
+GZIP=$(which gzip)

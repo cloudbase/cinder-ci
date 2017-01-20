@@ -11,7 +11,7 @@ $scriptdir = "$baseDir\scripts"
 $pythonDir = "C:\Python27"
 $configDir = "$openstackDir\etc"
 #$downloadLocation = "http://10.0.110.1/"
-$scriptdir = "C:\cinder-ci"
+$scriptdir = "C:\openstack\cinder-ci"
 
 $templateDir = "$scriptdir\windows\templates"
 $cinderTemplate = "$templateDir\cinder.conf"

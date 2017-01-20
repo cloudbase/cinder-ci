@@ -40,25 +40,21 @@ case "$JOB_TYPE" in
             ;;
 esac
 
-if [[ ! -z $DEBUG_JOB ]] && [[ $DEBUG_JOB = "yes" ]]; then 
+if [[ ! -z $IS_DEBUG_JOB ]] && [[ $IS_DEBUG_JOB = "yes" ]]; then 
 	NAME="$NAME-dbg"
 fi
 
 export NAME=$NAME
 echo NAME=$NAME | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+echo "exporting JOB_TYPE=$JOB_TYPE and ZUUL_UUID=$ZUUL_UUID"
+export ZUUL_UUID
+export JOB_TYPE
 
 NET_ID=$(nova net-list | grep 'private' | awk '{print $2}')
 echo NET_ID=$NET_ID | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 VM_OK=1
 while [ $VM_OK -ne 0 ]; do
-
-  #  set +e
- #   if (`nova list | grep "$NAME" > /dev/null 2>&1`); then nova delete "$NAME"; fi
-#    set -e
-
-
-
     echo "Deploying devstack $NAME"
     VMID=$(nova boot --config-drive true --flavor cinder.linux --image $DEVSTACK_IMAGE --key-name default --security-groups devstack --nic net-id="$NET_ID" --nic net-id="$NET_ID" "$NAME" --poll | awk '{if (NR == 21) {print $4}}')
     NOVABOOT_EXIT=$?
@@ -99,24 +95,12 @@ while [ $VM_OK -ne 0 ]; do
     echo "nova show output:"
     nova show "$VMID"
 
-
-    #DEVSTACK_FLOATING_IP=$(nova floating-ip-create public | awk '{print $2}' | sed '/^$/d' | tail -n 1 ) || echo "Failed to allocate floating IP"
-    #if [ -z "$DEVSTACK_FLOATING_IP" ]
-    #then
-        #exit 1
-    #fi
-    DEVSTACK_FLOATING_IP=$FIXED_IP
-
-    #exec_with_retry 15 5 "nova add-floating-ip $VMID $DEVSTACK_FLOATING_IP"
-
-    nova show "$VMID"
-
     echo "Wait for answer on port 22 on devstack"
     sleep 30
 
     #exec_with_retry 25 30 "nc -z -w3 $DEVSTACK_FLOATING_IP 22"
     set +e
-    wait_for_listening_port $FIXED_IP 22 30
+    wait_for_listening_port $FIXED_IP 22 20
     status=$?
     set -e
     if [ $status -eq 0 ]; then
@@ -126,7 +110,7 @@ while [ $VM_OK -ne 0 ]; do
         nova reboot "$VMID"
         sleep 90
         set +e
-        wait_for_listening_port $FIXED_IP 22 30
+        wait_for_listening_port $FIXED_IP 22 20
         status=$?
         set -e
         if [ $status -eq 0 ]; then
@@ -141,180 +125,164 @@ while [ $VM_OK -ne 0 ]; do
     fi
 done
  
+DEVSTACK_FLOATING_IP=$FIXED_IP
+echo DEVSTACK_FLOATING_IP=$FIXED_IP | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+echo FIXED_IP=$FIXED_IP | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+echo VMID=$VMID | tee -a  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+# Since we now have all the infos necessary for building HyperV and ws2012 nodes go ahead and build em
+echo "Starting building HyperV and ws2012 nodes"
 
+export LOG_DIR='C:\Openstack\logs\'
+nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv01 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv01-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+pid_hv01=$!
 
+nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv02 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+pid_hv02=$!
 
+nohup /usr/local/src/cinder-ci-2016/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02" > /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+pid_ws2012=$!
 
+echo "Copy scripts to devstack VM"
+scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci-2016/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/
 
-    echo DEVSTACK_FLOATING_IP=$FIXED_IP | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo FIXED_IP=$FIXED_IP | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    echo VMID=$VMID | tee -a  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    # Since we now have all the infos necessary for building HyperV and ws2012 nodes go ahead and build em
+echo "Copy devstack_params file to devstack VM"
+scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/bin/devstack_params.sh
 
-    echo "Starting building HyperV and ws2012 nodes"
-    nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv01 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv01-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
-    pid_hv01=$!
+# Repository section
+echo "setup apt-cacher-ng:"
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'echo "Acquire::http { Proxy \"http://10.20.1.32\" };" | sudo tee --append /etc/apt/apt.conf.d/90-apt-proxy.conf' 12
+echo "clean any apt files:"
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo rm -rfv /var/lib/apt/lists/*" 12
+echo "apt-get update:"
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo apt-get update --assume-yes" 12
+echo "apt-get upgrade:"
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'sudo DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -q -y -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" upgrade' 12
+echo "apt-get cleanup:"
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo apt-get autoremove --assume-yes" 12
 
-    nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv02 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
-    pid_hv02=$!
+#set timezone to UTC
+echo "Set local time to UTC on devstack"
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime" 12
 
-    nohup /usr/local/src/cinder-ci-2016/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02" > /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
-    pid_ws2012=$!
+echo "Ensure cifs-utils is present"
+set +e
+exit_code_cifs=0
+echo "Allowing 30 seconds sleep for /var/lib/dpkg/lock to release"
+sleep 30
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo apt-get install cifs-utils -y -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f" 12
+if [ $? -ne 0 ]; then
+    sleep 5
+    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo wget http://10.20.1.14:8080/cifs-utils_6.0-1ubuntu2_amd64.deb -O /tmp/cifs-utils_6.0-1ubuntu2_amd64.deb && sudo dpkg --install /tmp/cifs-utils_6.0-1ubuntu2_amd64.deb" 12
+    exit_code_cifs=$?
+fi
+set -e
+if [ $exit_code_cifs -ne 0 ]; then
+    exit 1
+fi
 
+echo "Update git repos to latest"
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "/home/ubuntu/bin/update_devstack_repos.sh --branch $ZUUL_BRANCH --build-for $ZUUL_PROJECT" 6
 
+echo "Ensure configs are copied over"
+scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci-2016/devstack_vm/devstack/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/devstack
 
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p -m 777 /openstack/volumes" 6
 
+#get locally the vhdx files used by tempest
+echo "Downloading the images for devstack"
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p /home/ubuntu/devstack/files/images/" 6
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "wget http://10.20.1.14:8080/cirros-0.3.3-x86_64.vhdx -O /home/ubuntu/devstack/files/images/cirros-0.3.3-x86_64.vhdx" 6
 
+echo "Reserve VLAN range for test"
+set +e
+VLAN_RANGE=`/usr/local/src/cinder-ci/vlan_allocation.py -a $VMID`
+echo "VLAN range selected is $VLAN_RANGE"
+if [ ! -z "$VLAN_RANGE" ]; then
+    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i 's/TENANT_VLAN_RANGE.*/TENANT_VLAN_RANGE='$VLAN_RANGE'/g' /home/ubuntu/devstack/local.conf" 3
+fi
+set -e
 
+echo "Run gerrit-git-prep on devstack"
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY  "/home/ubuntu/bin/gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT" 6
 
-    # Add 1 more interface after successful SSH
-    #nova interface-attach --net-id "$NET_ID" "$VMID"
+# Set up the smbfs shares list
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo mkdir -p /etc/cinder && sudo chown ubuntu /etc/cinder" 6
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo echo //$DEVSTACK_FLOATING_IP/openstack/volumes -o guest > /etc/cinder/smbfs_shares_config" 6
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'mkdir -p /openstack/logs; chmod 777 /openstack/logs; sudo chown nobody:nogroup /openstack/logs' 6
 
-    echo "Copy scripts to devstack VM"
-    scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci-2016/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/
-    
-    # Repository section
-    echo "setup apt-cacher-ng:"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'echo "Acquire::http { Proxy \"http://10.20.1.32\" };" | sudo tee --append /etc/apt/apt.conf.d/90-apt-proxy.conf' 12
-    echo "clean any apt files:"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo rm -rfv /var/lib/apt/lists/*" 12
-    echo "apt-get update:"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo apt-get update --assume-yes" 12
-    echo "apt-get upgrade:"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'sudo DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -q -y -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" upgrade' 12
-    echo "apt-get cleanup:"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo apt-get autoremove --assume-yes" 12
+# Update local conf
+update_local_conf
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i '3 i\branch=$ZUUL_BRANCH' /home/ubuntu/devstack/local.sh"
 
-    #set timezone to UTC
-    echo "Set local time to UTC on devstack"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime" 12
+nohup /usr/local/src/cinder-ci-2016/jobs/build_devstack.sh >> /home/jenkins-slave/logs/build-devstack-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+pid_devstack=$!
 
-    echo "Ensure cifs-utils is present"
-    set +e
-    exit_code_cifs=0
-    echo "Allowing 30 seconds sleep for /var/lib/dpkg/lock to release"
-    sleep 30
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo apt-get install cifs-utils -y -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f" 12
-    if [ $? -ne 0 ]; then
-        sleep 5
-        run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo wget http://10.20.1.14:8080/cifs-utils_6.0-1ubuntu2_amd64.deb -O /tmp/cifs-utils_6.0-1ubuntu2_amd64.deb && sudo dpkg --install /tmp/cifs-utils_6.0-1ubuntu2_amd64.deb" 12
-        exit_code_cifs=$?
+TIME_COUNT=0
+PROC_COUNT=4
+
+echo `timestamp` "Start waiting for parallel init jobs."
+
+finished_devstack=0;
+finished_hv01=0;
+finished_hv02=0;
+finished_ws2012=0;
+
+while [[ $TIME_COUNT -lt 60 ]] && [[ $PROC_COUNT -gt 0 ]]; do
+    if [[ $finished_devstack -eq 0 ]]; then
+        ps -p $pid_devstack > /dev/null 2>&1 || finished_devstack=$?
+        [[ $finished_devstack -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building devstack"
     fi
-    set -e
-    if [ $exit_code_cifs -ne 0 ]; then
-        exit 1
+    if [[ $finished_hv01 -eq 0 ]]; then
+        ps -p $pid_hv01 > /dev/null 2>&1 || finished_hv01=$?
+        [[ $finished_hv01 -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building $hyperv01"
     fi
-
-    echo "Update git repos to latest"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "/home/ubuntu/bin/update_devstack_repos.sh --branch $ZUUL_BRANCH --build-for $ZUUL_PROJECT" 6
-
-    echo "Ensure configs are copied over"
-    scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci-2016/devstack_vm/devstack/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/devstack
-
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p -m 777 /openstack/volumes" 6
-
-    #get locally the vhdx files used by tempest
-    echo "Downloading the images for devstack"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p /home/ubuntu/devstack/files/images/" 6
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "wget http://10.20.1.14:8080/cirros-0.3.3-x86_64.vhdx -O /home/ubuntu/devstack/files/images/cirros-0.3.3-x86_64.vhdx" 6
-
-    # Set ZUUL IP in hosts file
-    #ZUUL_CINDER="10.21.7.213"
-    #if  ! grep -qi zuul /etc/hosts ; then
-    #    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo '$ZUUL_CINDER zuul-cinder.openstack.tld' | sudo tee -a /etc/hosts"
-    #    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo '10.9.1.27 zuul-ssd-0.openstack.tld' | sudo tee -a /etc/hosts"
-    #    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "echo '10.9.1.29 zuul-ssd-1.openstack.tld' | sudo tee -a /etc/hosts"
-    #fi
-
-    echo "Reserve VLAN range for test"
-    set +e
-    VLAN_RANGE=`/usr/local/src/cinder-ci/vlan_allocation.py -a $VMID`
-    echo "VLAN range selected is $VLAN_RANGE"
-    if [ ! -z "$VLAN_RANGE" ]; then
-        run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i 's/TENANT_VLAN_RANGE.*/TENANT_VLAN_RANGE='$VLAN_RANGE'/g' /home/ubuntu/devstack/local.conf" 3
+    if [[ $finished_ws2012 -eq 0 ]]; then
+        ps -p $pid_ws2012 > /dev/null 2>&1 || finished_ws2012=$?
+        [[ $finished_ws2012 -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building $ws2012r2"
     fi
-    set -e
-
-    echo "Run gerrit-git-prep on devstack"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY  "/home/ubuntu/bin/gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT" 6
-
-    # Set up the smbfs shares list
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo mkdir -p /etc/cinder && sudo chown ubuntu /etc/cinder" 6
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sudo echo //$DEVSTACK_FLOATING_IP/openstack/volumes -o guest > /etc/cinder/smbfs_shares_config" 6
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'mkdir -p /openstack/logs; chmod 777 /openstack/logs; sudo chown nobody:nogroup /openstack/logs' 6
-
-    # Update local conf
-    update_local_conf
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i '3 i\branch=$ZUUL_BRANCH' /home/ubuntu/devstack/local.sh"
-    
-    nohup /usr/local/src/cinder-ci-2016/jobs/build_devstack.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02" > /home/jenkins-slave/logs/build-devstack-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
-    pid_devstack=$!
-
-    TIME_COUNT=0
-    PROC_COUNT=4
-
-    echo `timestamp` "Start waiting for parallel init jobs."
-
-    finished_devstack=0;
-    finished_hv01=0;
-    finished_hv02=0;
-    finished_ws2012=0;
-
-    while [[ $TIME_COUNT -lt 60 ]] && [[ $PROC_COUNT -gt 0 ]]; do
-        if [[ $finished_devstack -eq 0 ]]; then
-            ps -p $pid_devstack > /dev/null 2>&1 || finished_devstack=$?
-            [[ $finished_devstack -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building devstack"
-        fi
-        if [[ $finished_hv01 -eq 0 ]]; then
-            ps -p $pid_hv01 > /dev/null 2>&1 || finished_hv01=$?
-            [[ $finished_hv01 -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building $hyperv01"
-        fi
-        if [[ $finished_ws2012 -eq 0 ]]; then
-            ps -p $pid_ws2012 > /dev/null 2>&1 || finished_ws2012=$?
-            [[ $finished_ws2012 -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building $ws2012r2"
-        fi
-        if [[ $finished_hv02 -eq 0 ]]; then
-            ps -p $pid_hv02 > /dev/null 2>&1 || finished_hv02=$?
-            [[ $finished_hv02 -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building $hyperv02"
-        fi
-        if [[ $PROC_COUNT -gt 0 ]]; then
-            sleep 1m
-            TIME_COUNT=$(( $TIME_COUNT +1 ))
-        fi
-    done
-
-    echo `timestamp` "Finished waiting for the parallel init jobs."
-    echo `timestamp` "We looped $TIME_COUNT times, and when finishing we have $PROC_COUNT threads still active"
-
-    OSTACK_PROJECT=`echo "$ZUUL_PROJECT" | cut -d/ -f2`
-
-    if [[ ! -z $IS_DEBUG_JOB ]] && [[ $IS_DEBUG_JOB == "yes" ]]
-        then
-            echo "All build logs can be found in http://64.119.130.115/debug/$OSTACK_PROJECT/$ZUUL_CHANGE/$ZUUL_PATCHSET/"
-        else
-            echo "All build logs can be found in http://64.119.130.115/$OSTACK_PROJECT/$ZUUL_CHANGE/$ZUUL_PATCHSET/"
+    if [[ $finished_hv02 -eq 0 ]]; then
+        ps -p $pid_hv02 > /dev/null 2>&1 || finished_hv02=$?
+        [[ $finished_hv02 -ne 0 ]] && PROC_COUNT=$(( $PROC_COUNT - 1 )) && echo `date -u +%H:%M:%S` "Finished building $hyperv02"
     fi
-
     if [[ $PROC_COUNT -gt 0 ]]; then
-        kill -9 $pid_devstack > /dev/null 2>&1
-        kill -9 $pid_hv01 > /dev/null 2>&1
-        kill -9 $pid_hv02 > /dev/null 2>&1
-        echo "Not all build threads finished in time, initialization process failed."
-        exit 1
+        sleep 1m
+        TIME_COUNT=$(( $TIME_COUNT +1 ))
     fi
+done
 
-    echo "Doing post init stuff"
-    echo "Test that we have one cinder volume active"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'source /home/ubuntu/keystonerc; CINDER_COUNT=$(cinder service-list | grep cinder-volume | grep -c -w up); if [ "$CINDER_COUNT" == 1 ];then cinder service-list; else cinder service-list; exit 1;fi' 20
+echo `timestamp` "Finished waiting for the parallel init jobs."
+echo `timestamp` "We looped $TIME_COUNT times, and when finishing we have $PROC_COUNT threads still active"
 
-    # Run post_stack
-    echo "Run post_stack scripts on devstack"
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/keystonerc && /home/ubuntu/bin/post_stack.sh" 6
-    if [ $? -ne 0 ]
+OSTACK_PROJECT=`echo "$ZUUL_PROJECT" | cut -d/ -f2`
+
+if [[ ! -z $IS_DEBUG_JOB ]] && [[ $IS_DEBUG_JOB == "yes" ]]
     then
-        echo "Failed post_stack!"
-        exit 1
+        echo "All build logs can be found in http://64.119.130.115/debug/$OSTACK_PROJECT/$ZUUL_CHANGE/$ZUUL_PATCHSET/"
     else
-        DEVSTACK_VM_STATUS="OK"
-        echo "Initialize part finished"
-    fi
+        echo "All build logs can be found in http://64.119.130.115/$OSTACK_PROJECT/$ZUUL_CHANGE/$ZUUL_PATCHSET/"
+fi
+
+if [[ $PROC_COUNT -gt 0 ]]; then
+    kill -9 $pid_devstack > /dev/null 2>&1
+    kill -9 $pid_hv01 > /dev/null 2>&1
+    kill -9 $pid_hv02 > /dev/null 2>&1
+    echo "Not all build threads finished in time, initialization process failed."
+    exit 1
+fi
+
+echo "Doing post init stuff"
+echo "Test that we have one cinder volume active"
+post_build_restart_cinder_windows_services $ws2012r2 $WIN_USER $WIN_PASS
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'source /home/ubuntu/keystonerc; CINDER_COUNT=$(cinder service-list | grep cinder-volume | grep -c -w up); if [ "$CINDER_COUNT" == 1 ];then cinder service-list; else cinder service-list; exit 1;fi' 20
+
+# Run post_stack
+echo "Run post_stack scripts on devstack"
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/keystonerc && /home/ubuntu/bin/post_stack.sh" 6
+if [ $? -ne 0 ]
+then
+    echo "Failed post_stack!"
+    exit 1
+else
+    DEVSTACK_VM_STATUS="OK"
+    echo "Initialize part finished"
+fi

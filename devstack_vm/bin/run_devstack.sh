@@ -1,12 +1,9 @@
 #!/bin/bash
 basedir="/home/ubuntu/bin"
 . $basedir/utils.sh
+. $basedir/devstack_params.sh
 
-job_type=$1
-branch=$2
-hyperv01=$3
-hyperv02=$4
-
+echo "Parame are job_type=$job_type branch=$branch hyperv01=$hyperv01 hyperv02=$hyperv02"
 set -x
 set -e
 sudo ifconfig eth0 promisc up
@@ -103,14 +100,14 @@ function cherry_pick(){
     set -e
 }
 
-if [ $job_type != "iscsi" ]; then
+if [ $JOB_TYPE != "iscsi" ]; then
     set +e
     git remote add downstream https://github.com/petrutlucian94/cinder
     git fetch downstream
     git checkout -b testBranch
     set -e
     # cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
-    if [ ${branch,,} == "master" ]; then
+    if [ $ZUUL_BRANCH == "master" ]; then
         cherry_pick dcd839978ca8995cada8a62a5f19d21eaeb399df
         cherry_pick f711195367ead9a2592402965eb7c7a73baebc9f
     else
@@ -148,9 +145,15 @@ sed -i "s#PIP_GET_PIP_URL=https://bootstrap.pypa.io/get-pip.py#PIP_GET_PIP_URL=h
 #Requested by Claudiu Belu, temporary hack:
 sudo pip install -U /opt/stack/networking-hyperv
 
-set -o pipefail
-./stack.sh 2>&1 | tee $STACK_LOG
+#set -o pipefail
+#./stack.sh 2>&1 | tee $STACK_LOG
 
-TCP_PORTS=(80 443 3260 3306 5000 5672 6000 6001 6002 8000 8003 8004 8080 8773 8774 8775 8776 8777 9191 9292 9696 35357)
-firewall_manage_ports $hyperv01 add enable ${TCP_PORTS[@]}
-firewall_manage_ports $hyperv02 add enable ${TCP_PORTS[@]}
+nohup ./stack.sh > $STACK_LOG 2>&1 &
+pid=$!
+wait $pid
+cat $STACK_LOG
+
+TCP_PORTS=(80 137 443 3260 3306 5000 5355 5672 6000 6001 6002 8000 8003 8004 8080 8773 8774 8775 8776 8777 9191 9292 9696 35357)
+firewall_manage_ports $hyperv01_ip add enable ${TCP_PORTS[@]}
+firewall_manage_ports $hyperv02_ip add enable ${TCP_PORTS[@]}
+firewall_manage_ports $ws2012r2_ip add enable ${TCP_PORTS[@]}

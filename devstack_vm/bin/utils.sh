@@ -16,12 +16,12 @@ function get_win_files() {
     if [ ! -d "$local_dir" ];then
         mkdir -p "$local_dir"
     fi
-    smbclient "//$host/C\$" -c "prompt OFF; cd $remote_dir" -U "$win_user%$win_pass"
+    smbclient "//$host/C\$" -c "prompt OFF; cd $remote_dir" -U "$WIN_USER%$WIN_PASS"
     if [ $? -ne 0 ];then
         echo "Folder $remote_dir does not exists"
         return 0
     fi
-    smbclient "//$host/C\$" -c "prompt OFF; recurse ON; lcd $local_dir; cd $remote_dir; mget *" -U "$win_user%$win_pass"
+    smbclient "//$host/C\$" -c "prompt OFF; recurse ON; lcd $local_dir; cd $remote_dir; mget *" -U "$WIN_USER%$WIN_PASS"
 }
 
 function run_wsman_ps() {

@@ -16,7 +16,7 @@ if ($projectName -ne "cinder")
 
 $scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
 . "$scriptLocation\config.ps1"
-. "$scriptdir\windows\scripts\utils.ps1"
+. "$scriptLocation\utils.ps1"
 
 $pip_conf_content = @"
 [global]
@@ -35,6 +35,7 @@ else
 }
 Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 
+$ErrorActionPreference = "SilentlyContinue"
 & easy_install -U pip
 & pip install -U --pre pymi
 & pip install -U virtualenv

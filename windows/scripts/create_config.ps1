@@ -16,7 +16,7 @@ if ($projectName -ne "cinder")
 
 $scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
 . "$scriptLocation\config.ps1"
-. "$scriptdir\windows\scripts\utils.ps1"
+. "$scriptLocation\utils.ps1"
 
 $rabbitUser = "stackrabbit"
 
@@ -35,8 +35,6 @@ if ($hasCinderExec -eq $false){
     $cindesExec = "$pythonDir\Scripts\cinder-volume.exe"
 }
 
-Remove-Item -Recurse -Force "$remoteConfigs\*"
-Copy-Item -Recurse $configDir "$remoteConfigs\"
-Get-WMIObject Win32_LogicalDisk -filter "DriveType=3" | Select DeviceID, VolumeName, @{Name="size (GB)";Expression={"{0:N1}" -f($_.size/1gb)}}, @{Name="freespace (GB)";Expression={"{0:N1}" -f($_.freespace/1gb)}} | ft > "$remoteConfigs\disk_free.txt" 2>&1
-Get-Process > "$remoteConfigs\pid_stat.txt" 2>&1
+Get-WMIObject Win32_LogicalDisk -filter "DriveType=3" | Select DeviceID, VolumeName, @{Name="size (GB)";Expression={"{0:N1}" -f($_.size/1gb)}}, @{Name="freespace (GB)";Expression={"{0:N1}" -f($_.freespace/1gb)}} | ft > "$openstackLogs\disk_free.txt" 2>&1
+Get-Process > "$openstackLogs\pid_stat.txt" 2>&1
 

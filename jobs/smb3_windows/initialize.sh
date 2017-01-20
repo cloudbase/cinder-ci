@@ -16,6 +16,8 @@ echo ZUUL_PATCHSET=$ZUUL_PATCHSET | tee -a /home/jenkins-slave/runs/devstack_par
 echo ZUUL_UUID=$ZUUL_UUID | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 echo IS_DEBUG_JOB=$IS_DEBUG_JOB | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 echo DEVSTACK_SSH_KEY=$DEVSTACK_SSH_KEY | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+echo WIN_USER=$WIN_USER >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+echo WIN_PASS=$WIN_PASS >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 ZUUL_SITE=`echo "$ZUUL_URL" |sed 's/.\{2\}$//'`
 echo ZUUL_SITE=$ZUUL_SITE | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
@@ -24,12 +26,18 @@ DEVSTACK_IMAGE="devstack-81v1"
 echo DEVSTACK_IMAGE=$DEVSTACK_IMAGE | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 #Get IP addresses of the two Hyper-V hosts
+set +e
+ws2012r2_ip=`run_wsman_cmd $ws2012r2 $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned (Get-NetIPAddress -InterfaceAlias "*" -AddressFamily "IPv4").IPAddress' 2>&1 | grep -E -o '10\.250\.[0-9]{1,2}\.[0-9]{1,3}'` 
+
+
+set -e
 hyperv01_ip=`run_wsman_cmd $hyperv01 $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned (Get-NetIPAddress -InterfaceAlias "*br100*" -AddressFamily "IPv4").IPAddress' 2>&1 | grep -E -o '10\.250\.[0-9]{1,2}\.[0-9]{1,3}'` 
 hyperv02_ip=`run_wsman_cmd $hyperv02 $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned (Get-NetIPAddress -InterfaceAlias "*br100*" -AddressFamily "IPv4").IPAddress' 2>&1 | grep -E -o '10\.250\.[0-9]{1,2}\.[0-9]{1,3}'`
 set -e
 
 echo `timestamp` "Data IP of $hyperv01 is $hyperv01_ip"
 echo `timestamp` "Data IP of $hyperv02 is $hyperv02_ip"
+echo `timestamp` "Data IP of $ws2012r2 is $ws2012r2_ip"
 
 if [[ ! $hyperv01_ip =~ ^10\.250\.[0-9]{1,2}\.[0-9]{1,3} ]]; then
     echo "Did not receive a good IP for Hyper-V host $hyperv01 : $hyperv01_ip"
@@ -40,6 +48,7 @@ if [[ ! $hyperv02_ip =~ ^10\.250\.[0-9]{1,2}\.[0-9]{1,3} ]]; then
     exit 1
 fi
 
+echo ws2012r2_ip=$ws2012r2_ip | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 echo hyperv01_ip=$hyperv01_ip | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 echo hyperv02_ip=$hyperv02_ip | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
