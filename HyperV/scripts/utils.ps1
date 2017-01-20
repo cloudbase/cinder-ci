@@ -112,9 +112,9 @@ function exporthtmleventlog($path){
 }
 
 function cleareventlog(){
- Get-Eventlog -list | ForEach-Object {
-         Clear-Eventlog $_.LogDisplayName -ErrorAction SilentlyContinue
- }
+    foreach ($i in (get-winevent -ListLog * |  ? {$_.RecordCount -gt 0 })) {
+        wevtutil cl $i.LogName
+    }
 }
 
 

@@ -108,29 +108,6 @@ function archive_windows_logs() {
         find . -type f -exec gzip "{}" \;
         popd
         cp -r "$WIN_LOGS" "$LOG_DST_WIN"
-
-        # for i in `ls -A "$WIN_LOGS"`
-        # do
-        #     if [ -d "$WIN_LOGS/$i" ]
-        #     then
-        #         mkdir -p "$LOG_DST_WIN/$i"
-        #         for j in `ls -A "$WIN_LOGS/$i"`;
-        #         do
-        #             if [ -d "$WIN_LOGS/$i/$j" ]
-        #             then
-        #                 mkdir -p "LOG_DST_WIN/$i/$j"
-        #                 for k in `ls -A "$WIN_LOGS/$i/$j"`;
-        #                 do
-        #                     $GZIP -c "$WIN_LOGS/$i/$j/$k" > "$LOG_DST_WIN/$i/$j/$k.gz" || emit_warning "Failed to archive $WIN_LOGS/$i/$j/$k"
-        #                 done
-        #             else
-        #                 $GZIP -c "$WIN_LOGS/$i/$j/$k" > "$LOG_DST_WIN/$i/$j.gz" || emit_warning "Failed to archive $WIN_LOGS/$i/$j"
-        #             fi
-        #         done
-        #     else
-        #         $GZIP -c "$WIN_LOGS/$i" > "$LOG_DST_WIN/$i.gz" || emit_warning "Failed to archive $WIN_LOGS/$i"
-        #     fi
-        # done
     fi
 }
 
@@ -142,22 +119,17 @@ function archive_windows_configs(){
         find . -type f -exec gzip "{}" \;
         popd
         cp -r "$WIN_CONFIGS" "$CONFIG_DST_WIN"
-        # for i in `ls -A "$WIN_CONFIGS"`
-        # do
-        #     $GZIP -c "$WIN_CONFIGS/$i" > "$CONFIG_DST_WIN/$i.gz" || emit_warning "Failed to archive $WIN_CONFIGS/$i"
-        # done
     fi
 }
 
 function archive_tempest_files() {
-    pushd "$TEMPEST_LOGS"
-    find . -type f -exec gzip "{}" \;
-    popd
-    cp -r "$TEMPEST_LOGS" "$LOG_DST"
-    # for i in `ls -A $TEMPEST_LOGS`
-    # do
-    #     $GZIP "$TEMPEST_LOGS/$i" -c > "$LOG_DST/$i.gz" || emit_error "Failed to archive tempest logs"
-    # done
+    if [ -d "$TEMPEST_LOGS" ]
+    then
+        pushd "$TEMPEST_LOGS"
+        find . -type f -exec gzip "{}" \;
+        popd
+        cp -r "$TEMPEST_LOGS" "$LOG_DST"
+    fi
 }
 
 # Clean
