@@ -10,6 +10,10 @@ Param(
     [Parameter(Mandatory=$true)][array]$hypervNodes
 )
 
+Write-Host "HyperV nodes param: $hypervNodes"
+Write-Host "HyperV nodes param is "
+$hypervNodes.GetType()
+
 function unzip($src, $dest) {
 
 	$shell = new-object -com shell.application
@@ -65,5 +69,6 @@ if (!(Get-SMBShare -Name SMBShare))
 }
 
 $hypervNodes.split(",") | foreach {
+    Write-Host "HyperV hosts are $_"
     Grant-SmbShareAccess -Name SMBShare -AccountName "$hostname\$_$" -AccessRight Full -Force
 }
