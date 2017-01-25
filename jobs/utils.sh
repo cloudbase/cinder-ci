@@ -98,7 +98,7 @@ run_ps_cmd_with_retry () {
 
 function join_hyperv (){
     run_wsmancmd_with_retry 3 $1 $2 $3 'powershell if (-Not (test-path '$LOG_DIR')){mkdir '$LOG_DIR'}'
-    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/rbuzatu90/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-2016 >> '$LOG_DIR'\create-environment.log 2>&1'
+    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/cloudbase/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-2016 >> '$LOG_DIR'\create-environment.log 2>&1'
     run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\teardown.ps1'
     run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\EnsureOpenStackServices.ps1 Administrator H@rd24G3t >> '$LOG_DIR'\create-environment.log 2>&1'
     [ "$IS_DEBUG_JOB" == "yes" ] && run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell Write-Host Calling create-environment with devstackIP='$FIXED_IP' branchName=master buildFor=openstack/neutron '$IS_DEBUG_JOB' >> '$LOG_DIR'\create-environment.log 2>&1"'
@@ -117,7 +117,7 @@ join_windows(){
     run_ps_cmd_with_retry 3 $PARAMS "\$env:Path += ';C:\qemu-img'; setx PATH \$env:Path "
     echo "Joining cinder windows node: $WIN_IP"
     run_wsmancmd_with_retry 3 $PARAMS 'powershell -ExecutionPolicy RemoteSigned if (-Not (test-path '$LOG_DIR')){mkdir '$LOG_DIR'}'
-    run_wsmancmd_with_retry 3 $PARAMS 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/rbuzatu90/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-2016 >> '$LOG_DIR'\010-clone_ci_repo.log 2>&1'
+    run_wsmancmd_with_retry 3 $PARAMS 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/cloudbase/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-2016 >> '$LOG_DIR'\010-clone_ci_repo.log 2>&1'
     #echo "Teardown first"
     run_wsmancmd_with_retry 3 $PARAMS 'powershell -ExecutionPolicy RemoteSigned C:\openstack\cinder-ci\windows\scripts\teardown.ps1'
     echo "Disable firewall for cinder-volume"
