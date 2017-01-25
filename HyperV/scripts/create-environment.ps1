@@ -113,12 +113,6 @@ if ($hasBuildDir -eq $false){
     mkdir $buildDir
 }
 
-if ($hasProject -eq $false){
-    Get-ChildItem $buildDir
-    Get-ChildItem ( Get-Item $buildDir ).Parent.FullName
-    Throw "$projectName repository was not found. Please run gerrit-git-prep.sh for this project first"
-}
-
 if ($hasBinDir -eq $false){
     mkdir $binDir
 }
