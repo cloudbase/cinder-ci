@@ -462,7 +462,9 @@ function GitClonePull($path, $url, $branch="master")
             git clone $url $path
             if ($LastExitCode) { throw "git clone failed" }
         }
+        pushd $path
         git checkout $branch
+        popd
         if ($LastExitCode) { throw "git checkout failed" }
     }else{
         pushd $path
