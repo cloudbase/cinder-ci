@@ -45,10 +45,6 @@ if (!(Test-Path $configDir)) {
     Remove-Item -Recurse -Force $configDir\* -ErrorAction SilentlyContinue
 }
 
-if (!(Test-Path "$buildDir\cinder\setup.py")){
-    Throw "$projectName repository was not found. Please run gerrit-git-prep for this project first"
-}
-
 if (!(Test-Path $cinderTemplate)){
     Throw "Cinder template not found"
 }

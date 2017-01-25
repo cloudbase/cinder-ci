@@ -18,6 +18,11 @@ $scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Def
 . "$scriptLocation\config.ps1"
 . "$scriptLocation\utils.ps1"
 
+
+if (!(Test-Path "$buildDir\cinder\setup.py")){
+    Throw "$projectName repository was not found. Please run gerrit-git-prep for this project first"
+}
+
 pushd $buildDir\cinder
 Write-Host "when install_cinder starts git log says:"
 & git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
