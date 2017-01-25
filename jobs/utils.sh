@@ -113,8 +113,8 @@ join_windows(){
 
     PARAMS="$WIN_IP $WIN_USER $WIN_PASS"
     # set -e
-    echo "Set paths for windows"
-    run_ps_cmd_with_retry 3 $PARAMS "\$env:Path += ';C:\qemu-img'; setx PATH \$env:Path "
+    #echo "Set paths for windows"
+    #run_ps_cmd_with_retry 3 $PARAMS "\$env:Path += ';C:\qemu-img'; setx PATH \$env:Path "
     echo "Joining cinder windows node: $WIN_IP"
     run_wsmancmd_with_retry 3 $PARAMS 'powershell -ExecutionPolicy RemoteSigned if (-Not (test-path '$LOG_DIR')){mkdir '$LOG_DIR'}'
     run_wsmancmd_with_retry 3 $PARAMS 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/cloudbase/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-2016 >> '$LOG_DIR'\010-clone_ci_repo.log 2>&1'
