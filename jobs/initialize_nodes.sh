@@ -133,13 +133,13 @@ echo VMID=$VMID | tee -a  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$J
 echo "Starting building HyperV and ws2012 nodes"
 
 export LOG_DIR='C:\Openstack\logs\'
-nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv01 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv01-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv01 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv01-build-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
 pid_hv01=$!
 
-nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv02 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv02 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
 pid_hv02=$!
 
-nohup /usr/local/src/cinder-ci-2016/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02" > /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+nohup /usr/local/src/cinder-ci-2016/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02" > /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
 pid_ws2012=$!
 
 echo "Copy scripts to devstack VM"
@@ -214,7 +214,7 @@ run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'mkdir -p 
 update_local_conf
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i '3 i\branch=$ZUUL_BRANCH' /home/ubuntu/devstack/local.sh"
 
-nohup /usr/local/src/cinder-ci-2016/jobs/build_devstack.sh >> /home/jenkins-slave/logs/build-devstack-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+nohup /usr/local/src/cinder-ci-2016/jobs/build_devstack.sh >> /home/jenkins-slave/logs/build-devstack-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
 pid_devstack=$!
 
 TIME_COUNT=0
