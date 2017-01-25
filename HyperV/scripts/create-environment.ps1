@@ -25,7 +25,10 @@ $hasNeutronTemplate = Test-Path $neutronTemplate
 $hasNovaTemplate = Test-Path $novaTemplate
 $hasConfigDir = Test-Path $configDir
 $hasBinDir = Test-Path $binDir
+$hasBuildDir = Test-Path $buildDir
 $hasMkisoFs = Test-Path $binDir\mkisofs.exe
+$hasPipConf = Test-Path "$env:APPDATA\pip"
+$hasLogDir = Test-Path $openstackLogs
 $hasQemuImg = Test-Path $binDir\qemu-img.exe
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
@@ -80,6 +83,14 @@ if ($(Get-Service neutron-hyperv-agent).Status -ne "Stopped"){
     Throw "Neutron service is still running"
 }
 
+if ($hasPipConf -eq $false){
+    mkdir "$env:APPDATA\pip"
+}
+else 
+{
+    Remove-Item -Force "$env:APPDATA\pip\*"
+}
+
 Write-Host "Cleaning up the config folder."
 if ($hasConfigDir -eq $false) {
     mkdir $configDir
@@ -94,11 +105,19 @@ if ($hasConfigDir -eq $false) {
     }
 }
 
-#if ($hasProject -eq $false){
-#    Get-ChildItem $buildDir
-#    Get-ChildItem ( Get-Item $buildDir ).Parent.FullName
-#    Throw "$projectName repository was not found. Please run gerrit-git-prep.sh for this project first"
-#}
+if ($hasLogDir -eq $false){
+    mkdir $openstackLogs
+}
+
+if ($hasBuildDir -eq $false){
+    mkdir $buildDir
+}
+
+if ($hasProject -eq $false){
+    Get-ChildItem $buildDir
+    Get-ChildItem ( Get-Item $buildDir ).Parent.FullName
+    Throw "$projectName repository was not found. Please run gerrit-git-prep.sh for this project first"
+}
 
 if ($hasBinDir -eq $false){
     mkdir $binDir
@@ -153,11 +172,6 @@ else {
     Throw "Cannot build for project: $buildFor"
 }
 
-$hasLogDir = Test-Path $openstackLogs
-if ($hasLogDir -eq $false){
-    mkdir $openstackLogs
-}
-
 pushd C:\
 if (Test-Path $pythonArchive)
 {
@@ -173,14 +187,6 @@ Write-Host "Ensure Python folder is up to date"
 Write-Host "Extracting archive.."
 [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\$pythonArchive", "C:\")
 
-$hasPipConf = Test-Path "$env:APPDATA\pip"
-if ($hasPipConf -eq $false){
-    mkdir "$env:APPDATA\pip"
-}
-else 
-{
-    Remove-Item -Force "$env:APPDATA\pip\*"
-}
 Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 
 $ErrorActionPreference = "Continue"
@@ -190,16 +196,6 @@ $ErrorActionPreference = "Continue"
 $ErrorActionPreference = "Stop"
 
 popd
-
-$hasPipConf = Test-Path "$env:APPDATA\pip"
-if ($hasPipConf -eq $false){
-    mkdir "$env:APPDATA\pip"
-}
-else 
-{
-    Remove-Item -Force "$env:APPDATA\pip\*"
-}
-Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 
 cp $templateDir\distutils.cfg C:\Python27\Lib\distutils\distutils.cfg
 
