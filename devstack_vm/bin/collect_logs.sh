@@ -1,21 +1,8 @@
 #!/bin/bash
-TAR=$(which tar)
-GZIP=$(which gzip)
-
-DEVSTACK_LOG_DIR="/opt/stack/logs"
-DEVSTACK_LOGS="/opt/stack/logs/screen"
-DEVSTACK_BUILD_LOG="/opt/stack/logs/stack.sh.txt"
-MEMORY_STATS="/opt/stack/logs/memory_usage.log"
-IOSTAT_LOG="/opt/stack/logs/iostat.log"
-WIN_LOGS="/openstack/logs"
-TEMPEST_LOGS="/home/ubuntu/tempest"
-WIN_CONFIGS="/openstack/config/etc"
-
-LOG_DST="/home/ubuntu/aggregate"
-LOG_DST_DEVSTACK="$LOG_DST/devstack_logs"
-LOG_DST_WIN="$LOG_DST/windows_logs"
-CONFIG_DST_DEVSTACK="$LOG_DST/devstack_config"
-CONFIG_DST_WIN="$LOG_DST/windows_config"
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+. $DIR/config.sh
+. $DIR/utils.sh
+. $DIR/devstack_params.sh
 
 function emit_error() {
     echo "ERROR: $1"
@@ -99,57 +86,32 @@ function archive_devstack() {
     #/var/log/syslog
 }
 
+
 function archive_windows_logs() {
-    if [ -d "$WIN_LOGS" ]
-    then
+    if [ ! -d "$LOG_DST_WIN" ]; then
         mkdir -p "$LOG_DST_WIN"
-
-        pushd "$WIN_LOGS"
-        find . -type f -exec gzip "{}" \;
-        popd
-        cp -r "$WIN_LOGS" "$LOG_DST_WIN"
-
-        # for i in `ls -A "$WIN_LOGS"`
-        # do
-        #     if [ -d "$WIN_LOGS/$i" ]
-        #     then
-        #         mkdir -p "$LOG_DST_WIN/$i"
-        #         for j in `ls -A "$WIN_LOGS/$i"`;
-        #         do
-        #             if [ -d "$WIN_LOGS/$i/$j" ]
-        #             then
-        #                 mkdir -p "LOG_DST_WIN/$i/$j"
-        #                 for k in `ls -A "$WIN_LOGS/$i/$j"`;
-        #                 do
-        #                     $GZIP -c "$WIN_LOGS/$i/$j/$k" > "$LOG_DST_WIN/$i/$j/$k.gz" || emit_warning "Failed to archive $WIN_LOGS/$i/$j/$k"
-        #                 done
-        #             else
-        #                 $GZIP -c "$WIN_LOGS/$i/$j/$k" > "$LOG_DST_WIN/$i/$j.gz" || emit_warning "Failed to archive $WIN_LOGS/$i/$j"
-        #             fi
-        #         done
-        #     else
-        #         $GZIP -c "$WIN_LOGS/$i" > "$LOG_DST_WIN/$i.gz" || emit_warning "Failed to archive $WIN_LOGS/$i"
-        #     fi
-        # done
     fi
+    for file in `find "$LOG_DST_WIN" -type f`
+    do
+        $GZIP $file
+    done
 }
 
 function archive_windows_configs(){
-    if [ -d "$WIN_CONFIGS" ]
-    then
+    if [ ! -d "$CONFIG_DST_WIN" ]; then
         mkdir -p "$CONFIG_DST_WIN"
-        pushd "$WIN_CONFIGS"
-        find . -type f -exec gzip "{}" \;
-        popd
-        cp -r "$WIN_CONFIGS" "$CONFIG_DST_WIN"
-        # for i in `ls -A "$WIN_CONFIGS"`
-        # do
-        #     $GZIP -c "$WIN_CONFIGS/$i" > "$CONFIG_DST_WIN/$i.gz" || emit_warning "Failed to archive $WIN_CONFIGS/$i"
-        # done
     fi
+    for file in `find "$CONFIG_DST_WIN" -type f`
+    do
+        $GZIP $file
+    done
+
 }
 
 function archive_tempest_files() {
+    if [ ! -d "$TEMPEST_LOGS" ]; then
+        mkdir -p "$TEMPEST_LOGS"
+    fi
     pushd "$TEMPEST_LOGS"
     find . -type f -exec gzip "{}" \;
     popd
@@ -161,19 +123,39 @@ function archive_tempest_files() {
 }
 
 # Clean
-if [[ -z $1 ]] || [[ $1 != "yes" ]]; then
-    pushd /home/ubuntu/devstack
+#if [[ -z $1 ]] || [[ $1 != "yes" ]]; then
+#    pushd /home/ubuntu/devstack
+#    ./unstack.sh
+#    popd
+#fi
+
+if [ "$IS_DEBUG_JOB" != "yes" ]; then
+    echo "Stop devstack services"
+    cd /home/ubuntu/devstack
     ./unstack.sh
-    popd
 fi
 
-[ -d "$LOG_DST" ] && rm -rf "$LOG_DST"
-mkdir -p "$LOG_DST"
+set +e
+
+echo "Getting Hyper-V logs from $hyperv01 , $hyperv02 and $ws2012r2"
+get_win_files $hyperv01_ip "\OpenStack\logs" "$LOG_DST_WIN/$hyperv01"
+get_win_files $hyperv02_ip "\OpenStack\logs" "$LOG_DST_WIN/$hyperv02"
+get_win_files $ws2012r2_ip "\OpenStack\logs" "$LOG_DST_WIN/$ws2012r2"
+
+echo "Getting Hyper-V configs from $hyperv01 , $hyperv02 and $ws2012r2" 
+get_win_files $hyperv01_ip "\OpenStack\etc" "$CONFIG_DST_WIN/$hyperv01"
+get_win_files $hyperv02_ip "\OpenStack\etc" "$CONFIG_DST_WIN/$hyperv02"
+get_win_files $ws2012r2_ip "\OpenStack\etc" "$CONFIG_DST_WIN/$ws2012r2"
+
+# For security reasons ??
+rm -f $DIR/devstack_params.sh
 
 archive_devstack
 archive_windows_configs
 archive_windows_logs
 archive_tempest_files
+
+set -e
 
 pushd "$LOG_DST"
 $TAR -czf "$LOG_DST.tar.gz" . || emit_error "Failed to archive aggregate logs"

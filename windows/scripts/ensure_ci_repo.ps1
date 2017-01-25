@@ -22,7 +22,7 @@ pushd C:\
 if (!(Test-Path -Path "$scriptdir\windows\scripts\utils.ps1"))
 {
     Remove-Item -Force -Recurse "$scriptdir\* -ErrorAction SilentlyContinue"
-    GitClonePull "$scriptdir" "https://github.com/cloudbase/cinder-ci" "cambridge-test"
+    GitClonePull "$scriptdir" "https://github.com/cloudbase/cinder-ci" "cambridge-2016"
 }
 
 popd

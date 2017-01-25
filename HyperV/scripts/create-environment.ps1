@@ -158,11 +158,6 @@ if ($hasLogDir -eq $false){
     mkdir $openstackLogs
 }
 
-$hasConfigDir = Test-Path $remoteConfigs\$hostname
-if ($hasConfigDir -eq $false){
-    mkdir $remoteConfigs\$hostname
-}
-
 pushd C:\
 if (Test-Path $pythonArchive)
 {
@@ -188,9 +183,11 @@ else
 }
 Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 
+$ErrorActionPreference = "Continue"
 & easy_install -U pip
 & pip install setuptools==26.0.0
 & pip install pymi
+$ErrorActionPreference = "Stop"
 
 popd
 
@@ -314,10 +311,6 @@ if (@("stable/mitaka", "stable/newton", "master") -contains $branchName.ToLower(
         GitClonePull "$buildDir\os-win" "https://git.openstack.org/openstack/os-win.git" $branchName
         pushd $buildDir\os-win
 
-        # Fixes VHD/x info retrieval issue by avoiding opening parents when fetching VHD info
-        git fetch git://git.openstack.org/openstack/os-win refs/changes/18/408718/2
-        cherry_pick FETCH_HEAD
-
         & update-requirements.exe --source $buildDir\requirements .
         & pip install -U $buildDir\os-win
     }
@@ -358,9 +351,6 @@ if ($hasNeutronExec -eq $false){
     Throw "No neutron-hyperv-agent.exe found"
 }
 
-
-Remove-Item -Recurse -Force "$remoteConfigs\$hostname\*"
-Copy-Item -Recurse $configDir "$remoteConfigs\$hostname"
 
 Write-Host "Starting the services"
 

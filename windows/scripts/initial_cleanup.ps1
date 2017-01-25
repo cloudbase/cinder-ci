@@ -13,10 +13,9 @@ if ($projectName -ne "cinder")
 {
     Throw "Error: Incorrect project $projectName. This setup is for testing Cinder patches."
 }
-
 $scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
 . "$scriptLocation\config.ps1"
-. "$scriptdir\windows\scripts\utils.ps1"
+. "$scriptLocation\utils.ps1"
 
 $ErrorActionPreference = "SilentlyContinue"
 
@@ -46,20 +45,8 @@ if (!(Test-Path $configDir)) {
     Remove-Item -Recurse -Force $configDir\* -ErrorAction SilentlyContinue
 }
 
-if (!(Test-Path "$buildDir\cinder\setup.py")){
-    Throw "$projectName repository was not found. Please run gerrit-git-prep for this project first"
-}
-
 if (!(Test-Path $cinderTemplate)){
     Throw "Cinder template not found"
-}
-
-if (!(Test-Path $remoteLogs)){
-    mkdir $remoteLogs
-}
-
-if (!(Test-Path $remoteConfigs)){
-    mkdir $remoteConfigs
 }
 
 #copy distutils.cfg
