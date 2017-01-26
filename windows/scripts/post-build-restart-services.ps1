@@ -8,8 +8,7 @@ Stop-Service cinder-volume
 
 Write-Host "post-build: Cleaning previous logs!"
 
-# Maybe we dont want to remove create-env logs 
-#Remove-Item -Force C:\OpenStack\logs\*
+Remove-Item -Force "$openstackLogs\cinder.log"
 
 Write-Host "Starting the services"
 

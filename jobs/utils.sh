@@ -147,6 +147,10 @@ post_build_restart_cinder_windows_services (){
     run_wsmancmd_with_retry 5 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\openstack\cinder-ci\windows\scripts\post-build-restart-services.ps1 >> '$LOG_DIR'\create-environment-post-build.log 2>&1"'
 }
 
+post_build_restart_hyperv_services (){
+    run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\post-build-restart-services.ps1 >> '$LOG_DIR'\create-environment.log 2>&1"'
+}
+
 function timestamp(){
     echo `date -u +%H:%M:%S`
 }
