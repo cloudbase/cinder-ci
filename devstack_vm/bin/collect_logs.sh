@@ -138,14 +138,14 @@ fi
 set +e
 
 echo "Getting Hyper-V logs from $hyperv01 , $hyperv02 and $ws2012r2"
-get_win_files $hyperv01_ip "\OpenStack\logs" "$LOG_DST_WIN/$hyperv01"
-get_win_files $hyperv02_ip "\OpenStack\logs" "$LOG_DST_WIN/$hyperv02"
-get_win_files $ws2012r2_ip "\OpenStack\logs" "$LOG_DST_WIN/$ws2012r2"
+get_win_files $hyperv01_ip "\OpenStack\logs" "$LOG_DST_WIN/$hyperv01-compute01"
+get_win_files $hyperv02_ip "\OpenStack\logs" "$LOG_DST_WIN/$hyperv02-compute02"
+get_win_files $ws2012r2_ip "\OpenStack\logs" "$LOG_DST_WIN/$ws2012r2-cinder"
 
 echo "Getting Hyper-V configs from $hyperv01 , $hyperv02 and $ws2012r2" 
-get_win_files $hyperv01_ip "\OpenStack\etc" "$CONFIG_DST_WIN/$hyperv01"
-get_win_files $hyperv02_ip "\OpenStack\etc" "$CONFIG_DST_WIN/$hyperv02"
-get_win_files $ws2012r2_ip "\OpenStack\etc" "$CONFIG_DST_WIN/$ws2012r2"
+get_win_files $hyperv01_ip "\OpenStack\etc" "$CONFIG_DST_WIN/$hyperv01-compute01"
+get_win_files $hyperv02_ip "\OpenStack\etc" "$CONFIG_DST_WIN/$hyperv02-compute02"
+get_win_files $ws2012r2_ip "\OpenStack\etc" "$CONFIG_DST_WIN/$ws2012r2-cinder"
 
 # For security reasons ??
 rm -f $DIR/devstack_params.sh
