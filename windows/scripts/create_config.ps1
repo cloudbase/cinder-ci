@@ -35,6 +35,6 @@ if ($hasCinderExec -eq $false){
     $cindesExec = "$pythonDir\Scripts\cinder-volume.exe"
 }
 
-Get-WMIObject Win32_LogicalDisk -filter "DriveType=3" | Select DeviceID, VolumeName, @{Name="size (GB)";Expression={"{0:N1}" -f($_.size/1gb)}}, @{Name="freespace (GB)";Expression={"{0:N1}" -f($_.freespace/1gb)}} | ft > "$openstackLogs\disk_free.txt" 2>&1
-Get-Process > "$openstackLogs\pid_stat.txt" 2>&1
+Get-WMIObject Win32_LogicalDisk -filter "DriveType=3" | Select DeviceID, VolumeName, @{Name="size (GB)";Expression={"{0:N1}" -f($_.size/1gb)}}, @{Name="freespace (GB)";Expression={"{0:N1}" -f($_.freespace/1gb)}} | ft > "$openstackLogs\disk_free.log" 2>&1
+Get-Process > "$openstackLogs\pid_stat.log" 2>&1
 
