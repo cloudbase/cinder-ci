@@ -2,10 +2,6 @@
 source /usr/local/src/cinder-ci-2016/jobs/utils.sh
 source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-echo "Collecting logs"
-
-/usr/local/src/cinder-ci-2016/jobs/collect_logs.sh
-
 if [ -z "$IS_DEBUG_JOB" ] || [ "$IS_DEBUG_JOB" != "yes" ]; then
     echo "Not a debug job, cleaning up environment."
     source /home/jenkins-slave/tools/keystonerc_admin
