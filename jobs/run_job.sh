@@ -1,6 +1,4 @@
 #!/bin/bash
-source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-
 jen_date=$(date +%d/%m/%Y-%H:%M)
 export IS_DEBUG_JOB
 set +e
@@ -11,7 +9,7 @@ echo "Init job finished with exit code $result_init"
 
 if [ $result_init -eq 0 ]; then
     jen_date=$(date +%d/%m/%Y-%H:%M)
-    if [[ ! -z $RUN_TESTS ]] && [[ $RUN_TESTS == "no" ]]; then
+    if [[ ! -z "$RUN_TESTS" ]] && [[ "$RUN_TESTS" == "no" ]]; then
         echo "Init phase done, not running tests"
         result_tempest=0
     else
@@ -28,10 +26,7 @@ result_collect=$?
 echo "Collect logs job finished with exit code $result_collect"
 
 if [ $result_init -eq 0 ] && [ $result_tempest -eq 0 ]; then
-    result=0
+    exit 0
 else
-    result=1
+    exit 1
 fi
-
-set -e
-exit $result
