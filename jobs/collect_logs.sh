@@ -3,7 +3,7 @@ source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 source /home/jenkins-slave/tools/keystonerc_admin
 source /usr/local/src/cinder-ci-2016/jobs/utils.sh
 
-CONSOLE_LOG=/home/jenkins-slave/logs/console-log.$ZUUL_UUID.$JOB_TYPE.log
+CONSOLE_LOG=/home/jenkins-slave/logs/console-$ZUUL_UUID.$JOB_TYPE.log
 logs_project=cinder
 set +e
 set -f
@@ -66,15 +66,12 @@ gzip -9 /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID-$JOB_TYPE
 gzip -9 /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID-$JOB_TYPE.log
 gzip -9 /home/jenkins-slave/logs/build-devstack-log-$ZUUL_UUID-$JOB_TYPE.log
 
-echo 'Copying the devstack console log to the logs server'
-scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY $CONSOLE_LOG.gz logs@logs.openstack.tld:$LOGSDEST/ && rm -f $CONSOLE_LOG.gz
-
 echo "Extracting the logs tar archive"
 ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY logs@logs.openstack.tld "tar -xzf $LOGSDEST/aggregate-logs.tar.gz -C $LOGSDEST/"
 
-#echo "Uploading threaded logs"
 set +e
-scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY /home/jenkins-slave/logs/$CONSOLE_LOG.gz logs@logs.openstack.tld:$LOGSDEST/
+echo "Uploading build and console logs"
+scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY $CONSOLE_LOG.gz logs@logs.openstack.tld:$LOGSDEST/
 scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY /home/jenkins-slave/logs/hyperv-$hyperv01-build-log-$ZUUL_UUID-$JOB_TYPE.log.gz logs@logs.openstack.tld:$LOGSDEST/
 scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID-$JOB_TYPE.log.gz logs@logs.openstack.tld:$LOGSDEST/
 scp -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH_KEY /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID-$JOB_TYPE.log.gz logs@logs.openstack.tld:$LOGSDEST/
@@ -86,6 +83,7 @@ ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -i $LOGS_SSH
 
 echo "Clean up local copy of aggregate archive"
 rm -f "aggregate-$NAME.tar.gz"
+rm -f $CONSOLE_LOG.gz
 rm -f /home/jenkins-slave/logs/hyperv-$hyperv01-build-log-$ZUUL_UUID-$JOB_TYPE.log.gz
 rm -f /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID-$JOB_TYPE.log.gz
 rm -f /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID-$JOB_TYPE.log.gz
