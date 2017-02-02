@@ -5,9 +5,7 @@ basedir="/home/ubuntu/bin"
 
 set -x
 set -e
-sudo ifconfig eth0 promisc up
 sudo ifconfig eth1 promisc up
-
 sudo ip -f inet r replace default via 10.250.0.1 dev eth0
 
 HOSTNAME=$(hostname)
