@@ -342,7 +342,7 @@ if ($hasNeutronExec -eq $false){
 }
 
 
-#Write-Host "Starting the services"
+Write-Host "Done building env"
 #
 #$currDate = (Get-Date).ToString()
 #Write-Host "$currDate Starting nova-compute service"
