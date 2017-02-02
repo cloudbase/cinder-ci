@@ -74,6 +74,9 @@ if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/new
         pushd $buildDir\cinder
         git fetch git://git.openstack.org/openstack/cinder refs/changes/41/403641/4
         cherry_pick FETCH_HEAD
+        
+        git fetch git://git.openstack.org/openstack/cinder refs/changes/19/426719/3
+        cherry_pick FETCH_HEAD
         popd
     }
 }
