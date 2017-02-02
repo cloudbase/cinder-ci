@@ -3,13 +3,12 @@ basedir="/home/ubuntu/bin"
 . $basedir/utils.sh
 . $basedir/devstack_params.sh
 
-echo "Parame are job_type=$job_type branch=$branch hyperv01=$hyperv01 hyperv02=$hyperv02"
 set -x
 set -e
 sudo ifconfig eth0 promisc up
 sudo ifconfig eth1 promisc up
 
-# sudo ifconfig eth2 promisc up
+sudo ip -f inet r replace default via 10.250.0.1 dev eth0
 
 HOSTNAME=$(hostname)
 
