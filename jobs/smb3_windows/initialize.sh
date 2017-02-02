@@ -22,7 +22,7 @@ echo WIN_PASS=$WIN_PASS >> /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$
 ZUUL_SITE=`echo "$ZUUL_URL" |sed 's/.\{2\}$//'`
 echo ZUUL_SITE=$ZUUL_SITE | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-DEVSTACK_IMAGE="devstack-81v2"
+DEVSTACK_IMAGE="devstack-82v1"
 echo DEVSTACK_IMAGE=$DEVSTACK_IMAGE | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 #Get IP addresses of the two Hyper-V hosts
