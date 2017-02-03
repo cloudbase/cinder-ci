@@ -3,13 +3,10 @@ basedir="/home/ubuntu/bin"
 . $basedir/utils.sh
 . $basedir/devstack_params.sh
 
-echo "Parame are job_type=$job_type branch=$branch hyperv01=$hyperv01 hyperv02=$hyperv02"
 set -x
 set -e
-sudo ifconfig eth0 promisc up
 sudo ifconfig eth1 promisc up
-
-# sudo ifconfig eth2 promisc up
+sudo ip -f inet r replace default via 10.250.0.1 dev eth0
 
 HOSTNAME=$(hostname)
 
@@ -28,7 +25,6 @@ sudo cp $HOME/.pip/pip.conf /root/.pip/
 sudo chown -R root:root /root/.pip
 
 #Update packages to latest version
-sudo easy_install -U pip
 sudo pip install -U six
 sudo pip install -U kombu
 sudo pip install -U pbr
@@ -40,8 +36,6 @@ PBR_LOC="/opt/stack/pbr"
 # Clean devstack logs
 sudo rm -f "$DEVSTACK_LOGS/*"
 sudo rm -rf "$PBR_LOC"
-cp /etc/hosts $DEVSTACK_LOGS/hosts.txt
-
 
 MYIP=$(/sbin/ifconfig eth0 2>/dev/null| grep "inet addr:" 2>/dev/null| sed 's/.*inet addr://g;s/ .*//g' 2>/dev/null)
 
@@ -140,7 +134,7 @@ STACK_LOG="/opt/stack/logs/stack.sh.txt"
 STACK_ROTATE_LIMIT=6
 rotate_log $STACK_LOG $STACK_ROTATE_LIMIT
 
-sed -i "s#PIP_GET_PIP_URL=https://bootstrap.pypa.io/get-pip.py#PIP_GET_PIP_URL=http://10.20.1.14:8080/get-pip.py#g" /home/ubuntu/devstack/tools/install_pip.sh
+#sed -i "s#PIP_GET_PIP_URL=https://bootstrap.pypa.io/get-pip.py#PIP_GET_PIP_URL=http://10.20.1.14:8080/get-pip.py#g" /home/ubuntu/devstack/tools/install_pip.sh
 
 #Requested by Claudiu Belu, temporary hack:
 sudo pip install -U /opt/stack/networking-hyperv

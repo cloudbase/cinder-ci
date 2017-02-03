@@ -137,8 +137,6 @@ join_windows(){
     run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\install_cinder.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\060-install_cinder.log 2>&1"'
     echo "creating config"
     run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\create_config.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\070-create_config.log 2>&1"'
-    echo "starting services"
-    run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\start_services.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\080-start_services.log 2>&1"'
 }
 
 

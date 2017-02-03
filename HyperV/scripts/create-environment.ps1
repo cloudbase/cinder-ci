@@ -284,7 +284,7 @@ ExecRetry {
 
 if (@("stable/mitaka", "stable/newton", "stable/ocata", "master") -contains $branchName.ToLower()) {
     ExecRetry {
-        # os-win only exists on stable/mitaka, stable/newton and master.
+        # os-win only exists on stable/mitaka, stable/newton, stable/ocata and master.
         GitClonePull "$buildDir\os-win" "https://git.openstack.org/openstack/os-win.git" $branchName
         pushd $buildDir\os-win
 
@@ -327,3 +327,5 @@ $hasNeutronExec = Test-Path "$pythonScripts\neutron-hyperv-agent.exe"
 if ($hasNeutronExec -eq $false){
     Throw "No neutron-hyperv-agent.exe found"
 }
+
+Write-Host "Done building env"

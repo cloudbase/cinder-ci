@@ -60,7 +60,7 @@ Write-Host "just before installing cinder git log says:"
 & git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
 pip install -r requirements.txt
 
-if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/newton"){
+if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/newton" -or $branchName.ToLower() -eq "stable/ocata"){
     ExecRetry {
         GitClonePull "$buildDir\oslo.concurrency\" "https://github.com/openstack/oslo.concurrency" "master"
         pushd $buildDir\oslo.concurrency
@@ -73,6 +73,9 @@ if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/new
     ExecRetry {
         pushd $buildDir\cinder
         git fetch git://git.openstack.org/openstack/cinder refs/changes/41/403641/4
+        cherry_pick FETCH_HEAD
+        
+        git fetch git://git.openstack.org/openstack/cinder refs/changes/19/426719/3
         cherry_pick FETCH_HEAD
         popd
     }

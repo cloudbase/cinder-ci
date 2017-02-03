@@ -2,16 +2,10 @@ $scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Def
 . "$scriptLocation\utils.ps1"
 . "$scriptLocation\config.ps1"
 
-Write-Host "post-build: Stoping the services!"
-
-Stop-Service cinder-volume
-
-Write-Host "post-build: Cleaning previous logs!"
-
-Remove-Item -Force "$openstackLogs\cinder.log"
-
 Write-Host "Starting the services"
 
+$currDate = (Get-Date).ToString()
+Write-Host "$currDate Starting cinder-volume service"
 Try
 {
     Start-Service cinder-volume
@@ -26,7 +20,8 @@ Catch
 Start-Sleep -s 30
 if ($(get-service cinder-volume).Status -eq "Stopped")
 {
-    Write-Host "We try to start:"
+    $currDate = (Get-Date).ToString()
+    Write-Host "$currDate We try to start:"
     Write-Host Start-Process -PassThru -RedirectStandardError "$openstackLogs\process_error.txt" -RedirectStandardOutput "$openstackLogs\process_output.txt" -FilePath "$pythonDir\python.exe" -ArgumentList '-c "from ctypes import wintypes; from cinder.cmd import volume; volume.main()"'
     Try
     {
