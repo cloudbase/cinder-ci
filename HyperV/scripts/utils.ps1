@@ -132,3 +132,15 @@ function destroy_planned_vms() {
         $svc.DestroySystem($pvm)
     }
 }
+
+function cherry_pick($commit) {
+    $eapSet = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    git cherry-pick $commit
+
+    if ($LastExitCode) {
+        echo "Ignoring failed git cherry-pick $commit"
+        git checkout --force
+    }
+    $ErrorActionPreference = $eapSet
+}

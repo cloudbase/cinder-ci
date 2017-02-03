@@ -16,7 +16,17 @@ if ($projectName -ne "cinder")
 
 $scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
 . "$scriptLocation\config.ps1"
-. "$scriptdir\windows\scripts\utils.ps1"
+. "$scriptLocation\utils.ps1"
+
+
+if (!(Test-Path "$buildDir\cinder\setup.py")){
+    Throw "$projectName repository was not found. Please run gerrit-git-prep for this project first"
+}
+
+pushd $buildDir\cinder
+Write-Host "when install_cinder starts git log says:"
+& git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
+popd
 
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
@@ -46,6 +56,7 @@ ExecRetry {
 }
 
 pushd $buildDir\cinder
+Write-Host "just before installing cinder git log says:"
 & git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
 pip install -r requirements.txt
 

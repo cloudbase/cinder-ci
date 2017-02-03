@@ -1,4 +1,6 @@
 #!/bin/bash
+source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
+
 if [[ ! -z $RUN_TESTS ]] && [[ $RUN_TESTS == "no" ]]; then
     echo "Init phase done, not running tests"
     exit 0

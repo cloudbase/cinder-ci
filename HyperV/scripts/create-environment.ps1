@@ -1,7 +1,7 @@
 Param(
     [Parameter(Mandatory=$true)][string]$devstackIP,
     [string]$branchName='master',
-    [string]$buildFor='openstack/neutron',
+    [string]$buildFor='openstack/cinder',
     [string]$isDebug='no'
 )
 
@@ -18,14 +18,16 @@ $scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Def
 . "$scriptLocation\config.ps1"
 . "$scriptLocation\utils.ps1"
 
-$hasProject = Test-Path $buildDir\$projectName
 $hasNova = Test-Path $buildDir\nova
 $hasNeutron = Test-Path $buildDir\neutron
 $hasNeutronTemplate = Test-Path $neutronTemplate
 $hasNovaTemplate = Test-Path $novaTemplate
 $hasConfigDir = Test-Path $configDir
 $hasBinDir = Test-Path $binDir
+$hasBuildDir = Test-Path $buildDir
 $hasMkisoFs = Test-Path $binDir\mkisofs.exe
+$hasPipConf = Test-Path "$env:APPDATA\pip"
+$hasLogDir = Test-Path $openstackLogs
 $hasQemuImg = Test-Path $binDir\qemu-img.exe
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
@@ -80,6 +82,14 @@ if ($(Get-Service neutron-hyperv-agent).Status -ne "Stopped"){
     Throw "Neutron service is still running"
 }
 
+if ($hasPipConf -eq $false){
+    mkdir "$env:APPDATA\pip"
+}
+else 
+{
+    Remove-Item -Force "$env:APPDATA\pip\*"
+}
+
 Write-Host "Cleaning up the config folder."
 if ($hasConfigDir -eq $false) {
     mkdir $configDir
@@ -94,11 +104,13 @@ if ($hasConfigDir -eq $false) {
     }
 }
 
-#if ($hasProject -eq $false){
-#    Get-ChildItem $buildDir
-#    Get-ChildItem ( Get-Item $buildDir ).Parent.FullName
-#    Throw "$projectName repository was not found. Please run gerrit-git-prep.sh for this project first"
-#}
+if ($hasLogDir -eq $false){
+    mkdir $openstackLogs
+}
+
+if ($hasBuildDir -eq $false){
+    mkdir $buildDir
+}
 
 if ($hasBinDir -eq $false){
     mkdir $binDir
@@ -126,7 +138,7 @@ if ($isDebug -eq  'yes') {
     Get-ChildItem $buildDir
 }
 
-if ($buildFor -eq "openstack/neutron") {
+if ($buildFor -eq "openstack/cinder") {
     ExecRetry {
         GitClonePull "$buildDir\nova" "https://git.openstack.org/openstack/nova.git" $branchName
     }
@@ -153,16 +165,6 @@ else {
     Throw "Cannot build for project: $buildFor"
 }
 
-$hasLogDir = Test-Path $openstackLogs
-if ($hasLogDir -eq $false){
-    mkdir $openstackLogs
-}
-
-$hasConfigDir = Test-Path $remoteConfigs\$hostname
-if ($hasConfigDir -eq $false){
-    mkdir $remoteConfigs\$hostname
-}
-
 pushd C:\
 if (Test-Path $pythonArchive)
 {
@@ -178,45 +180,17 @@ Write-Host "Ensure Python folder is up to date"
 Write-Host "Extracting archive.."
 [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\$pythonArchive", "C:\")
 
-$hasPipConf = Test-Path "$env:APPDATA\pip"
-if ($hasPipConf -eq $false){
-    mkdir "$env:APPDATA\pip"
-}
-else 
-{
-    Remove-Item -Force "$env:APPDATA\pip\*"
-}
 Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 
+$ErrorActionPreference = "Continue"
 & easy_install -U pip
 & pip install setuptools==26.0.0
 & pip install pymi
+$ErrorActionPreference = "Stop"
 
 popd
 
-$hasPipConf = Test-Path "$env:APPDATA\pip"
-if ($hasPipConf -eq $false){
-    mkdir "$env:APPDATA\pip"
-}
-else 
-{
-    Remove-Item -Force "$env:APPDATA\pip\*"
-}
-Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
-
 cp $templateDir\distutils.cfg C:\Python27\Lib\distutils\distutils.cfg
-
-function cherry_pick($commit) {
-    $eapSet = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
-    git cherry-pick $commit
-
-    if ($LastExitCode) {
-        echo "Ignoring failed git cherry-pick $commit"
-        git checkout --force
-    }
-    $ErrorActionPreference = $eapSet
-}
 
 if ($isDebug -eq  'yes') {
     Write-Host "BuildDir is: $buildDir"
@@ -292,13 +266,13 @@ ExecRetry {
         Get-ChildItem $buildDir\compute-hyperv
     }
     pushd $buildDir\compute-hyperv
-    if ($branchName -eq 'master') {
+    if (@("stable/ocata", "master") -contains $branchName.ToLower()) {
         # This patch fixes duplicate option use_multipath_io
         git fetch https://git.openstack.org/openstack/compute-hyperv refs/changes/91/400091/1
         cherry_pick FETCH_HEAD
     }
     & update-requirements.exe --source $buildDir\requirements .
-    if (($branchName -eq 'stable/liberty') -or ($branchName -eq 'stable/mitaka')) {
+    if (@("stable/liberty", "stable/mitaka") -contains $branchName.ToLower()) {
         & pip install -c $buildDir\requirements\upper-constraints.txt -U .
     }
     else {
@@ -308,15 +282,11 @@ ExecRetry {
     popd
 }
 
-if (@("stable/mitaka", "stable/newton", "master") -contains $branchName.ToLower()) {
+if (@("stable/mitaka", "stable/newton", "stable/ocata", "master") -contains $branchName.ToLower()) {
     ExecRetry {
         # os-win only exists on stable/mitaka, stable/newton and master.
         GitClonePull "$buildDir\os-win" "https://git.openstack.org/openstack/os-win.git" $branchName
         pushd $buildDir\os-win
-
-        # Fixes VHD/x info retrieval issue by avoiding opening parents when fetching VHD info
-        git fetch git://git.openstack.org/openstack/os-win refs/changes/18/408718/2
-        cherry_pick FETCH_HEAD
 
         & update-requirements.exe --source $buildDir\requirements .
         & pip install -U $buildDir\os-win
@@ -356,88 +326,4 @@ if ($hasNovaExec -eq $false){
 $hasNeutronExec = Test-Path "$pythonScripts\neutron-hyperv-agent.exe"
 if ($hasNeutronExec -eq $false){
     Throw "No neutron-hyperv-agent.exe found"
-}
-
-
-Remove-Item -Recurse -Force "$remoteConfigs\$hostname\*"
-Copy-Item -Recurse $configDir "$remoteConfigs\$hostname"
-
-Write-Host "Starting the services"
-
-$currDate = (Get-Date).ToString()
-Write-Host "$currDate Starting nova-compute service"
-Try
-{
-    Start-Service nova-compute
-}
-Catch
-{
-    Write-Host "Can not start the nova-compute service"
-}
-Start-Sleep -s 30
-if ($(get-service nova-compute).Status -eq "Stopped")
-{
-    Write-Host "nova-compute service is not running."
-    $currDate = (Get-Date).ToString()
-    Write-Host "$currDate We try to start:"
-        Write-Host Start-Process -PassThru -RedirectStandardError "$openstackLogs\process_error.txt" -RedirectStandardOutput "$openstackLogs\process_output.txt" -FilePath "$pythonDir\Scripts\nova-compute.exe" -ArgumentList "--config-file $configDir\nova.conf"
-    $currDate = (Get-Date).ToString()
-    Add-Content "$openstackLogs\nova-compute.log" "`n$currDate Starting nova-compute as a python process."
-    Try
-    {
-    	$proc = Start-Process -PassThru -RedirectStandardError "$openstackLogs\process_error.txt" -RedirectStandardOutput "$openstackLogs\process_output.txt" -FilePath "$pythonScripts\nova-compute.exe" -ArgumentList "--config-file $configDir\nova.conf"
-    }
-    Catch
-    {
-    	Throw "Could not start the process manually"
-    }
-    Start-Sleep -s 30
-    if (! $proc.HasExited)
-    {
-    	Stop-Process -Id $proc.Id -Force
-    	Throw "Process started fine when run manually."
-    }
-    else
-    {
-    	Throw "Can not start the nova-compute service. The manual run failed as well."
-    }
-}
-
-$currDate = (Get-Date).ToString()
-Write-Host "$currDate neutron-hyperv-agent service"
-Try
-{
-    Start-Service neutron-hyperv-agent
-}
-Catch
-{
-    Write-Host "Can not start the neutron-hyperv-agent service"
-}
-Start-Sleep -s 30
-if ($(get-service neutron-hyperv-agent).Status -eq "Stopped")
-{
-    Write-Host "neutron-hyperv-agent service is not running."
-    $currDate = (Get-Date).ToString()
-    Write-Host "$currDate We try to start:"
-    Write-Host Start-Process -PassThru -RedirectStandardError "$openstackLogs\process_error.txt" -RedirectStandardOutput "$openstackLogs\process_output.txt" -FilePath "$pythonScripts\neutron-hyperv-agent.exe" -ArgumentList "--config-file $configDir\neutron_hyperv_agent.conf"
-    $currDate = (Get-Date).ToString()
-    Add-Content "$openstackLogs\neutron-hyperv-agent.log" "`n$currDate starting neutron-hyperv-agent as a python process."
-    Try
-    {
-    	$proc = Start-Process -PassThru -RedirectStandardError "$openstackLogs\process_error.txt" -RedirectStandardOutput "$openstackLogs\process_output.txt" -FilePath "$pythonScripts\neutron-hyperv-agent.exe" -ArgumentList "--config-file $configDir\neutron_hyperv_agent.conf"
-    }
-    Catch
-    {
-    	Throw "Could not start the process manually"
-    }
-    Start-Sleep -s 30
-    if (! $proc.HasExited)
-    {
-    	Stop-Process -Id $proc.Id -Force
-    	Throw "Process started fine when run manually."
-    }
-    else
-    {
-    	Throw "Can not start the neutron-hyperv-agent service. The manual run failed as well."
-    }
 }
