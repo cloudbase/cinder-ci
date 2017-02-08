@@ -274,9 +274,11 @@ if [[ $PROC_COUNT -gt 0 ]]; then
     exit 1
 fi
 
-echo "Doing post init stuff"
+echo "Post init on cinder node: $ws2012r2"
 post_build_restart_cinder_windows_services $ws2012r2 $WIN_USER $WIN_PASS
+echo "Post init on compute01 node: $hyperv01"
 post_build_restart_hyperv_services $hyperv01 $WIN_USER $WIN_PASS
+echo "Post init on compute02 node: $hyperv02"
 post_build_restart_hyperv_services $hyperv02 $WIN_USER $WIN_PASS
 
 echo "Test that we have one cinder volume active"
