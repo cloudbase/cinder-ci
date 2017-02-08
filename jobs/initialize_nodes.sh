@@ -180,10 +180,6 @@ if [ $exit_code_cifs -ne 0 ]; then
     exit 1
 fi
 
-if [ "$JOB_TYPE" == "smb3_windows" ]; then
-    run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'echo -e "tempest.api.volume.admin.v2.test_snapshot_manage" >> /home/ubuntu/bin/excluded-tests.txt'
-fi
-
 echo "Update git repos to latest"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "/home/ubuntu/bin/update_devstack_repos.sh --branch $ZUUL_BRANCH --build-for $ZUUL_PROJECT" 6
 

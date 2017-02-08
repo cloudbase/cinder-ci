@@ -25,15 +25,8 @@ include_tests_file="/home/ubuntu/bin/included-tests.txt"
 include_tests=(`awk 'NF && $1!~/^#/' $include_tests_file`)
 include_regex=$(array_to_regex ${include_tests[@]})
 
-#determine which tests to exclude/isolate based on the job type
-if [ "$job_type" == "iscsi" ]; then
-	exclude_tests_file="/home/ubuntu/bin/excluded-tests-"$job_type".txt"
-	isolated_tests_file="/home/ubuntu/bin/isolated-tests-"$job_type".txt"
-else
-	exclude_tests_file="/home/ubuntu/bin/excluded-tests.txt"
-	isolated_tests_file="/home/ubuntu/bin/isolated-tests.txt"
-fi
-
+exclude_tests_file="/home/ubuntu/bin/excluded-tests-"$job_type".txt"
+isolated_tests_file="/home/ubuntu/bin/isolated-tests-"$job_type".txt"
 
 if [ -f "$exclude_tests_file" ]; then
     exclude_tests=(`awk 'NF && $1!~/^#/' $exclude_tests_file`)
