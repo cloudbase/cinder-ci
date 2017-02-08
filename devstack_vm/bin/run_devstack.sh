@@ -101,7 +101,7 @@ if [ $JOB_TYPE != "iscsi" ]; then
     git checkout -b testBranch
     set -e
     # cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
-    if [ $ZUUL_BRANCH == "master" ]; then
+    if [[ "$ZUUL_BRANCH" == "master" ]] || [[ "$ZUUL_BRANCH" == "stable/ocata" ]]; then
         cherry_pick dcd839978ca8995cada8a62a5f19d21eaeb399df
         cherry_pick f711195367ead9a2592402965eb7c7a73baebc9f
     else

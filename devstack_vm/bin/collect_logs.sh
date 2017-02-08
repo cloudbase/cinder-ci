@@ -116,18 +116,7 @@ function archive_tempest_files() {
     find . -type f -exec gzip "{}" \;
     popd
     cp -r "$TEMPEST_LOGS" "$LOG_DST"
-    # for i in `ls -A $TEMPEST_LOGS`
-    # do
-    #     $GZIP "$TEMPEST_LOGS/$i" -c > "$LOG_DST/$i.gz" || emit_error "Failed to archive tempest logs"
-    # done
 }
-
-# Clean
-#if [[ -z $1 ]] || [[ $1 != "yes" ]]; then
-#    pushd /home/ubuntu/devstack
-#    ./unstack.sh
-#    popd
-#fi
 
 if [ "$IS_DEBUG_JOB" != "yes" ]; then
     echo "Stop devstack services"

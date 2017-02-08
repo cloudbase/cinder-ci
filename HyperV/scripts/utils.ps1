@@ -112,9 +112,9 @@ function exporthtmleventlog($path){
 }
 
 function cleareventlog(){
- Get-Eventlog -list | ForEach-Object {
-         Clear-Eventlog $_.LogDisplayName -ErrorAction SilentlyContinue
- }
+    foreach ($i in (get-winevent -ListLog * |  ? {$_.RecordCount -gt 0 })) {
+        wevtutil cl $i.LogName
+    }
 }
 
 
@@ -131,4 +131,16 @@ function destroy_planned_vms() {
     foreach($pvm in $planned_vms) {
         $svc.DestroySystem($pvm)
     }
+}
+
+function cherry_pick($commit) {
+    $eapSet = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    git cherry-pick $commit
+
+    if ($LastExitCode) {
+        echo "Ignoring failed git cherry-pick $commit"
+        git checkout --force
+    }
+    $ErrorActionPreference = $eapSet
 }
