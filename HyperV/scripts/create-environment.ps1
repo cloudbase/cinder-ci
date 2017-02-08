@@ -212,10 +212,10 @@ ExecRetry {
 
 ExecRetry {
     if ($isDebug -eq  'yes') {
-        Write-Host "Content of $buildDir\$projectName"
-        Get-ChildItem $buildDir\$projectName
+        Write-Host "Content of $buildDir\neutron"
+        Get-ChildItem $buildDir\neutron
     }
-    pushd $buildDir\$projectName
+    pushd $buildDir\neutron
     Write-Host "Installing openstack/neutron..."
     & update-requirements.exe --source $buildDir\requirements .
     & pip install -c $buildDir\requirements\upper-constraints.txt -U .
