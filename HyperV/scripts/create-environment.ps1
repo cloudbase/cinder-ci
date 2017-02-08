@@ -138,32 +138,26 @@ if ($isDebug -eq  'yes') {
     Get-ChildItem $buildDir
 }
 
-if ($buildFor -eq "openstack/cinder") {
-    ExecRetry {
-        GitClonePull "$buildDir\nova" "https://git.openstack.org/openstack/nova.git" $branchName
-    }
-    Get-ChildItem $buildDir
-    ExecRetry {
-        GitClonePull "$buildDir\neutron" "https://git.openstack.org/openstack/neutron.git" $branchName
-    }
-    Get-ChildItem $buildDir
-    ExecRetry {
-        GitClonePull "$buildDir\networking-hyperv" "https://git.openstack.org/openstack/networking-hyperv.git" $branchName
-    }
-    Get-ChildItem $buildDir
-    ExecRetry {
-        GitClonePull "$buildDir\compute-hyperv" "https://git.openstack.org/openstack/compute-hyperv.git" $branchName
-    }
-    Get-ChildItem $buildDir
-    ExecRetry {
-        GitClonePull "$buildDir\requirements" "https://git.openstack.org/openstack/requirements.git" $branchName
-    }
-    
-    Get-ChildItem $buildDir
+ExecRetry {
+    GitClonePull "$buildDir\nova" "https://git.openstack.org/openstack/nova.git" $branchName
 }
-else {
-    Throw "Cannot build for project: $buildFor"
+Get-ChildItem $buildDir
+ExecRetry {
+    GitClonePull "$buildDir\neutron" "https://git.openstack.org/openstack/neutron.git" $branchName
 }
+Get-ChildItem $buildDir
+ExecRetry {
+    GitClonePull "$buildDir\networking-hyperv" "https://git.openstack.org/openstack/networking-hyperv.git" $branchName
+}
+Get-ChildItem $buildDir
+ExecRetry {
+    GitClonePull "$buildDir\compute-hyperv" "https://git.openstack.org/openstack/compute-hyperv.git" $branchName
+}
+Get-ChildItem $buildDir
+ExecRetry {
+    GitClonePull "$buildDir\requirements" "https://git.openstack.org/openstack/requirements.git" $branchName
+}
+Get-ChildItem $buildDir
 
 pushd C:\
 if (Test-Path $pythonArchive)
@@ -212,10 +206,10 @@ ExecRetry {
 
 ExecRetry {
     if ($isDebug -eq  'yes') {
-        Write-Host "Content of $buildDir\$projectName"
-        Get-ChildItem $buildDir\$projectName
+        Write-Host "Content of $buildDir\neutron"
+        Get-ChildItem $buildDir\neutron
     }
-    pushd $buildDir\$projectName
+    pushd $buildDir\neutron
     Write-Host "Installing openstack/neutron..."
     & update-requirements.exe --source $buildDir\requirements .
     & pip install -c $buildDir\requirements\upper-constraints.txt -U .
