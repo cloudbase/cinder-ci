@@ -115,6 +115,10 @@ cd /opt/stack/nova
 git fetch https://plucian@review.openstack.org/openstack/nova refs/changes/19/187619/3
 cherry_pick FETCH_HEAD
 
+cd /opt/stack/tempest
+git fetch git://git.openstack.org/openstack/tempest refs/changes/13/433213/3
+cherry_pick FETCH_HEAD
+
 cd /home/ubuntu/devstack
 
 ./unstack.sh
