@@ -216,23 +216,55 @@ function add_user_to_passwordless_sudoers() {
 
 rotate_log () {
     local file="$1"
-    local limit="$2"
-    #We set $new_file as $file without extension 
-    local new_file="${file//.txt/}"
+    local limit=$2
     if [ -f $file ] ; then
-        if [[ -f ${new_file}.${limit}.txt ]] ; then
-            rm ${new_file}.${limit}.txt
+        if [ -f ${file}.${limit} ] ; then
+            rm ${file}.${limit}
         fi
 
         for (( CNT=$limit; CNT > 1; CNT-- )) ; do
-            if [[ -f ${new_file}.$(($CNT-1)).txt ]]; then
-                echo ${new_file}.$(($CNT-1)).txt
-                mv ${new_file}.$(($CNT-1)).txt ${new_file}.${CNT}.txt || echo "Failed to run: mv ${new_file}.$(($CNT-1)).txt ${new_file}.${CNT}.txt"
+            if [ -f ${file}.$(($CNT-1)) ]; then
+                mv ${file}.$(($CNT-1)) ${file}.${CNT} || echo "Failed to run: mv ${file}.$(($CNT-1)) ${file}.${CNT}"
             fi
         done
 
-        # Renames current log to .1.txt
-        mv $file ${new_file}.1.txt
+        # Renames current log to .1
+        mv $file ${file}.1
         touch $file
     fi
 }
+
+function git_timed {
+    local count=0
+    local timeout=0
+
+    if [[ -n "${GIT_TIMEOUT}" ]]; then
+        timeout=${GIT_TIMEOUT}
+    fi
+
+    until timeout -s SIGINT ${timeout} git "$@"; do
+        echo "Command exited with '$?' [git $@] ... retrying"
+        count=$(($count + 1))
+        echo "timeout ${count} for git call: [git $@]"
+        if [ $count -eq 3 ]; then
+            echo $LINENO "Maximum of 3 git retries reached"
+            exit 1
+        fi
+        sleep 5
+    done
+}
+
+function cherry_pick() {
+    commit=$1
+    set +e
+    git cherry-pick $commit
+
+    if [ $? -ne 0 ]
+    then
+        echo "Ignoring failed git cherry-pick $commit"
+        git cherry-pick --abort
+    fi
+
+    set -e
+}
+
