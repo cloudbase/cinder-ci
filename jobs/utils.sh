@@ -102,7 +102,7 @@ function join_hyperv (){
     run_wsmancmd_with_retry 3 $1 $2 $3 'netsh.exe advfirewall set allprofiles state off'
     run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned Remove-Item -Recurse -Force C:\OpenStack\cinder-ci ; git clone https://github.com/cloudbase/cinder-ci C:\OpenStack\cinder-ci ; cd C:\OpenStack\cinder-ci ; git checkout cambridge-2016 >> '$LOG_DIR'\create-environment.log 2>&1'
     run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\teardown.ps1'
-    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\EnsureOpenStackServices.ps1 Administrator H@rd24G3t >> '$LOG_DIR'\create-environment.log 2>&1'
+    run_wsmancmd_with_retry 3 $1 $2 $3 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\EnsureOpenStackServices.ps1 '$2' '$3' >> '$LOG_DIR'\create-environment.log 2>&1'
     [ "$IS_DEBUG_JOB" == "yes" ] && run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell Write-Host Calling create-environment with devstackIP='$FIXED_IP' branchName '$ZUUL_BRANCH' buildFor '$ZUUL_PROJECT' '$IS_DEBUG_JOB' >> '$LOG_DIR'\create-environment.log 2>&1"'
     run_wsmancmd_with_retry 3 $1 $2 $3 '"powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\create-environment.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' '$IS_DEBUG_JOB' >> '$LOG_DIR'\create-environment.log 2>&1"'
 }
