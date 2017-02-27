@@ -60,40 +60,6 @@ cd /opt/stack/cinder
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
 
-rotate_log () {
-    local file="$1"
-    local limit=$2
-    if [ -f $file ] ; then
-        if [ -f ${file}.${limit} ] ; then
-            rm ${file}.${limit}
-        fi
-
-        for (( CNT=$limit; CNT > 1; CNT-- )) ; do
-            if [ -f ${file}.$(($CNT-1)) ]; then
-                mv ${file}.$(($CNT-1)) ${file}.${CNT} || echo "Failed to run: mv ${file}.$(($CNT-1)) ${file}.${CNT}"
-            fi
-        done
-
-        # Renames current log to .1
-        mv $file ${file}.1
-        touch $file
-    fi
-}
-
-function cherry_pick(){
-    commit=$1
-    set +e
-    git cherry-pick $commit
-
-    if [ $? -ne 0 ]
-    then
-        echo "Ignoring failed git cherry-pick $commit"
-        git checkout --force
-    fi
-
-    set -e
-}
-
 if [ $JOB_TYPE != "iscsi" ]; then
     set +e
     git remote add downstream https://github.com/petrutlucian94/cinder
@@ -112,11 +78,11 @@ fi
 
 cd /opt/stack/nova
 # Nova volume attach race condition fix
-git fetch https://plucian@review.openstack.org/openstack/nova refs/changes/19/187619/3
+git_timed fetch https://plucian@review.openstack.org/openstack/nova refs/changes/19/187619/3
 cherry_pick FETCH_HEAD
 
 cd /opt/stack/tempest
-git fetch git://git.openstack.org/openstack/tempest refs/changes/13/433213/3
+git_timed fetch git://git.openstack.org/openstack/tempest refs/changes/13/433213/3
 cherry_pick FETCH_HEAD
 
 cd /home/ubuntu/devstack
