@@ -49,7 +49,7 @@ ExecRetry {
 
 ExecRetry {
     pushd "$buildDir\requirements"
-    & pip install -c upper-constraints.txt -U pbr virtualenv httplib2 prettytable>=0.7 setuptools
+    & pip install -c upper-constraints.txt -U pbr virtualenv httplib2 prettytable>=0.7 setuptools==33.1.1
     & pip install -c upper-constraints.txt -U .
     if ($LastExitCode) { Throw "Failed to install openstack/requirements from repo" }
     popd
