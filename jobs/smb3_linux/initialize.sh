@@ -1,8 +1,9 @@
 #!/bin/bash
+basedir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # Loading functions
-source /usr/local/src/cinder-ci-2016/jobs/utils.sh
+source $basedir/../utils.sh
 set -e
 source $KEYSTONERC
 
 # Deploy devstack vm
-source /usr/local/src/cinder-ci-2016/jobs/deploy_devstack_vm.sh
+source $basedir/../deploy_devstack_vm.sh

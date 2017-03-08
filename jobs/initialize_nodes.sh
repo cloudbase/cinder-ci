@@ -1,19 +1,20 @@
 #!/bin/bash
 
-source /usr/local/src/cinder-ci-2016/jobs/utils.sh
+basedir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source $basedir/utils.sh
 source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 # Functions section
 update_local_conf (){
     if [ $JOB_TYPE = "smb3_linux" ]
     then 
-        EXTRA_OPTS_PATH="/usr/local/src/cinder-ci-2016/jobs/smb3_linux/local-conf-extra"
+        EXTRA_OPTS_PATH="$basedir/smb3_linux/local-conf-extra"
     elif [ $JOB_TYPE = "smb3_windows" ]
         then
-            EXTRA_OPTS_PATH="/usr/local/src/cinder-ci-2016/jobs/smb3_windows/local-conf-extra"
+            EXTRA_OPTS_PATH="$basedir/smb3_windows/local-conf-extra"
         elif [ $JOB_TYPE = "iscsi" ]
             then            
-                EXTRA_OPTS_PATH="/usr/local/src/cinder-ci-2016/jobs/iscsi/local-conf-extra"
+                EXTRA_OPTS_PATH="$basedir/iscsi/local-conf-extra"
             else 
                 echo "No proper JOB_TYPE received!"
                 exit 1
@@ -133,17 +134,17 @@ echo VMID=$VMID | tee -a  /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$J
 echo "Starting building HyperV and ws2012 nodes"
 
 export LOG_DIR='C:\Openstack\logs\'
-nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv01 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv01-build-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
+nohup $basedir/build_hyperv.sh $hyperv01 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv01-build-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
 pid_hv01=$!
 
-nohup /usr/local/src/cinder-ci-2016/jobs/build_hyperv.sh $hyperv02 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
+nohup $basedir/build_hyperv.sh $hyperv02 $JOB_TYPE > /home/jenkins-slave/logs/hyperv-$hyperv02-build-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
 pid_hv02=$!
 
-nohup /usr/local/src/cinder-ci-2016/jobs/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02" > /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
+nohup $basedir/build_windows.sh $ws2012r2 $JOB_TYPE "$hyperv01,$hyperv02" > /home/jenkins-slave/logs/ws2012-build-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
 pid_ws2012=$!
 
 echo "Copy scripts to devstack VM"
-scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci-2016/devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/
+scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY $basedir/../devstack_vm/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/
 
 echo "Copy devstack_params file to devstack VM"
 scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/bin/devstack_params.sh
@@ -184,7 +185,7 @@ echo "Update git repos to latest"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "/home/ubuntu/bin/update_devstack_repos.sh --branch $ZUUL_BRANCH --build-for $ZUUL_PROJECT" 6
 
 echo "Ensure configs are copied over"
-scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /usr/local/src/cinder-ci-2016/devstack_vm/devstack/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/devstack
+scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY $basedir/../devstack_vm/devstack/* ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/devstack
 
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "mkdir -p -m 777 /openstack/volumes" 6
 
@@ -195,7 +196,7 @@ run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "wget http
 
 echo "Reserve VLAN range for test"
 set +e
-VLAN_RANGE=`/usr/local/src/cinder-ci-2016/vlan_allocation.py -a $VMID`
+VLAN_RANGE=`$basedir/../vlan_allocation.py -a $VMID`
 echo "VLAN range selected is $VLAN_RANGE"
 if [ ! -z "$VLAN_RANGE" ]; then
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i 's/TENANT_VLAN_RANGE.*/TENANT_VLAN_RANGE='$VLAN_RANGE'/g' /home/ubuntu/devstack/local.conf" 3
@@ -214,7 +215,7 @@ run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'mkdir -p 
 update_local_conf
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i '3 i\branch=$ZUUL_BRANCH' /home/ubuntu/devstack/local.sh"
 
-nohup /usr/local/src/cinder-ci-2016/jobs/build_devstack.sh >> /home/jenkins-slave/logs/build-devstack-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
+nohup $basedir/build_devstack.sh >> /home/jenkins-slave/logs/build-devstack-log-$ZUUL_UUID-$JOB_TYPE.log 2>&1 &
 pid_devstack=$!
 
 TIME_COUNT=0
