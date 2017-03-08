@@ -96,6 +96,8 @@ ExecRetry {
     pushd $buildDir\os-win
     pip install .
     popd
+    pip install kombu==4.0.1
+    pip install amqp==2.1.3
 }
 
 popd
