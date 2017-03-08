@@ -195,7 +195,7 @@ run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "wget http
 
 echo "Reserve VLAN range for test"
 set +e
-VLAN_RANGE=`/usr/local/src/cinder-ci/vlan_allocation.py -a $VMID`
+VLAN_RANGE=`/usr/local/src/cinder-ci-2016/vlan_allocation.py -a $VMID`
 echo "VLAN range selected is $VLAN_RANGE"
 if [ ! -z "$VLAN_RANGE" ]; then
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i 's/TENANT_VLAN_RANGE.*/TENANT_VLAN_RANGE='$VLAN_RANGE'/g' /home/ubuntu/devstack/local.conf" 3
