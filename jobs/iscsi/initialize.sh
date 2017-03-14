@@ -1,6 +1,7 @@
 #!/bin/bash
+basedir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # Loading functions
-source /usr/local/src/cinder-ci-2016/jobs/utils.sh
+source $basedir/../utils.sh
 set -e
 source $KEYSTONERC
 
@@ -52,7 +53,7 @@ echo ws2012r2_ip=$ws2012r2_ip | tee -a /home/jenkins-slave/runs/devstack_params.
 echo hyperv01_ip=$hyperv01_ip | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 echo hyperv02_ip=$hyperv02_ip | tee -a /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
-/usr/local/src/cinder-ci-2016/jobs/initialize_nodes.sh #>> /home/jenkins-slave/logs/devstack-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
+$basedir/../initialize_nodes.sh #>> /home/jenkins-slave/logs/devstack-build-log-$ZUUL_UUID-$JOB_TYPE 2>&1 &
 
 OSTACK_PROJECT=`echo "$ZUUL_PROJECT" | cut -d/ -f2`
 

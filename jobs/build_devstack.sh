@@ -1,6 +1,7 @@
 #!/bin/bash
+basedir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # Loading parameters
-source /usr/local/src/cinder-ci-2016/jobs/utils.sh
+source $basedir/utils.sh
 source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 # Run devstack

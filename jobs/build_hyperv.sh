@@ -1,9 +1,10 @@
 #!/bin/bash
 #
+basedir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 hyperv_node=$1
 JOB_TYPE=$2
 # Loading all the needed functions
-source /usr/local/src/cinder-ci-2016/jobs/utils.sh
+source $basedir/utils.sh
 
 # Loading parameters
 source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt

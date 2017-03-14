@@ -1,5 +1,6 @@
 #!/bin/bash
-source /usr/local/src/cinder-ci-2016/jobs/utils.sh
+basedir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source $basedir/utils.sh
 source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 
 if [ -z "$IS_DEBUG_JOB" ] || [ "$IS_DEBUG_JOB" != "yes" ]; then
@@ -7,7 +8,7 @@ if [ -z "$IS_DEBUG_JOB" ] || [ "$IS_DEBUG_JOB" != "yes" ]; then
     source /home/jenkins-slave/tools/keystonerc_admin
     nova delete $VMID
     rm -f /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
-    /usr/local/src/cinder-ci-2016/vlan_allocation.py -r $VMID
+    $basedir/../vlan_allocation.py -r $VMID
     
     run_wsmancmd_with_retry 3 $hyperv01 $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\teardown.ps1'
     run_wsmancmd_with_retry 3 $hyperv02 $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned C:\OpenStack\cinder-ci\HyperV\scripts\teardown.ps1'

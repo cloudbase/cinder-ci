@@ -1,7 +1,8 @@
 #!/bin/bash
+basedir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt
 source /home/jenkins-slave/tools/keystonerc_admin
-source /usr/local/src/cinder-ci-2016/jobs/utils.sh
+source $basedir/utils.sh
 
 CONSOLE_LOG=/home/jenkins-slave/logs/console-$ZUUL_UUID.$JOB_TYPE.log
 logs_project=cinder
