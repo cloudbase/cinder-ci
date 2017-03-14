@@ -2,7 +2,7 @@
 
 source /home/ubuntu/keystonerc
 
-CINDER_COUNT=$(cinder service-list | grep cinder-volume | grep -c -w up); 
+CINDER_COUNT=$(openstack volume service list | grep cinder-volume | grep -c -w up); 
 
 if [ "$CINDER_COUNT" != 1 ]
 then
