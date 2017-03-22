@@ -70,10 +70,6 @@ tests_file=$(tempfile)
 $basedir/get-tests.sh $project_name $tests_dir $test_suite $job_type > $tests_file
 cp $tests_file $basedir/normal_tests.txt
 
-if [[ $job_type == "iscsi" ]]; then
-    parallel_tests=1
-fi
-
 $basedir/parallel-test-runner.sh $tests_file $tests_dir $log_file \
     $parallel_tests $max_attempts || true
 
