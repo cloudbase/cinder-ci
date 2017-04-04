@@ -22,4 +22,4 @@ tempest.api.volume.test_volumes_snapshots.VolumesSnapshotTestJSON.test_snapshot_
 tempest.api.volume.test_volumes_snapshots.VolumesSnapshotTestJSON.test_snapshot_create_offline_delete_online
 tempest.api.volume.test_volumes_snapshots.VolumesSnapshotTestJSON.test_snapshot_delete_with_volume_in_use
 
-tempest.api.volume.admin.v2.test_snapshot_manage
+tempest.api.volume.admin.test_snapshot_manage
