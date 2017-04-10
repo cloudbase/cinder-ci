@@ -21,3 +21,4 @@ tempest.api.volume.admin.test_volume_types.VolumeTypesV2Test.test_volume_type_en
 tempest.api.volume.admin.test_volume_types.VolumeTypesV2Test.test_volume_type_list
 
 tempest.api.volume.admin.test_snapshot_manage.SnapshotManageAdminTest
+tempest.api.volume.test_volume_delete_cascade.VolumesDeleteCascade
