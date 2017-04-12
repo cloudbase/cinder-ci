@@ -100,7 +100,7 @@ ExecRetry {
     pip install .
     popd
     pip install kombu==4.0.1
-    pip install amqp==2.1.3
+    pip install amqp==2.1.3 oslo.log==3.23.0
 }
 
 popd
