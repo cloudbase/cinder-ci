@@ -292,7 +292,7 @@ if (@("stable/mitaka", "stable/newton", "stable/ocata", "master") -contains $bra
 }
 
 # Temporary fix for os-win
-pip install setuptools==33.1.1
+pip install setuptools==33.1.1 oslo.log==3.23.0
 pip install kombu==4.0.1
 pip install amqp==2.1.3
 
