@@ -149,6 +149,8 @@ scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DE
 echo "Copy devstack_params file to devstack VM"
 scp -v -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/bin/devstack_params.sh
 
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i 's/export OS_AUTH_URL.*/export OS_AUTH_URL=http:\/\/127.0.0.1\/identity/g' /home/ubuntu/keystonerc" 3
+
 # Repository section
 echo "setup apt-cacher-ng:"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'echo "Acquire::http { Proxy \"http://10.20.1.36:8000\" };" | sudo tee --append /etc/apt/apt.conf.d/90-apt-proxy.conf' 12
