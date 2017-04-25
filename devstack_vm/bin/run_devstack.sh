@@ -54,6 +54,22 @@ fi
 # exclude in-use snapshots tests for stable branches, this feature is only supported in pike
 if [ "$ZUUL_BRANCH" == "stable/newton" ] || [ "$ZUUL_BRANCH" == "stable/ocata" ]; then
 cat <<EOT >> /home/ubuntu/bin/excluded-tests-smb3_windows.txt
+#test_volume_boot_pattern
+tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_create_ebs_image_and_check_boot
+tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern
+tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_create_ebs_image_and_check_boot
+tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_volume_boot_pattern
+
+#volume.admin.test_volume_types.VolumeTypes
+tempest.api.volume.admin.test_volume_types.VolumeTypesV1Test.test_volume_crud_with_volume_type_and_extra_specs
+tempest.api.volume.admin.test_volume_types.VolumeTypesV1Test.test_volume_type_create_get_delete
+tempest.api.volume.admin.test_volume_types.VolumeTypesV1Test.test_volume_type_encryption_create_get_delete
+tempest.api.volume.admin.test_volume_types.VolumeTypesV1Test.test_volume_type_list
+tempest.api.volume.admin.test_volume_types.VolumeTypesV2Test.test_volume_crud_with_volume_type_and_extra_specs
+tempest.api.volume.admin.test_volume_types.VolumeTypesV2Test.test_volume_type_create_get_delete
+tempest.api.volume.admin.test_volume_types.VolumeTypesV2Test.test_volume_type_encryption_create_get_delete
+tempest.api.volume.admin.test_volume_types.VolumeTypesV2Test.test_volume_type_list
+
 # This driver does not support snapshotting in-use volumes
 tempest.api.volume.test_volumes_snapshots.VolumesV1SnapshotTestJSON.test_snapshot_create_with_volume_in_use
 tempest.api.volume.test_volumes_snapshots.VolumesV1SnapshotTestJSON.test_snapshot_create_offline_delete_online
