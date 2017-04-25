@@ -51,6 +51,18 @@ then
         sed -i 's/^HOST_IP=.*/HOST_IP='$MYIP'/g' "$LOCALRC"
 fi
 
+# exclude in-use snapshots tests for stable branches, this feature is only supported in pike
+if [ "$ZUUL_BRANCH" == "stable/newton" ] || [ "$ZUUL_BRANCH" == "stable/ocata" ]; then
+cat <<EOT >> /home/ubuntu/bin/excluded-tests-smb3_windows.txt
+# This driver does not support snapshotting in-use volumes
+tempest.api.volume.test_volumes_snapshots.VolumesV1SnapshotTestJSON.test_snapshot_create_with_volume_in_use
+tempest.api.volume.test_volumes_snapshots.VolumesV1SnapshotTestJSON.test_snapshot_create_offline_delete_online
+tempest.api.volume.test_volumes_snapshots.VolumesV1SnapshotTestJSON.test_snapshot_delete_with_volume_in_use
+tempest.api.volume.test_volumes_snapshots.VolumesSnapshotTestJSON.test_snapshot_create_with_volume_in_use
+tempest.api.volume.test_volumes_snapshots.VolumesSnapshotTestJSON.test_snapshot_create_offline_delete_online
+tempest.api.volume.test_volumes_snapshots.VolumesSnapshotTestJSON.test_snapshot_delete_with_volume_in_use
+EOT
+fi
 
 cd /home/ubuntu/devstack
 git pull
