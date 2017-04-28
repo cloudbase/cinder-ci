@@ -48,24 +48,28 @@ find . -name *pyc -print0 | xargs -0 rm -f
 # Update all repositories except the one testing the patch.
 for i in `ls -A`
 do
-	if [ "$i" != "$PROJECT_NAME" ]
-	then
-		pushd "$i"
-	        if [ -d ".git" ]
-        	then
-        		git reset --hard
-        		git clean -f -d
-        		git fetch --all
-        		git checkout "$BRANCH" || echo "Failed to switch branch"
+    if [[ "$i" != "$PROJECT_NAME" ]] && [[ -d $i ]]
+    then
+        if pushd "$i"
+        then
+	    if [ -d ".git" ]
+            then
+        	git reset --hard
+        	git clean -f -d
+        	git fetch --all
+        	git checkout "$BRANCH" || echo "Failed to switch branch"
                 git pull
-        	fi
-		echo "Folder: $BASEDIR/$i"
-		echo "Git branch output:"
-		git branch
-		echo "Git Log output:"
-		git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
-		popd
+            fi
+	    echo "Folder: $BASEDIR/$i"
+	    echo "Git branch output:"
+	    git branch
+	    echo "Git Log output:"
+	    git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
+	    popd
+        else
+            echo "Error trying to update $i"
 	fi
+    fi
 done
 
 popd
