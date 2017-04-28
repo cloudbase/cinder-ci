@@ -1,1 +1,3 @@
 tempest.api.volume.admin.test_snapshot_manage
+# volume extend is not supported when having snapshots
+tempest.api.volume.test_volumes_extend.VolumesExtendTest.test_volume_extend_when_volume_has_snapshot
