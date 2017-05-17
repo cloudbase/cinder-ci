@@ -24,3 +24,6 @@ tempest.api.volume.admin.test_snapshot_manage.SnapshotManageAdminTest
 # test added in https://github.com/openstack/tempest/commit/7b0eaf8f544cfbaab521a80abfff33e7b637b90d
 # exclude until we have a fix
 tempest.api.volume.admin.test_volumes_actions.VolumesActionsTest.test_force_detach_volume
+
+# https://bugs.launchpad.net/tempest/+bug/1691144
+tempest.api.volume.admin.test_volume_hosts.VolumeHostsAdminTestsJSON.test_show_host

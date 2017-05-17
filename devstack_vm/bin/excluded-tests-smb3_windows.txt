@@ -1,3 +1,5 @@
 tempest.api.volume.admin.test_snapshot_manage
 # volume extend is not supported when having snapshots
 tempest.api.volume.test_volumes_extend.VolumesExtendTest.test_volume_extend_when_volume_has_snapshot
+# https://bugs.launchpad.net/tempest/+bug/1691144
+tempest.api.volume.admin.test_volume_hosts.VolumeHostsAdminTestsJSON.test_show_host
