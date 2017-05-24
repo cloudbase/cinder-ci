@@ -265,6 +265,10 @@ ExecRetry {
         git fetch https://git.openstack.org/openstack/compute-hyperv refs/changes/91/400091/1
         cherry_pick FETCH_HEAD
     }
+
+    git fetch git://git.openstack.org/openstack/compute-hyperv refs/changes/70/467370/1
+    cherry_pick FETCH_HEAD
+
     & update-requirements.exe --source $buildDir\requirements .
     if (@("stable/liberty", "stable/mitaka") -contains $branchName.ToLower()) {
         & pip install -c $buildDir\requirements\upper-constraints.txt -U .
