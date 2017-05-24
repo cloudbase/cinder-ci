@@ -60,7 +60,7 @@ iniset $TEMPEST_CONFIG volume-feature-enabled manage_volume False
 
 iniset $TEMPEST_CONFIG scenario img_dir "/home/ubuntu/devstack/files/images"
 iniset $TEMPEST_CONFIG scenario img_file "cirros-0.3.3-x86_64.vhdx"
-iniset $TEMPEST_CONFIG scenario img_disk_format vhd
+iniset $TEMPEST_CONFIG scenario img_disk_format vhdx
 
 iniset $TEMPEST_CONFIG orchestration build_timeout 90
 iniset $TEMPEST_CONFIG boto build_timeout 60
