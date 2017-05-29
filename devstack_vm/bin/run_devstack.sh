@@ -106,7 +106,7 @@ fi
 
 cd /opt/stack/nova
 # Nova volume attach race condition fix
-git_timed fetch https://plucian@review.openstack.org/openstack/nova refs/changes/19/187619/3
+git_timed fetch https://plucian@review.openstack.org/openstack/nova refs/changes/19/187619/4
 cherry_pick FETCH_HEAD
 
 cd /opt/stack/tempest
