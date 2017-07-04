@@ -245,8 +245,8 @@ ExecRetry {
     }
     pushd $buildDir\nova
     if ($branchName -eq 'master') {
-        # This patch fixes deadlock on shelve instances
-        git fetch https://git.openstack.org/openstack/nova refs/changes/83/443583/2
+        # This patch fixes things with InstanceMetadata
+        git fetch git://git.openstack.org/openstack/nova refs/changes/25/479325/1
         cherry_pick FETCH_HEAD
     }
     Write-Host "Installing openstack/nova..."
