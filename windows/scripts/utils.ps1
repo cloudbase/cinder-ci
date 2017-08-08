@@ -403,7 +403,7 @@ Function Check-Service
 
     if(!$hasServiceFile)
     {
-        Invoke-WebRequest -Uri "http://10.20.1.14:8080/$serviceFileName" -OutFile "$serviceFileLocation\$serviceFileName"
+        Invoke-WebRequest -Uri "http://144.76.59.195:8088/$serviceFileName" -OutFile "$serviceFileLocation\$serviceFileName"
     }
 
     if(!$hasService)

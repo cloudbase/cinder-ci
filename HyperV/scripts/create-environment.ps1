@@ -33,22 +33,25 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 $pip_conf_content = @"
 [global]
-index-url = http://10.20.1.8:8080/cloudbase/CI/+simple/
+index-url = http://144.76.59.195:8099/cloudbase/CI/+simple/
 [install]
-trusted-host = 10.20.1.8
+trusted-host = 144.76.59.195
 "@
 
 $ErrorActionPreference = "SilentlyContinue"
 
 # Do a selective teardown
-Write-Host "Ensuring nova and neutron services are stopped."
-Stop-Service -Name nova-compute -Force
-Stop-Service -Name neutron-hyperv-agent -Force
+#Write-Host "Ensuring nova and neutron services are stopped."
+#Stop-Service -Name nova-compute -Force
+#Stop-Service -Name neutron-hyperv-agent -Force
 
-Write-Host "Stopping any possible python processes left."
-Stop-Process -Name python -Force
+#Write-Host "Stopping any possible python processes left."
+#Stop-Process -Name python -Force
 
-destroy_planned_vms
+#destroy_planned_vms
+
+mkdir c:\SMBShare
+New-SMBShare -Name SMBShare -Path C:\SMBShare -FullAccess "Administrator"
 
 if (Get-Process -Name nova-compute){
     Throw "Nova is still running on this host"
@@ -117,7 +120,7 @@ if ($hasBinDir -eq $false){
 }
 
 if (($hasMkisoFs -eq $false) -or ($hasQemuImg -eq $false)){
-    Invoke-WebRequest -Uri "http://10.20.1.14:8080/openstack_bin.zip" -OutFile "$bindir\openstack_bin.zip"
+    Invoke-WebRequest -Uri "http://144.76.59.195:8088/openstack_bin.zip" -OutFile "$bindir\openstack_bin.zip"
     [System.IO.Compression.ZipFile]::ExtractToDirectory("$bindir\openstack_bin.zip", "$bindir")
     Remove-Item -Force "$bindir\openstack_bin.zip"
 }
@@ -160,19 +163,19 @@ ExecRetry {
 Get-ChildItem $buildDir
 
 pushd C:\
-if (Test-Path $pythonArchive)
-{
-    Remove-Item -Force $pythonArchive
-}
-Invoke-WebRequest -Uri http://10.20.1.14:8080/python.zip -OutFile $pythonArchive
-if (Test-Path $pythonDir)
-{
-    Cmd /C "rmdir /S /Q $pythonDir"
-    #Remove-Item -Recurse -Force $pythonDir
-}
-Write-Host "Ensure Python folder is up to date"
-Write-Host "Extracting archive.."
-[System.IO.Compression.ZipFile]::ExtractToDirectory("C:\$pythonArchive", "C:\")
+#if (Test-Path $pythonArchive)
+#{
+#    Remove-Item -Force $pythonArchive
+#}
+#Invoke-WebRequest -Uri http://144.76.59.195:8088/python.zip -OutFile $pythonArchive
+#if (Test-Path $pythonDir)
+#{
+#    Cmd /C "rmdir /S /Q $pythonDir"
+#    #Remove-Item -Recurse -Force $pythonDir
+#}
+#Write-Host "Ensure Python folder is up to date"
+#Write-Host "Extracting archive.."
+#[System.IO.Compression.ZipFile]::ExtractToDirectory("C:\$pythonArchive", "C:\")
 
 Add-Content "$env:APPDATA\pip\pip.ini" $pip_conf_content
 

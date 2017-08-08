@@ -6,19 +6,19 @@ basedir="/home/ubuntu/bin"
 set -x
 set -e
 sudo ifconfig eth1 promisc up
-sudo ip -f inet r replace default via 10.250.0.1 dev eth0
+#sudo ip -f inet r replace default via 10.250.0.1 dev eth0
 
-HOSTNAME=$(hostname)
+#HOSTNAME=$(hostname)
 
-sudo sed -i '2i127.0.0.1  '$HOSTNAME'' /etc/hosts
+#sudo sed -i '2i127.0.0.1  '$HOSTNAME'' /etc/hosts
 
 # Add pip cache for devstack
 mkdir -p $HOME/.pip
 echo "[global]" > $HOME/.pip/pip.conf
-echo "trusted-host = 10.20.1.8" >> $HOME/.pip/pip.conf
-echo "index-url = http://10.20.1.8:8080/cloudbase/CI/+simple/" >> $HOME/.pip/pip.conf
+echo "trusted-host = 144.76.59.195" >> $HOME/.pip/pip.conf
+echo "index-url = http://144.76.59.195:8099/cloudbase/CI/+simple/" >> $HOME/.pip/pip.conf
 echo "[install]" >> $HOME/.pip/pip.conf
-echo "trusted-host = 10.20.1.8" >> $HOME/.pip/pip.conf
+echo "trusted-host = 144.76.59.195" >> $HOME/.pip/pip.conf
 
 sudo mkdir -p /root/.pip
 sudo cp $HOME/.pip/pip.conf /root/.pip/
@@ -145,7 +145,7 @@ pid=$!
 wait $pid
 cat $STACK_LOG
 
-TCP_PORTS=(80 137 443 3260 3306 5000 5355 5672 6000 6001 6002 8000 8003 8004 8080 8773 8774 8775 8776 8777 9191 9292 9696 35357)
-firewall_manage_ports $hyperv01_ip add enable ${TCP_PORTS[@]}
-firewall_manage_ports $hyperv02_ip add enable ${TCP_PORTS[@]}
-firewall_manage_ports $ws2012r2_ip add enable ${TCP_PORTS[@]}
+#TCP_PORTS=(80 137 443 3260 3306 5000 5355 5672 6000 6001 6002 8000 8003 8004 8080 8773 8774 8775 8776 8777 9191 9292 9696 35357)
+#firewall_manage_ports $hyperv01_ip add enable ${TCP_PORTS[@]}
+#firewall_manage_ports $hyperv02_ip add enable ${TCP_PORTS[@]}
+#firewall_manage_ports $ws2012r2_ip add enable ${TCP_PORTS[@]}

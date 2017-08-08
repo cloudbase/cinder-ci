@@ -20,9 +20,9 @@ $scriptLocation = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Def
 
 $pip_conf_content = @"
 [global]
-index-url = http://10.20.1.8:8080/cloudbase/CI/+simple/
+index-url = http://144.76.59.195:8099/cloudbase/CI/+simple/
 [install]
-trusted-host = 10.20.1.8
+trusted-host = 144.76.59.195
 "@
 
 $hasPipConf = Test-Path "$env:APPDATA\pip"

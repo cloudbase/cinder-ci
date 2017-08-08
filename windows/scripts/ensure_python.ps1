@@ -28,7 +28,7 @@ if (Test-Path $pythonDir)
 }
 
 ExecRetry {
-    Invoke-WebRequest -Uri http://10.20.1.14:8080/python.zip -OutFile $pythonArchive
+    Invoke-WebRequest -Uri http://144.76.59.195:8088/python.zip -OutFile $pythonArchive
     if ($LastExitCode) { Throw "Failed fetching python27.tar.gz" }
 }
 Write-Host "Ensure Python folder is up to date"
