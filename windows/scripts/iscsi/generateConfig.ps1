@@ -10,6 +10,17 @@ Param(
     [Parameter(Mandatory=$true)][array]$hypervNodes
 )
 
+function unzip($src, $dest) {
+
+        $shell = new-object -com shell.application
+        $zip = $shell.NameSpace($src)
+        foreach($item in $zip.items())
+        {
+                $shell.Namespace($dest).copyhere($item)
+        }
+
+}
+
 Invoke-WebRequest -Uri http://144.76.59.195:8088/qemu-img-cbsl-build.zip -OutFile c:\qemu-img-cbsl-build.zip
 if (Test-Path -Path c:\qemu-img){
 	Remove-Item -Force -Recurse c:\qemu-img
