@@ -65,7 +65,7 @@ export WIN_IP="$WIN_IP"
     
 COUNT=1
 while [ -z "$DEVSTACK_IP" ] || [ -z "$HV1_IP" ] || [ -z "$WIN_IP" ] || [ "$DEVSTACK_IP" == "unset" ] || [ "$HV1_IP" == "unset" ] || [ "$WIN_IP" == "unset" ]; do
-    if [ $COUNT -lt 10 ]; then
+    if [ $COUNT -lt 15 ]; then
         sleep 15
         DEVSTACK_IP=$(run_ssh_cmd_with_retry root@$ESXI_HOST $DEVSTACK_SSH_KEY "/vmfs/volumes/datastore1/get-vm-ip.sh $DEVSTACK_NAME")
         HV1_IP=$(run_ssh_cmd_with_retry root@$ESXI_HOST $DEVSTACK_SSH_KEY "/vmfs/volumes/datastore1/get-vm-ip.sh $HV1_NAME")
