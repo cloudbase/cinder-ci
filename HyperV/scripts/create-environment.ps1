@@ -265,7 +265,7 @@ ExecRetry {
         Get-ChildItem $buildDir\compute-hyperv
     }
     pushd $buildDir\compute-hyperv
-    if (@("stable/ocata", "master") -contains $branchName.ToLower()) {
+    if ("stable/ocata" -eq $branchName.ToLower()) {
         # This patch fixes duplicate option use_multipath_io
         git fetch https://git.openstack.org/openstack/compute-hyperv refs/changes/91/400091/1
         cherry_pick FETCH_HEAD
@@ -281,9 +281,9 @@ ExecRetry {
     popd
 }
 
-if (@("stable/mitaka", "stable/newton", "stable/ocata", "master") -contains $branchName.ToLower()) {
+if (@("stable/mitaka", "stable/newton", "stable/ocata", "stable/pike", "master") -contains $branchName.ToLower()) {
     ExecRetry {
-        # os-win only exists on stable/mitaka, stable/newton, stable/ocata and master.
+        # os-win only exists on mitaka and newer releases.
         GitClonePull "$buildDir\os-win" "https://git.openstack.org/openstack/os-win.git" $branchName
         pushd $buildDir\os-win
         Write-Host "Installing OpenStack/os-win..."
