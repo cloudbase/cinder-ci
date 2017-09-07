@@ -312,6 +312,8 @@ post_build_restart_hyperv_services $hyperv01 $WIN_USER $WIN_PASS
 echo "Test that we have one cinder volume active"
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'source /home/ubuntu/keystonerc; CINDER_COUNT=$(openstack volume service list | grep cinder-volume | grep -c -w up); if [ "$CINDER_COUNT" == 1 ];then openstack volume service list ; else openstack volume service list; exit 1;fi' 20
 
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'mkdir /opt/stack/logs/screen || echo /opt/stack/logs/screen already present' 1
+
 if [[ "$ZUUL_BRANCH" == "master" ]] || [[ "$ZUUL_BRANCH" == "stable/ocata" ]] || [[ "$ZUUL_BRANCH" == "stable/pike" ]]; then
     run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "url=\$(grep transport_url /etc/nova/nova-dhcpbridge.conf | head -1 | awk '{print \$3}'); nova-manage cell_v2 simple_cell_setup --transport-url \$url >> /opt/stack/logs/screen/create_cell.log"
 fi
