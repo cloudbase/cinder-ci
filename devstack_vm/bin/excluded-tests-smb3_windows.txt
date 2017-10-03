@@ -5,3 +5,4 @@ tempest.api.volume.test_volumes_extend.VolumesExtendTest.test_volume_extend_when
 tempest.api.volume.admin.test_volume_hosts.VolumeHostsAdminTestsJSON.test_show_host
 # exclude requested by luci, sometimes it fails reading from a diff image while the volume is attached
 tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern
+tempest.api.volume.admin.test_snapshot_manage.SnapshotManageAdminTest.test_unmanage_manage_snapshot
