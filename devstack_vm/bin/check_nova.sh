@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /home/ubuntu/keystonerc
+source /home/ubuntu/devstack/openrc admin admin
 
 NOVA_COUNT=$(nova service-list | awk '{if (NR > 3) {print $2 " " $10 }}' | grep -c "nova-compute up")
 

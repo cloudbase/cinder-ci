@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /home/ubuntu/keystonerc
+source /home/ubuntu/devstack/openrc admin admin
 
 CINDER_COUNT=$(openstack volume service list | grep cinder-volume | grep -c -w up); 
 

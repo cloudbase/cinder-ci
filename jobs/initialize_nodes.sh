@@ -179,8 +179,6 @@ scp -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVST
 echo "Copy devstack_params file to devstack VM"
 scp -r -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -i $DEVSTACK_SSH_KEY /home/jenkins-slave/runs/devstack_params.$ZUUL_UUID.$JOB_TYPE.txt ubuntu@$DEVSTACK_FLOATING_IP:/home/ubuntu/bin/devstack_params.sh
 
-run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i 's/export OS_AUTH_URL.*/export OS_AUTH_URL=http:\/\/127.0.0.1\/identity/g' /home/ubuntu/keystonerc" 3
-
 # Repository section
 echo "setup apt-cacher-ng:"
 #run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'echo "Acquire::http { Proxy \"http://10.20.1.36:8000\" };" | sudo tee --append /etc/apt/apt.conf.d/90-apt-proxy.conf' 12
@@ -310,7 +308,7 @@ echo "Post init on compute01 node: $hyperv01"
 post_build_restart_hyperv_services $hyperv01 $WIN_USER $WIN_PASS
 
 echo "Test that we have one cinder volume active"
-run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'source /home/ubuntu/keystonerc; CINDER_COUNT=$(openstack volume service list | grep cinder-volume | grep -c -w up); if [ "$CINDER_COUNT" == 1 ];then openstack volume service list ; else openstack volume service list; exit 1;fi' 20
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'source /home/ubuntu/devstack/openrc admin admin; CINDER_COUNT=$(openstack volume service list | grep cinder-volume | grep -c -w up); if [ "$CINDER_COUNT" == 1 ];then openstack volume service list ; else openstack volume service list; exit 1;fi' 20
 
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'mkdir /opt/stack/logs/screen || echo /opt/stack/logs/screen already present' 1
 
@@ -320,7 +318,7 @@ fi
 
 # Run post_stack
 echo "Run post_stack scripts on devstack"
-run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/keystonerc && /home/ubuntu/bin/post_stack.sh" 6
+run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "source /home/ubuntu/devstack/openrc admin admin && /home/ubuntu/bin/post_stack.sh" 6
 if [ $? -ne 0 ]
 then
     echo "Failed post_stack!"
