@@ -88,27 +88,6 @@ cd /opt/stack/cinder
 git config --global user.email "microsoft_cinder_ci@microsoft.com"
 git config --global user.name "Microsoft Cinder CI"
 
-if [ $JOB_TYPE != "iscsi" ]; then
-    set +e
-    git remote add downstream https://github.com/petrutlucian94/cinder
-    git fetch downstream
-    git checkout -b testBranch
-    set -e
-    # cherry_pick 56b1194332c29504ab96da35cf4f56143f0bd9cd
-    if [[ "$ZUUL_BRANCH" == "stable/ocata" ]]; then
-        cherry_pick dcd839978ca8995cada8a62a5f19d21eaeb399df
-        cherry_pick f711195367ead9a2592402965eb7c7a73baebc9f
-    else
-        cherry_pick 0c13ba732eb5b44e90a062a1783b29f2718f3da8
-        cherry_pick 06ee0b259daf13e8c0028a149b3882f1e3373ae1
-    fi
-fi
-
-cd /opt/stack/nova
-# Nova volume attach race condition fix
-git_timed fetch https://plucian@review.openstack.org/openstack/nova refs/changes/19/187619/4
-cherry_pick FETCH_HEAD
-
 cd /opt/stack/tempest
 git_timed fetch git://git.openstack.org/openstack/tempest refs/changes/13/433213/3
 cherry_pick FETCH_HEAD
