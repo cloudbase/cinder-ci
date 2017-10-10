@@ -63,7 +63,7 @@ pip install -r requirements.txt
 ExecRetry {
     GitClonePull "$buildDir\oslo.concurrency\" "https://github.com/openstack/oslo.concurrency" $branchName
     pushd $buildDir\oslo.concurrency
-    & update-requirements.exe --source $buildDir\requirements .	
+    & edit-constraints.exe $buildDir\requirements\upper-constraints.txt -- oslo.concurrency ""	
     & pip install -c $buildDir\requirements\upper-constraints.txt -U .
     if ($LastExitCode) { Throw "Failed to install oslo.concurrency from repo" }
     popd
