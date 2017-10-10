@@ -120,6 +120,7 @@ function archive_tempest_files() {
     find . -type f -exec gzip "{}" \;
     popd
     cp -r "$TEMPEST_LOGS" "$LOG_DST"
+    $GZIP -c /opt/stack/tempest/tempest.log > "$LOG_DST/tempest/tempest.log.gz" || emit_warning "Failed to archive tempest.log"
 }
 
 # get openstack services logs
