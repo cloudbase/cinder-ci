@@ -60,15 +60,13 @@ Write-Host "just before installing cinder git log says:"
 & git --no-pager log -10 --pretty=format:"%h - %an, %ae,  %ar : %s"
 pip install -r requirements.txt
 
-if ($branchName.ToLower() -eq "master" -or $branchName.ToLower() -eq "stable/newton" -or $branchName.ToLower() -eq "stable/ocata"){
-    ExecRetry {
-        GitClonePull "$buildDir\oslo.concurrency\" "https://github.com/openstack/oslo.concurrency" "master"
-        pushd $buildDir\oslo.concurrency
-    	
-        & pip install -U .
-        if ($LastExitCode) { Throw "Failed to install oslo.concurrency from repo" }
-        popd
-    }
+ExecRetry {
+    GitClonePull "$buildDir\oslo.concurrency\" "https://github.com/openstack/oslo.concurrency" $branchName
+    pushd $buildDir\oslo.concurrency
+    & update-requirements.exe --source $buildDir\requirements .	
+    & pip install -c $buildDir\requirements\upper-constraints.txt -U .
+    if ($LastExitCode) { Throw "Failed to install oslo.concurrency from repo" }
+    popd
 }
 
 ExecRetry {

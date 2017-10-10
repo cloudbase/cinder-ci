@@ -133,7 +133,7 @@ join_windows(){
     run_ps_cmd_with_retry 3 $PARAMS '"C:\openstack\cinder-ci\windows\scripts\ensure_pip_pkgs.ps1 -devstackIP '$FIXED_IP' -branchName '$ZUUL_BRANCH' -buildFor '$ZUUL_PROJECT' -testCase '$JOB_TYPE' -winUser '$WIN_USER' -winPasswd '$WIN_PASS' -hypervNodes '$HYPERV_NODES' >> '$LOG_DIR'\050-ensure_pip_pkgs.log 2>&1"'
  #   echo "Run gerrit-git-prep on $PARAMS with zuul-site=$ZUUL_SITE zuul-ref=$ZUUL_REF zuul-change=$ZUUL_CHANGE zuul-project=$ZUUL_PROJECT"
  #   run_wsmancmd_with_retry 3 $PARAMS "bash C:\openstack\cinder-ci\windows\scripts\gerrit-git-prep.sh --zuul-site $ZUUL_SITE --gerrit-site $ZUUL_SITE --zuul-ref $ZUUL_REF --zuul-change $ZUUL_CHANGE --zuul-project $ZUUL_PROJECT"
-    run_ps_cmd_with_retry 3 $PARAMS 'zuul-cloner -m C:\OpenStack\cinder-ci\jobs\clonemap.yaml -v git://git.openstack.org '$ZUUL_PROJECT' --zuul-branch '$ZUUL_BRANCH' --zuul-ref '$ZUUL_REF' --zuul-url '$ZUUL_SITE'/p --workspace c:\openstack\build'
+    run_ps_cmd_with_retry 3 $PARAMS 'zuul-cloner -m C:\OpenStack\cinder-ci\jobs\clonemap.yaml -v git://git.openstack.org '$ZUUL_PROJECT' --zuul-branch '$ZUUL_BRANCH' --zuul-ref '$ZUUL_REF' --zuul-url '$ZUUL_URL' --workspace c:\openstack\build'
 
     run_wsmancmd_with_retry 3 $PARAMS 'setx /M path "%path%;c:\qemu-img"'
 
