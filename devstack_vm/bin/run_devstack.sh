@@ -12,8 +12,8 @@ sudo ifconfig eth1 promisc up
 
 #sudo sed -i '2i127.0.0.1  '$HOSTNAME'' /etc/hosts
 
-echo "SystemMaxUse=15G" >> /etc/systemd/journald.conf
-echo "RuntimeMaxUse=15G" >> /etc/systemd/journald.conf
+echo "SystemMaxUse=15G" | sudo tee -a /etc/systemd/journald.conf
+echo "RuntimeMaxUse=15G" | sudo tee -a /etc/systemd/journald.conf
 
 # Add pip cache for devstack
 mkdir -p $HOME/.pip
