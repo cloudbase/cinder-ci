@@ -5,3 +5,4 @@ tempest.api.volume.admin.test_volumes_actions.VolumesActionsTest.test_force_deta
 
 # https://bugs.launchpad.net/tempest/+bug/1691144
 tempest.api.volume.admin.test_volume_hosts.VolumeHostsAdminTestsJSON.test_show_host
+tempest.api.volume.test_volumes_extend.VolumesExtendAttachedTest.test_extend_attached_volume
