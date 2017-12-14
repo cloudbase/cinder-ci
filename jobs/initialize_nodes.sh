@@ -233,6 +233,9 @@ run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY 'sudo mkdi
 update_local_conf
 run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i '3 i\branch=$ZUUL_BRANCH' /home/ubuntu/devstack/local.sh"
 
+# make sure timezone is set to utc
+run_wsman_cmd $HV1_IP $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned set-timezone -id UTC'
+
 # Create vswitch br100 and add data IP
 echo "Creating vswitch br100 on $HV1_NAME"
 run_wsman_cmd $HV1_IP $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned New-VMSwitch -Name br100 -AllowManagementOS $true -NetAdapterName \"Ethernet1\"'
