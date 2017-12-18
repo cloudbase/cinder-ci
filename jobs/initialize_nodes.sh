@@ -236,6 +236,10 @@ run_ssh_cmd_with_retry ubuntu@$DEVSTACK_FLOATING_IP $DEVSTACK_SSH_KEY "sed -i '3
 # make sure timezone is set to utc
 run_wsman_cmd $HV1_IP $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned set-timezone -id UTC'
 run_wsman_cmd $WIN_IP $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned set-timezone -id UTC'
+echo "HV timezone"
+run_wsman_cmd $HV1_IP $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned get-timezone'
+echo "WIN timezone"
+run_wsman_cmd $WIN_IP $WIN_USER $WIN_PASS 'powershell -ExecutionPolicy RemoteSigned get-timezone'
 
 # Create vswitch br100 and add data IP
 echo "Creating vswitch br100 on $HV1_NAME"
