@@ -34,12 +34,12 @@ set +u
 source $tests_dir/.tox/tempest/bin/activate
 set -u
 
-if [ ! -d "$tests_dir/.testrepository" ]; then
+if [ ! -d "$tests_dir/.stestr" ]; then
     push_dir
     cd $tests_dir
 
-    echo "Initializing testr"
-    testr init
+    echo "Initializing stestr"
+    stestr init
     pop_dir
 fi
 

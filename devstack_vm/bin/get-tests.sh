@@ -45,4 +45,4 @@ if [ ! "$exclude_regex" ]; then
     exclude_regex='^$'
 fi
 
-testr list-tests | grep $include_regex | grep -v $exclude_regex
+stestr list | grep $include_regex | grep -v $exclude_regex
