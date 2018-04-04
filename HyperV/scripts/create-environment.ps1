@@ -200,6 +200,7 @@ if ($isDebug -eq  'yes') {
 
 ExecRetry {
     pushd "$buildDir\requirements"
+    (gc upper-constraints.txt) -replace "^pbr.*", "pbr===3.1.1" | Set-Content upper-constraints.txt
     Write-Host "Installing OpenStack/Requirements..."
     & pip install -c upper-constraints.txt -U pbr virtualenv httplib2 prettytable>=0.7 setuptools
     & pip install -c upper-constraints.txt -U .
